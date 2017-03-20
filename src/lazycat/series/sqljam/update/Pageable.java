@@ -1,5 +1,6 @@
 package lazycat.series.sqljam.update;
 
+import java.util.Iterator;
 import java.util.List;
 
 import lazycat.series.sqljam.Configuration;
@@ -67,6 +68,14 @@ public class Pageable implements ResultSet {
 
 	public <T> List<T> list(Class<T> beanClass) {
 		return query.getSession().list(this, beanClass);
+	}
+
+	public <T> Iterator<T> iterator() {
+		return (Iterator<T>) query.getSession().iterator(this, query.getMappedClass());
+	}
+
+	public <T> Iterator<T> iterator(Class<T> beanClass) {
+		return query.getSession().iterator(this, beanClass);
 	}
 
 	public int into(Class<?> mappedClass) {

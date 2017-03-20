@@ -1,12 +1,12 @@
 package lazycat.series.sqljam;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import lazycat.series.converter.TypeConverter;
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.jdbc.TypeHandlerRegistry;
-import lazycat.series.jdbc.mapper.RowMapper;
 import lazycat.series.sqljam.transcation.Transaction;
 
 /**
@@ -17,17 +17,22 @@ import lazycat.series.sqljam.transcation.Transaction;
  */
 public interface SessionExecutor {
 
-	<T> List<T> list(Transaction transaction, Executable query, Class<T> objectClass);
-
-	<T> List<T> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, Class<T> objectClass);
-
 	List<Map<String, Object>> list(Transaction transaction, Executable query);
 
 	List<Map<String, Object>> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes);
 
-	<T> List<T> list(Transaction transaction, Executable query, RowMapper<T> rowMapper);
+	<T> List<T> list(Transaction transaction, Executable query, Class<T> objectClass);
 
-	<T> List<T> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, RowMapper<T> rowMapper);
+	<T> List<T> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, Class<T> objectClass);
+
+	<T> Iterator<T> iterator(Transaction transaction, Executable query, Class<T> objectClass);
+
+	<T> Iterator<T> iterator(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes,
+			Class<T> objectClass);
+
+	Iterator<Map<String, Object>> iterator(Transaction transaction, Executable query);
+
+	Iterator<Map<String, Object>> iterator(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes);
 
 	<T> T first(Transaction transaction, Executable query, final Class<T> objectClass);
 

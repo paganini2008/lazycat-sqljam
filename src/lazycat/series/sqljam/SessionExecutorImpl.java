@@ -1,6 +1,7 @@
 package lazycat.series.sqljam;
 
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,16 +38,37 @@ public class SessionExecutorImpl implements SessionExecutor {
 	public <T> List<T> list(Transaction transaction, Executable query, Class<T> objectClass) {
 		final ParameterCollector parameterCollector = new PreparedParameterCollector();
 		query.setParameters(parameterCollector, configuration);
-		return list(transaction, query.getText(configuration), parameterCollector.getParameters(), parameterCollector.getJdbcTypes(),
-				objectClass);
+		return list(transaction, query.getText(configuration), parameterCollector.getParameters(),
+				parameterCollector.getJdbcTypes(), objectClass);
 	}
 
-	public <T> List<T> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, Class<T> objectClass) {
+	public <T> List<T> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes,
+			Class<T> objectClass) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exec: " + sql);
 		}
 		try {
-			return sqlRunner.queryForList(transaction.getConnection(), sql, parameters, jdbcTypes, getObjectRowMapper(objectClass));
+			return sqlRunner.queryForList(transaction.getConnection(), sql, parameters, jdbcTypes,
+					getObjectRowMapper(objectClass));
+		} catch (SQLException e) {
+			throw new SessionException(e);
+		}
+	}
+
+	public Iterator<Map<String, Object>> iterator(Transaction transaction, Executable query) {
+		final ParameterCollector parameterCollector = new PreparedParameterCollector();
+		query.setParameters(parameterCollector, configuration);
+		return iterator(transaction, query.getText(configuration), parameterCollector.getParameters(),
+				parameterCollector.getJdbcTypes());
+	}
+
+	public Iterator<Map<String, Object>> iterator(Transaction transaction, String sql, Object[] parameters,
+			JdbcType[] jdbcTypes) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Exec: " + sql);
+		}
+		try {
+			return sqlRunner.iterator(transaction.getConnection(), sql, parameters, jdbcTypes);
 		} catch (SQLException e) {
 			throw new SessionException(e);
 		}
@@ -55,7 +77,8 @@ public class SessionExecutorImpl implements SessionExecutor {
 	public List<Map<String, Object>> list(Transaction transaction, Executable query) {
 		final ParameterCollector parameterCollector = new PreparedParameterCollector();
 		query.setParameters(parameterCollector, configuration);
-		return list(transaction, query.getText(configuration), parameterCollector.getParameters(), parameterCollector.getJdbcTypes());
+		return list(transaction, query.getText(configuration), parameterCollector.getParameters(),
+				parameterCollector.getJdbcTypes());
 	}
 
 	public List<Map<String, Object>> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes) {
@@ -69,19 +92,20 @@ public class SessionExecutorImpl implements SessionExecutor {
 		}
 	}
 
-	public <T> List<T> list(Transaction transaction, Executable query, RowMapper<T> rowMapper) {
+	public <T> Iterator<T> iterator(Transaction transaction, Executable query, Class<T> objectClass) {
 		final ParameterCollector parameterCollector = new PreparedParameterCollector();
 		query.setParameters(parameterCollector, configuration);
-		return list(transaction, query.getText(configuration), parameterCollector.getParameters(), parameterCollector.getJdbcTypes(),
-				rowMapper);
+		return iterator(transaction, query.getText(configuration), parameterCollector.getParameters(),
+				parameterCollector.getJdbcTypes(), objectClass);
 	}
 
-	public <T> List<T> list(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, RowMapper<T> rowMapper) {
+	public <T> Iterator<T> iterator(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes,
+			Class<T> objectClass) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exec: " + sql);
 		}
 		try {
-			return sqlRunner.queryForList(transaction.getConnection(), sql, parameters, jdbcTypes, rowMapper);
+			return sqlRunner.iterator(transaction.getConnection(), sql, parameters, jdbcTypes, getObjectRowMapper(objectClass));
 		} catch (SQLException e) {
 			throw new SessionException(e);
 		}
@@ -90,16 +114,18 @@ public class SessionExecutorImpl implements SessionExecutor {
 	public <T> T first(Transaction transaction, Executable query, final Class<T> objectClass) {
 		final ParameterCollector parameterCollector = new PreparedParameterCollector();
 		query.setParameters(parameterCollector, configuration);
-		return first(transaction, query.getText(configuration), parameterCollector.getParameters(), parameterCollector.getJdbcTypes(),
-				objectClass);
+		return first(transaction, query.getText(configuration), parameterCollector.getParameters(),
+				parameterCollector.getJdbcTypes(), objectClass);
 	}
 
-	public <T> T first(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, final Class<T> objectClass) {
+	public <T> T first(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes,
+			final Class<T> objectClass) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exec: " + sql);
 		}
 		try {
-			return sqlRunner.queryForObject(transaction.getConnection(), sql, parameters, jdbcTypes, getObjectRowMapper(objectClass));
+			return sqlRunner.queryForObject(transaction.getConnection(), sql, parameters, jdbcTypes,
+					getObjectRowMapper(objectClass));
 		} catch (SQLException e) {
 			throw new SessionException(e);
 		}
@@ -108,11 +134,12 @@ public class SessionExecutorImpl implements SessionExecutor {
 	public <T> T getResult(Transaction transaction, Executable query, final Class<T> requiredType) {
 		final ParameterCollector parameterCollector = new PreparedParameterCollector();
 		query.setParameters(parameterCollector, configuration);
-		return getResult(transaction, query.getText(configuration), parameterCollector.getParameters(), parameterCollector.getJdbcTypes(),
-				requiredType);
+		return getResult(transaction, query.getText(configuration), parameterCollector.getParameters(),
+				parameterCollector.getJdbcTypes(), requiredType);
 	}
 
-	public <T> T getResult(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, Class<T> requiredType) {
+	public <T> T getResult(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes,
+			Class<T> requiredType) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exec: " + sql);
 		}
@@ -136,8 +163,8 @@ public class SessionExecutorImpl implements SessionExecutor {
 		final ParameterCollector parameterCollector = new PreparedParameterCollector();
 		try {
 			executable.setParameters(parameterCollector, configuration);
-			return sqlRunner.update(transaction.getConnection(), executable.getText(configuration), parameterCollector.getParameters(),
-					parameterCollector.getJdbcTypes(), keyStore.getKeyHolder());
+			return sqlRunner.update(transaction.getConnection(), executable.getText(configuration),
+					parameterCollector.getParameters(), parameterCollector.getJdbcTypes(), keyStore.getKeyHolder());
 		} catch (SQLException e) {
 			throw new SessionException(e);
 		}
@@ -189,7 +216,8 @@ public class SessionExecutorImpl implements SessionExecutor {
 			logger.debug("Exec: " + sql);
 		}
 		try {
-			return sqlRunner.update(transaction.getConnection(), sql, arguments != null ? new ArrayParameterSource(arguments) : null);
+			return sqlRunner.update(transaction.getConnection(), sql,
+					arguments != null ? new ArrayParameterSource(arguments) : null);
 		} catch (SQLException e) {
 			throw new SessionException(e);
 		}

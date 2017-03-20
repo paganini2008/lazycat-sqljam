@@ -224,7 +224,7 @@ public class TestMySql {
 		}
 		System.out.println("Over");
 	}
-
+  
 	public static void main7(String[] args) {
 		Session session = openSession();
 		Delete delete = session.delete(Article.class);

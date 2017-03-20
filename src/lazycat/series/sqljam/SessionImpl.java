@@ -1,13 +1,14 @@
 package lazycat.series.sqljam;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import lazycat.series.beans.PropertyUtils;
 import lazycat.series.cache.Cache;
 import lazycat.series.cache.LruCache;
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.jdbc.mapper.RowMapper;
 import lazycat.series.sqljam.expression.Fields;
 import lazycat.series.sqljam.expression.Identifier;
 import lazycat.series.sqljam.expression.SqlParameterExpression;
@@ -85,13 +86,21 @@ public class SessionImpl implements Session {
 	public <T> T first(Executable query, Class<T> objectClass) {
 		return sessionExecutor.first(transaction, query, objectClass);
 	}
+	
+	public <T> Iterator<T> iterator(Executable query, Class<T> beanClass) {
+		return sessionExecutor.iterator(transaction,query, beanClass);
+	}
+
+	public <T> Iterator<Map<String, Object>> iterator(Executable query) {
+		return sessionExecutor.iterator(transaction, query);
+	}
 
 	public <T> List<T> list(Executable query, Class<T> objectClass) {
 		return sessionExecutor.list(transaction, query, objectClass);
 	}
 
-	public <T> List<T> list(Executable query, RowMapper<T> rowMapper) {
-		return sessionExecutor.list(transaction, query, rowMapper);
+	public <T> List<Map<String, Object>> list(Executable query) {
+		return sessionExecutor.list(transaction, query); 
 	}
 
 	public int batch(Executable executable) {

@@ -1,5 +1,6 @@
 package lazycat.series.sqljam.query;
 
+import java.util.Iterator;
 import java.util.List;
 
 import lazycat.series.lang.StringUtils;
@@ -246,6 +247,14 @@ public class QueryImpl extends AbstractQuery implements Query {
 		return session.list(this, beanClass);
 	}
 
+	public <T> Iterator<T> iterator() {
+		return (Iterator<T>) session.iterator(this, mappedClass);
+	}
+
+	public <T> Iterator<T> iterator(Class<T> beanClass) {
+		return session.iterator(this, beanClass);
+	}
+
 	public <T> T getResult(Class<T> requiredType) {
 		return session.getResult(this, requiredType);
 	}
@@ -270,11 +279,6 @@ public class QueryImpl extends AbstractQuery implements Query {
 
 	public Query all() {
 		return column(new All());
-	}
-
-	public Query cleanColumns() {
-		builder.field = null;
-		return this;
 	}
 
 	public int size() {

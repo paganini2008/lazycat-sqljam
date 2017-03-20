@@ -26,7 +26,6 @@ public class QueryBuilder implements SqlBuilder {
 	Expression group;
 	Expression having;
 	Expression order;
-	boolean distinct;
 
 	private final Translator translator;
 
@@ -55,7 +54,7 @@ public class QueryBuilder implements SqlBuilder {
 	public String getText(Configuration configuration) {
 		final Feature feature = configuration.getFeature();
 		StringBuilder text = new StringBuilder();
-		text.append(feature.select(distinct));
+		text.append(feature.select(false));
 		if (field == null) {
 			field = new SelectAll();
 		}

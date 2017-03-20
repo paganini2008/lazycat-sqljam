@@ -1,10 +1,11 @@
 package lazycat.series.sqljam;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.jdbc.mapper.RowMapper;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.update.Delete;
 import lazycat.series.sqljam.update.Insert;
@@ -36,9 +37,13 @@ public interface Session {
 
 	<T> T first(Executable query, Class<T> beanClass);
 
-	<T> List<T> list(Executable query, Class<T> beanClass);
+	<T> List<T> list(Executable query, Class<T> objectClass);
 
-	<T> List<T> list(Executable query, RowMapper<T> rowMapper);
+	<T> List<Map<String, Object>> list(Executable query);
+
+	<T> Iterator<T> iterator(Executable query, Class<T> objectClass);
+
+	<T> Iterator<Map<String, Object>> iterator(Executable query);
 
 	Insert insert(Class<?> mappedClass);
 

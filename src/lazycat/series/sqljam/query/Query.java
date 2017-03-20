@@ -77,8 +77,6 @@ public interface Query extends From, ResultSet {
 
 	Query all();
 
-	Query cleanColumns();
-
 	ResultSet limit(int limit);
 
 	ResultSet limit(int offset, int limit);

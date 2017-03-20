@@ -1,5 +1,6 @@
 package lazycat.series.sqljam.query;
 
+import java.util.Iterator;
 import java.util.List;
 
 import lazycat.series.sqljam.Executable;
@@ -25,6 +26,10 @@ public interface ResultSet extends Executable {
 	<T> List<T> list();
 
 	<T> List<T> list(Class<T> beanClass);
+
+	<T> Iterator<T> iterator();
+
+	<T> Iterator<T> iterator(Class<T> beanClass);
 
 	int into(Class<?> mappedClass);
 
