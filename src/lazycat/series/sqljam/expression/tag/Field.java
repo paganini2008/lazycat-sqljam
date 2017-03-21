@@ -1,4 +1,4 @@
-package lazycat.series.sqljam.expression;
+package lazycat.series.sqljam.expression.tag;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

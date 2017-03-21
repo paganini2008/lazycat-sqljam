@@ -17,6 +17,8 @@ public interface Query extends From, ResultSet {
 
 	Query from(Query subQuery, String alias);
 
+	Query relation(Expression expression);
+
 	Query filter(Expression expression);
 
 	Query crossJoin(Class<?> mappedClass, String alias, Expression on);

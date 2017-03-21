@@ -7,6 +7,7 @@ import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
+import lazycat.series.sqljam.expression.Expressions;
 import lazycat.series.sqljam.expression.SelectAll;
 import lazycat.series.sqljam.feature.Feature;
 import lazycat.series.sqljam.update.SqlBuilder;
@@ -22,6 +23,7 @@ public class QueryBuilder implements SqlBuilder {
 	From query;
 	Join join;
 	Expression field;
+	Expression relation;
 	Expression where;
 	Expression group;
 	Expression having;
@@ -60,8 +62,16 @@ public class QueryBuilder implements SqlBuilder {
 		}
 		text.append(field.getText(translator, configuration));
 		text.append(feature.from(query.getText(configuration)));
-		if (where != null) {
-			text.append(feature.where(where.getText(translator, configuration)));
+		if (relation != null && where != null) {
+			Expression all = Expressions.and(relation, where);
+			text.append(feature.where(all.getText(translator, configuration)));
+		} else {
+			if (relation != null) {
+				text.append(feature.where(relation.getText(translator, configuration)));
+			}
+			if (where != null) {
+				text.append(feature.where(where.getText(translator, configuration)));
+			}
 		}
 		if (join != null) {
 			text.append(join.getText(translator, configuration));
@@ -83,6 +93,9 @@ public class QueryBuilder implements SqlBuilder {
 		if (field != null) {
 			field.setParameter(translator, parameterCollector, configuration);
 		}
+		if (relation != null) {
+			relation.setParameter(translator, parameterCollector, configuration);
+		}
 		if (where != null) {
 			where.setParameter(translator, parameterCollector, configuration);
 		}
@@ -94,6 +107,9 @@ public class QueryBuilder implements SqlBuilder {
 			if (having != null) {
 				having.setParameter(translator, parameterCollector, configuration);
 			}
+		}
+		if (order != null) {
+			order.setParameter(translator, parameterCollector, configuration);
 		}
 	}
 

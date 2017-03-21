@@ -55,8 +55,12 @@ public abstract class SQL92Criterion {
 	public String select(boolean distinct) {
 		return distinct ? "select distinct " : "select ";
 	}
+	
+	public String tableAs(String left, String right) {
+		return left + " as " + right;
+	}
 
-	public String as(String left, String right) {
+	public String columnAs(String left, String right) {
 		return left + " as " + right;
 	}
 

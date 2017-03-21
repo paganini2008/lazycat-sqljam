@@ -36,7 +36,7 @@ public class SimpleFrom extends StandardFrom {
 			text.append(",");
 		}
 		if (StringUtils.isNotBlank(tableAlias)) {
-			text.append(configuration.getFeature().as(tableDefinition.getTableName(), tableAlias));
+			text.append(configuration.getFeature().tableAs(tableDefinition.getTableName(), tableAlias));
 		} else {
 			text.append(tableDefinition.getTableName());
 		}

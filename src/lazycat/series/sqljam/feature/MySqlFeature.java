@@ -12,7 +12,7 @@ import lazycat.series.lang.Ints;
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.JdbcFault;
 import lazycat.series.sqljam.JdbcUtils;
-import lazycat.series.sqljam.MappingFault;
+import lazycat.series.sqljam.MappingException;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 import lazycat.series.sqljam.relational.TableDefinition;
 
@@ -138,7 +138,7 @@ public class MySqlFeature extends BasicFeature {
 			str.append(columnDefinition.getColumnName());
 			JdbcType jdbcType = columnDefinition.getJdbcType();
 			if (jdbcType == null) {
-				throw new MappingFault("Undefined jdbcType.");
+				throw new MappingException("Undefined jdbcType.");
 			}
 			if (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT) {
 				jdbcType = getJdbcType(columnDefinition.getJavaType());

@@ -17,10 +17,10 @@ public class JdbcTypeMapper {
 	private final Map<JdbcType, String> defaults = new HashMap<JdbcType, String>();
 	private final Map<JdbcType, Map<Long, String>> weights = new HashMap<JdbcType, Map<Long, String>>();
 
-	public String get(JdbcType jdbcType) throws TypeMapperFault {
+	public String get(JdbcType jdbcType) throws TypeMapperException {
 		String result = defaults.get(jdbcType);
 		if (result == null) {
-			throw new TypeMapperFault("No feature mapping for jdbc type: " + jdbcType);
+			throw new TypeMapperException("No feature mapping for jdbc type: " + jdbcType);
 		}
 		return result;
 	}
@@ -42,12 +42,12 @@ public class JdbcTypeMapper {
 		}
 		String part = get(jdbcType);
 		if (size < 0 && part.contains("$l")) {
-			throw new TypeMapperFault("Please specify data length.");
+			throw new TypeMapperException("Please specify data length.");
 		}
 		return replace(part, size);
 	}
 
-	public String get(JdbcType jdbcType, int m, int d) throws TypeMapperFault {
+	public String get(JdbcType jdbcType, int m, int d) throws TypeMapperException {
 		String part = get(jdbcType);
 		if (m > 0 && d > 0) {
 			if (m > d) {
@@ -58,7 +58,7 @@ public class JdbcTypeMapper {
 		} else if (m < 0 && d < 0) {
 			return getShort(part);
 		}
-		throw new TypeMapperFault("");
+		throw new TypeMapperException("");
 	}
 
 	private static String replace(String type, int m, int d) {

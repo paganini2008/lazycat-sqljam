@@ -14,7 +14,7 @@ import lazycat.series.lang.Ints;
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.JdbcFault;
 import lazycat.series.sqljam.JdbcUtils;
-import lazycat.series.sqljam.MappingFault;
+import lazycat.series.sqljam.MappingException;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 import lazycat.series.sqljam.relational.TableDefinition;
 
@@ -48,8 +48,8 @@ public class PostgreSqlFeature extends BasicFeature {
 		registerColumnType(JdbcType.LONGVARBINARY, "bytea");
 		registerColumnType(JdbcType.CLOB, "text");
 		registerColumnType(JdbcType.BLOB, "oid");
-		registerColumnType(JdbcType.NUMERIC, "decimal($p,$s)");
-		registerColumnType(JdbcType.DECIMAL, "decimal($p,$s)");
+		registerColumnType(JdbcType.NUMERIC, "numeric($p,$s)");
+		registerColumnType(JdbcType.DECIMAL, "numeric($p,$s)");
 
 		registerJavaType(Boolean.TYPE, JdbcType.BOOLEAN);
 		registerJavaType(Boolean.class, JdbcType.BOOLEAN);
@@ -121,8 +121,7 @@ public class PostgreSqlFeature extends BasicFeature {
 	}
 
 	protected String getCreateSequenceSqlString() {
-		return "create sequence ? increment by 1 minvalue 1 no maxvalue start with 1 owned by ?";
-
+		return "create sequence if not exists ? increment by 1 minvalue 1 no maxvalue start with 1 owned by ?";
 	}
 
 	protected String getIdentitySqlString() {
@@ -142,6 +141,9 @@ public class PostgreSqlFeature extends BasicFeature {
 	}
 
 	protected int[] getColumnModified(ColumnDefinition columnDefinition, DatabaseMetaData dbmd) {
+		if ("price".equals(columnDefinition.getColumnName())) {
+			System.out.println("PostgreSqlFeature.getColumnModified()");
+		}
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		boolean result = true;
 		Map<String, Object> metadata;
@@ -188,8 +190,9 @@ public class PostgreSqlFeature extends BasicFeature {
 		String typeName = (String) metadata.get("TYPE_NAME");
 		JdbcType jdbcType = JdbcType.find((Integer) metadata.get("DATA_TYPE"));
 		if (StringUtils.isNotBlank(typeName) && jdbcType != null) {
-			JdbcType jdbcTypeFind = (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT)
-					? getJdbcType(columnDefinition.getJavaType()) : columnDefinition.getJdbcType();
+			JdbcType jdbcTypeFind = (columnDefinition.getJdbcType() == JdbcType.OTHER
+					|| columnDefinition.getJdbcType() == JdbcType.OBJECT) ? getJdbcType(columnDefinition.getJavaType())
+							: columnDefinition.getJdbcType();
 			String typeNameFind;
 			if (JdbcUtils.isNumeric(jdbcTypeFind)) {
 				typeNameFind = getColumnType(jdbcTypeFind, columnDefinition.getPrecision(), columnDefinition.getScale());
@@ -224,7 +227,7 @@ public class PostgreSqlFeature extends BasicFeature {
 			case MODIFY_DATA_TYPE:
 				JdbcType jdbcType = columnDefinition.getJdbcType();
 				if (jdbcType == null) {
-					throw new MappingFault("Undefined jdbcType.");
+					throw new MappingException("Undefined jdbcType.");
 				}
 				if (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT) {
 					jdbcType = getJdbcType(columnDefinition.getJavaType());
@@ -263,7 +266,8 @@ public class PostgreSqlFeature extends BasicFeature {
 				break;
 			case MODIFY_COMMENT:
 				if (StringUtils.isNotBlank(columnDefinition.getComment())) {
-					String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(), columnDefinition.getComment() };
+					String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(),
+							columnDefinition.getComment() };
 					sqls.add(formatString(getAddTableColumnCommentSqlString(), args));
 				}
 				break;
@@ -278,8 +282,8 @@ public class PostgreSqlFeature extends BasicFeature {
 				String seqName = getDefaultSequenceName(tableDefinition.getTableName(), columnDefinition.getColumnName());
 				ddls.add(formatString(getCreateSequenceSqlString(),
 						new String[] { seqName, tableDefinition.getTableName() + "." + columnDefinition.getColumnName() }));
-				ddls.add(formatString(getSetDefaultValueSqlString(),
-						new String[] { tableDefinition.getTableName(), columnDefinition.getColumnName(), "nextval('" + seqName + "')" }));
+				ddls.add(formatString(getSetDefaultValueSqlString(), new String[] { tableDefinition.getTableName(),
+						columnDefinition.getColumnName(), "nextval('" + seqName + "')" }));
 			}
 			if (!columnDefinition.isNullable()) {
 				ddls.add(formatString(getSetNullableSqlString(),
@@ -290,7 +294,8 @@ public class PostgreSqlFeature extends BasicFeature {
 						columnDefinition.getColumnName(), columnDefinition.getDefaultValue() }));
 			}
 			if (StringUtils.isNotBlank(columnDefinition.getComment())) {
-				String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(), columnDefinition.getComment() };
+				String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(),
+						columnDefinition.getComment() };
 				ddls.add(formatString(getAddTableColumnCommentSqlString(), args));
 			}
 		}
@@ -304,7 +309,7 @@ public class PostgreSqlFeature extends BasicFeature {
 			str.append(columnDefinition.getColumnName());
 			JdbcType jdbcType = columnDefinition.getJdbcType();
 			if (jdbcType == null) {
-				throw new MappingFault("Undefined jdbcType.");
+				throw new MappingException("Undefined jdbcType.");
 			}
 			if (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT) {
 				jdbcType = getJdbcType(columnDefinition.getJavaType());
@@ -320,11 +325,7 @@ public class PostgreSqlFeature extends BasicFeature {
 		}
 	}
 
-	public String decorateQueryColumnAlias(String alias) {
-		return "\"" + alias + "\"";
-	}
-
-	public String as(String left, String right) {
+	public String columnAs(String left, String right) {
 		return left + " as \"" + right + "\"";
 	}
 

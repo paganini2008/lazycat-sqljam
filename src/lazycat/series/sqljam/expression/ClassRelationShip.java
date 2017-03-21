@@ -3,6 +3,7 @@ package lazycat.series.sqljam.expression;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.expression.tag.RelationShip;
 import lazycat.series.sqljam.relational.ForeignKeyDefinition;
 import lazycat.series.sqljam.relational.TableDefinition;
 
@@ -12,14 +13,15 @@ import lazycat.series.sqljam.relational.TableDefinition;
  * @author Fred Feng
  * @version 1.0
  */
-public class RelationShip implements Expression {
+@RelationShip
+public class ClassRelationShip implements Expression {
 
 	private final Class<?> left;
 	private final String leftAlias;
 	private final Class<?> right;
 	private final String rightAlias;
 
-	public RelationShip(Class<?> left, String leftAlias, Class<?> right, String rightAlias) {
+	public ClassRelationShip(Class<?> left, String leftAlias, Class<?> right, String rightAlias) {
 		this.left = left;
 		this.leftAlias = leftAlias;
 		this.right = right;

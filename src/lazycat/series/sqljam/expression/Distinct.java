@@ -3,6 +3,7 @@ package lazycat.series.sqljam.expression;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.expression.tag.Field;
 
 /**
  * Distinct

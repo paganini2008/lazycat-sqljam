@@ -60,7 +60,7 @@ public class SelectAll implements Expression {
 		for (ColumnDefinition cd : definitions) {
 			if (!excludeProperties.contains(cd.getMappedProperty())) {
 				String columnName = prefix + cd.getColumnName();
-				list.add(as ? feature.as(columnName, cd.getMappedProperty()) : columnName);
+				list.add(as ? feature.columnAs(columnName, cd.getMappedProperty()) : columnName);
 			}
 		}
 		return CollectionUtils.join(list, ",");

@@ -68,6 +68,11 @@ public class QueryImpl extends AbstractQuery implements Query {
 		return this;
 	}
 
+	public Query relation(Expression expression) {
+		builder.relation = expression;
+		return this;
+	}
+
 	public Query crossJoin(Class<?> mappedClass, String tableAlias, Expression on) {
 		return join(mappedClass, tableAlias, JoinType.CROSS_JOIN, on);
 	}

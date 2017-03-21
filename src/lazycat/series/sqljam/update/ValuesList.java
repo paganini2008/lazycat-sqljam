@@ -12,7 +12,7 @@ import lazycat.series.collection.CollectionUtils;
 import lazycat.series.lang.Assert;
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.NullValueFault;
+import lazycat.series.sqljam.NullValueException;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
@@ -122,10 +122,10 @@ public class ValuesList implements Expression {
 						continue;
 					}
 					if (translator.isPrimaryKey(null, cd.getMappedProperty(), configuration.getMetaData())) {
-						throw new NullValueFault("PrimaryKey '" + cd.getMappedProperty() + "' must not be null.");
+						throw new NullValueException("PrimaryKey '" + cd.getMappedProperty() + "' must not be null.");
 					}
 					if (StringUtils.isBlank(cd.getDefaultValue())) {
-						throw new NullValueFault("Property '" + cd.getMappedProperty() + "' must not be null.");
+						throw new NullValueException("Property '" + cd.getMappedProperty() + "' must not be null.");
 					}
 				}
 			}

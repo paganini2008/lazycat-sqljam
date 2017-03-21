@@ -74,7 +74,7 @@ public class AnnotationMetadata implements MetaData {
 
 	public TableEditor addTable(Class<?> mappedClass, String catalog, String schema, String tableName) {
 		if (hasMapped(mappedClass)) {
-			throw new MappingFault(mappedClass.getName() + " has been mapped.");
+			throw new MappingException(mappedClass.getName() + " has been mapped.");
 		}
 		SchemaEditor schemaEditor = getSchemaEditor(catalog, schema);
 		tableEditorRegistry.put(mappedClass, new TableEditorImpl(schemaEditor, mappedClass, tableName));
@@ -91,17 +91,17 @@ public class AnnotationMetadata implements MetaData {
 						try {
 							mappedClass = Class.forName(className);
 						} catch (ClassNotFoundException e) {
-							throw new MappingFault(e);
+							throw new MappingException(e);
 						}
 						try {
 							mapClass(mappedClass);
-						} catch (MappingFault e) {
+						} catch (MappingException e) {
 							logger.warn(e.getMessage());
 						}
 					}
 				});
 			} catch (IOException e) {
-				throw new MappingFault("Error in scanning package.", e);
+				throw new MappingException("Error in scanning package.", e);
 			}
 		}
 		return this;
@@ -109,7 +109,7 @@ public class AnnotationMetadata implements MetaData {
 
 	public synchronized MetaData mapClass(Class<?> mappedClass) {
 		if (!mappedClass.isAnnotationPresent(Table.class)) {
-			throw new MappingFault("Unrecognized class '" + mappedClass.getName() + "' and please set annotation on the class head.");
+			throw new MappingException("Unrecognized class '" + mappedClass.getName() + "' and please set annotation on the class head.");
 		}
 		Table annotation = mappedClass.getAnnotation(Table.class);
 		TableEditor tableEditor = addTable(mappedClass, annotation.catalog(), annotation.schema(), annotation.name());
@@ -161,7 +161,7 @@ public class AnnotationMetadata implements MetaData {
 		}
 		if (field.isAnnotationPresent(UniqueKey.class)) {
 			if (tableEditor.getTableDefinition().isPrimaryKey(columnEditor.getColumnDefinition().getMappedProperty())) {
-				throw new MappingFault("Duplicated unique key. MappedProperty: " + columnEditor.getColumnDefinition().getMappedProperty()
+				throw new MappingException("Duplicated unique key. MappedProperty: " + columnEditor.getColumnDefinition().getMappedProperty()
 						+ ", ColumnName: " + columnEditor.getColumnDefinition().getColumnName());
 			}
 			UniqueKey uniqueKey = field.getAnnotation(UniqueKey.class);

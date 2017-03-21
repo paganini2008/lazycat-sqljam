@@ -3,6 +3,7 @@ package lazycat.series.sqljam.expression;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.expression.tag.Order;
 
 /**
  * Asc
@@ -10,6 +11,7 @@ import lazycat.series.sqljam.Translator;
  * @author Fred Feng
  * @version 1.0
  */
+@Order
 public class Asc implements Expression {
 
 	private final Expression expression;

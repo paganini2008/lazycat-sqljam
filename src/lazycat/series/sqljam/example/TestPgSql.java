@@ -1,5 +1,6 @@
 package lazycat.series.sqljam.example;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import lazycat.series.logger.LazyLogger;
@@ -9,7 +10,11 @@ import lazycat.series.sqljam.ConfigurationInitializer;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.SessionEngine;
 import lazycat.series.sqljam.example.model.Article;
+import lazycat.series.sqljam.example.model.Order;
+import lazycat.series.sqljam.example.model.User;
+import lazycat.series.sqljam.expression.Column;
 import lazycat.series.sqljam.expression.Expressions;
+import lazycat.series.sqljam.expression.Fields;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.update.Batch;
 
@@ -176,8 +181,88 @@ public class TestPgSql {
 		System.out.println("Over");
 	}
 
+	public static void test11() {
+		Session session = openSession();
+		Article article = new Article();
+		article.setText("这是一篇计算机文章");
+		article.setTitle("论计算机");
+		article.setContent("<div>这是一篇计算机文章</div>");
+		article.setUrl("http://www.jay.com");
+		article.setAuthor("Jay");
+		article.setScore(68.0f);
+		session.save(article);
+		session.commit();
+		System.out.println(article.getId() + "\t" + article.getAuthor());
+	}
+
+	public static void test10() {
+		Session session = openSession();
+		User user = new User();
+		user.setUsername("resin");
+		user.setPassword("111111");
+		session.save(user);
+		session.commit();
+		System.out.println(user.getId());
+	}
+
+	private static Session openSession() {
+		String driverClassName = "org.postgresql.Driver";
+		String jdbcUrl = "jdbc:postgresql://localhost:5432/db_test";
+		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "tomcat", "12345678", null, false,
+				new ConfigurationInitializer() {
+					public void configure(Configuration configuration) {
+						configuration.scanPackage("lazycat.series.sqljam.example.model");
+					}
+				});
+		return sessionEngine.openSession();
+	}
+
+	public static void test13() {
+		Session session = openSession();
+		Order order = new Order();
+		order.setPrice(new BigDecimal("10.801"));
+		order.setUid(5);
+		session.save(order);
+
+		order = new Order();
+		order.setPrice(new BigDecimal("100.209"));
+		order.setUid(5);
+		session.save(order);
+
+		order = new Order();
+		order.setPrice(new BigDecimal("201.678"));
+		order.setUid(5);
+		session.save(order);
+		session.commit();
+	}
+
+	public static void main6() {
+		Session session = openSession();
+		List<Article> list = session.query(Article.class).group("title").column("title").max("score", "score").list();
+		for (Article a : list) {
+			System.out.println(a);
+		}
+		System.out.println("Over");
+	}
+
+	public static void main9() {
+		Session session = openSession();
+		int effected = session.update(Article.class, null).filter(Expressions.eq("author", "Jay")).set("title", "论公园").execute();
+		session.commit();
+		System.out.println("Eff:" + effected);
+	}
+	
+	public static void test2() {
+		Session session = openSession();
+		User user = session.get(4, User.class);
+		int effected = session.delete(user, true);
+		//session.commit();
+		System.out.println("Effected: " + effected);
+		session.close();
+	}
+
 	public static void main(String[] args) {
-		main3(args);
+		test2();
 	}
 
 }

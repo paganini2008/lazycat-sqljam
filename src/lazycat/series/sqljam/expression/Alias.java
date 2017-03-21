@@ -27,7 +27,7 @@ public class Alias implements Expression {
 	}
 
 	public String getText(Translator translator, Configuration configuration) {
-		return configuration.getFeature().as(expression.getText(translator, configuration), alias);
+		return configuration.getFeature().columnAs(expression.getText(translator, configuration), alias);
 	}
 
 	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {

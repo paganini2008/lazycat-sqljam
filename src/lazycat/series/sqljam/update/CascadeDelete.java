@@ -9,7 +9,7 @@ import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.expression.Expression;
 import lazycat.series.sqljam.expression.Expressions;
 import lazycat.series.sqljam.expression.Label;
-import lazycat.series.sqljam.expression.RelationShip;
+import lazycat.series.sqljam.expression.ClassRelationShip;
 import lazycat.series.sqljam.query.Query;
 
 /**
@@ -29,8 +29,8 @@ public class CascadeDelete implements Delete {
 		this.last = session.delete(mappedClass);
 		List<Class<?>> references = session.getConfiguration().getMetaData().getReferences(mappedClass);
 		for (Class<?> reference : references) {
-			cascades.add(
-					session.query(mappedClass).filter(new RelationShip(mappedClass, tableAlias, reference, "reference")).column(Label.ONE));
+			cascades.add(session.query(mappedClass).relation(new ClassRelationShip(reference, "reference", mappedClass, tableAlias))
+					.column(Label.ONE));
 		}
 		this.session = session;
 	}
@@ -49,7 +49,7 @@ public class CascadeDelete implements Delete {
 		effected += last.execute();
 		return effected;
 	}
-	
+
 	public Delete self() {
 		last.self();
 		return this;

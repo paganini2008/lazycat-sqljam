@@ -4,6 +4,7 @@ import lazycat.series.lang.Assert;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.expression.tag.Field;
 
 /**
  * Label

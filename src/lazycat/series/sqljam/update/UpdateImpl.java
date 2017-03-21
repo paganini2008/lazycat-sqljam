@@ -41,16 +41,16 @@ public class UpdateImpl implements Update {
 		return set(new Setter(object));
 	}
 
-	public Update set(String propertyName, String anotherPropertyName) {
-		return set(Expressions.eq(propertyName, anotherPropertyName));
+	public Update set(String property, String anotherPropertyName) {
+		return set(Expressions.eq(property, anotherPropertyName));
 	}
 
-	public Update set(String propertyName, From query) {
-		return set(Expressions.eq(propertyName, query));
+	public Update set(String property, From query) {
+		return set(Expressions.eq(property, query));
 	}
 
-	public Update set(String propertyName, Object parameter) {
-		return set(Expressions.eq(propertyName, parameter));
+	public Update set(String property, Object parameter) {
+		return set(Expressions.eq(property, parameter));
 	}
 
 	public Update set(Expression expression) {

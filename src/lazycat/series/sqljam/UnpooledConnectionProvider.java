@@ -40,7 +40,7 @@ public class UnpooledConnectionProvider implements ConnectionProvider {
 		try {
 			Class.forName(driverClassName);
 		} catch (ClassNotFoundException e) {
-			throw new ConnectionFault("Can't find the driverClassName: " + driverClassName, e);
+			throw new ConnectionException("Can't find the driverClassName: " + driverClassName, e);
 		}
 		this.driverClassName = driverClassName;
 	}
@@ -65,7 +65,7 @@ public class UnpooledConnectionProvider implements ConnectionProvider {
 		try {
 			return DriverManager.getConnection(url, username, password);
 		} catch (SQLException e) {
-			throw new ConnectionFault(e);
+			throw new ConnectionException(e);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class UnpooledConnectionProvider implements ConnectionProvider {
 				connection.close();
 			}
 		} catch (SQLException e) {
-			throw new ConnectionFault(e);
+			throw new ConnectionException(e);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class UnpooledConnectionProvider implements ConnectionProvider {
 		try {
 			connection.setAutoCommit(true);
 		} catch (SQLException e) {
-			throw new ConnectionFault(e);
+			throw new ConnectionException(e);
 		}
 		return connection;
 	}

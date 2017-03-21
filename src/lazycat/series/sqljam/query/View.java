@@ -27,7 +27,7 @@ public class View extends StandardFrom {
 			text.append(",");
 		}
 		String q = configuration.getFeature().wrap(query.getText(configuration));
-		text.append(configuration.getFeature().as(q, tableAlias));
+		text.append(configuration.getFeature().tableAs(q, tableAlias));
 		return text.toString();
 	}
 

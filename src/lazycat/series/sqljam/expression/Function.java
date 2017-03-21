@@ -8,6 +8,7 @@ import lazycat.series.lang.Ints;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.expression.tag.Field;
 
 /**
  * Represent a function

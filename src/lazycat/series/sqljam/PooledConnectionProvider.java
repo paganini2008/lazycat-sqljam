@@ -17,7 +17,7 @@ public class PooledConnectionProvider implements ConnectionProvider {
 		try {
 			return dataSource.getConnection();
 		} catch (SQLException e) {
-			throw new ConnectionFault(e);
+			throw new ConnectionException(e);
 		}
 	}
 
@@ -27,7 +27,7 @@ public class PooledConnectionProvider implements ConnectionProvider {
 				connection.close();
 			}
 		} catch (SQLException e) {
-			throw new ConnectionFault(e);
+			throw new ConnectionException(e);
 		}
 	}
 
@@ -36,7 +36,7 @@ public class PooledConnectionProvider implements ConnectionProvider {
 		try {
 			connection.setAutoCommit(true);
 		} catch (SQLException e) {
-			throw new ConnectionFault(e);
+			throw new ConnectionException(e);
 		}
 		return connection;
 	}

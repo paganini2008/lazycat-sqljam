@@ -10,7 +10,7 @@ import java.util.Map;
 import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.beans.ToStringBuilder.PrintStyle;
 import lazycat.series.sqljam.AutoDdl;
-import lazycat.series.sqljam.MappingFault;
+import lazycat.series.sqljam.MappingException;
 import lazycat.series.sqljam.generator.IdentifierGenerator;
 
 /**
@@ -132,7 +132,7 @@ public class StardardTableDefinition implements TableDefinition {
 		if (columns.containsKey(mappedProperty)) {
 			return columns.get(mappedProperty).isAutoIncrement();
 		}
-		throw new MappingFault("Unknow mappedProperty: " + mappedProperty);
+		throw new MappingException("Unknow mappedProperty: " + mappedProperty);
 	}
 
 	public UniqueKeyDefinition[] getUniqueKeyDefinitions() {

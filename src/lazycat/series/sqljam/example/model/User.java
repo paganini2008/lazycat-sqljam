@@ -1,5 +1,8 @@
 package lazycat.series.sqljam.example.model;
 
+import java.util.Calendar;
+
+import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.AutoDdl;
 import lazycat.series.sqljam.annotation.Column;
 import lazycat.series.sqljam.annotation.PrimaryKey;
@@ -14,9 +17,11 @@ public class User {
 
 	@Column
 	private String username;
-
 	@Column
 	private String password;
+
+	@Column(jdbcType = JdbcType.DATE)
+	private Calendar myTime;
 
 	public int getId() {
 		return id;
@@ -40,6 +45,14 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Calendar getMyTime() {
+		return myTime;
+	}
+
+	public void setMyTime(Calendar myTime) {
+		this.myTime = myTime;
 	}
 
 	public String toString() {

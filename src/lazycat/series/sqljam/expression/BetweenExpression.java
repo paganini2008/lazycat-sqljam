@@ -6,7 +6,7 @@ import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
 
 /**
- * between
+ * BetweenExpression
  * 
  * @author Fred Feng
  * @version 1.0
@@ -40,8 +40,8 @@ public class BetweenExpression implements Expression {
 	}
 
 	public String getText(Translator translator, Configuration configuration) {
-		return configuration.getFeature().between(expression.getText(translator, configuration), lower.getText(translator, configuration),
-				high.getText(translator, configuration));
+		return configuration.getFeature().between(expression.getText(translator, configuration),
+				lower.getText(translator, configuration), high.getText(translator, configuration));
 	}
 
 	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {

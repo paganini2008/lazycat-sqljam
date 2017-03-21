@@ -15,11 +15,11 @@ public interface Update extends Executor {
 
 	Update set(Object object);
 
-	Update set(String propertyName, Object parameter);
+	Update set(String property, Object parameter);
 
-	Update set(String propertyName, From query);
+	Update set(String property, From query);
 
-	Update set(String propertyName, String anotherPropertyName);
+	Update set(String property, String anotherProperty);
 
 	Update set(Expression expression);
 

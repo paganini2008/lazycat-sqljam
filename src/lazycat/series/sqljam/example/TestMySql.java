@@ -38,6 +38,20 @@ public class TestMySql {
 		Session session = sessionEngine.openSession();
 		System.out.println(session);
 	}
+	
+	public static void test12() {
+		Session session = openSession();
+		Article article = new Article();
+		article.setText("这是一篇军事文章");
+		article.setTitle("论军事");
+		article.setContent("<div>这是一篇军事文章</div>");
+		article.setUrl("http://www.jerry.com");
+		article.setAuthor("Jerry");
+		article.setScore(58.0f);
+		session.save(article);
+		session.commit();
+		System.out.println(article.getId() + "\t" + article.getAuthor());
+	}
 
 	public static void test3() {
 		Session session = openSession();
@@ -112,19 +126,7 @@ public class TestMySql {
 	}
 
 	public static void main3(String[] args) {
-
-		String driverClassName = "com.mysql.jdbc.Driver";
-		String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
-		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "root", "12345678", null, true,
-				new ConfigurationInitializer() {
-					public void configure(Configuration configuration) {
-						configuration.scanPackage("lazycat.series.sqljam.example.model");
-						// configuration.mapClass(Article.class);
-					}
-				});
-		Session session = sessionEngine.openSession();
-		System.out.println(session);
-
+		Session session = openSession();
 		Query query = session.query(Article.class);
 		query.filter(Expressions.gte("score", 100));
 		query.desc("author");
@@ -255,7 +257,7 @@ public class TestMySql {
 	public static void test10() {
 		Session session = openSession();
 		User user = new User();
-		user.setUsername("weblogic");
+		user.setUsername("resin");
 		user.setPassword("111111");
 		session.save(user);
 		session.commit();
@@ -275,18 +277,20 @@ public class TestMySql {
 		Session session = openSession();
 		Order order = new Order();
 		order.setPrice(new BigDecimal("10.801"));
-		order.setUid(1);
+		order.setUid(6);
 		session.save(order);
 
 		order = new Order();
 		order.setPrice(new BigDecimal("100.209"));
-		order.setUid(1);
+		order.setUid(6);
 		session.save(order);
 
 		order = new Order();
 		order.setPrice(new BigDecimal("201.678"));
-		order.setUid(1);
+		order.setUid(6);
 		session.save(order);
+		
+		 
 		session.commit();
 	}
 
@@ -306,7 +310,7 @@ public class TestMySql {
 	}
 
 	public static void main(String[] args) {
-		main6(args);
+		test11();
 	}
 
 }
