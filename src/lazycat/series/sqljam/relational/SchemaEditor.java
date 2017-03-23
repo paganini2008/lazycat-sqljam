@@ -1,6 +1,6 @@
 package lazycat.series.sqljam.relational;
 
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * SchemaEditor
@@ -14,6 +14,6 @@ public interface SchemaEditor {
 
 	SequenceEditor addSequence(String sequenceName, boolean assigned); 
 
-	void addIdentifierGenerator(String generatorName, IdentifierGenerator identifierGenerator);
+	void addIdentifierGenerator(String generatorName, Generator identifierGenerator);
 
 }

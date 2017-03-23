@@ -11,13 +11,13 @@ import lazycat.series.sqljam.feature.Feature;
  * @author Fred Feng
  * @version 1.0
  */
-public class SequenceAssignedIdentifierGenerator implements IdentifierGenerator {
+public class SequenceAssignedGenerator implements Generator {
 
-	private static final LazyLogger logger = LoggerFactory.getLogger(SequenceAssignedIdentifierGenerator.class);
+	private static final LazyLogger logger = LoggerFactory.getLogger(SequenceAssignedGenerator.class);
 
 	private final String generator;
 
-	public SequenceAssignedIdentifierGenerator(String generator) {
+	public SequenceAssignedGenerator(String generator) {
 		this.generator = generator;
 	}
 

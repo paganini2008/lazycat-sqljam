@@ -3,7 +3,7 @@ package lazycat.series.sqljam.relational;
 import java.lang.reflect.Type;
 
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * ColumnDefinition
@@ -41,7 +41,7 @@ public interface ColumnDefinition {
 
 	Type getJavaType();
 
-	IdentifierGenerator getIdentifierGenerator();
+	Generator getIdentifierGenerator();
 
 	TableDefinition getTableDefinition();
 

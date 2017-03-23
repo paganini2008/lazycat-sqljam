@@ -9,11 +9,11 @@ import lazycat.series.sqljam.feature.Feature;
  * @author Fred Feng
  * @version 1.0
  */
-public class SequenceIdentifierGenerator implements IdentifierGenerator {
+public class SequenceGenerator implements Generator {
 
 	private final String generator;
 
-	public SequenceIdentifierGenerator(String generator) {
+	public SequenceGenerator(String generator) {
 		this.generator = generator;
 	}
 

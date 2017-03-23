@@ -17,7 +17,7 @@ import lazycat.series.sqljam.NullValueException;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 
 /**
@@ -102,7 +102,7 @@ public class ValuesBack implements Expression {
 				continue;
 			}
 			Object value = null;
-			IdentifierGenerator identifier = cd.getIdentifierGenerator();
+			Generator identifier = cd.getIdentifierGenerator();
 			if (identifier != null) {
 				if (identifier.hasValue(configuration.getFeature(), translator.getCurrentSession())) {
 					value = identifier.getValue(configuration.getFeature(), translator.getCurrentSession());

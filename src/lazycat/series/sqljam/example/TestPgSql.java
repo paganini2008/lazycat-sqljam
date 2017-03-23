@@ -198,7 +198,7 @@ public class TestPgSql {
 	public static void test10() {
 		Session session = openSession();
 		User user = new User();
-		user.setUsername("resin");
+		user.setUsername("tomcat");
 		user.setPassword("111111");
 		session.save(user);
 		session.commit();
@@ -221,17 +221,17 @@ public class TestPgSql {
 		Session session = openSession();
 		Order order = new Order();
 		order.setPrice(new BigDecimal("10.801"));
-		order.setUid(5);
+		order.setUid(7);
 		session.save(order);
 
 		order = new Order();
 		order.setPrice(new BigDecimal("100.209"));
-		order.setUid(5);
+		order.setUid(7);
 		session.save(order);
 
 		order = new Order();
 		order.setPrice(new BigDecimal("201.678"));
-		order.setUid(5);
+		order.setUid(7);
 		session.save(order);
 		session.commit();
 	}
@@ -254,7 +254,7 @@ public class TestPgSql {
 	
 	public static void test2() {
 		Session session = openSession();
-		User user = session.get(4, User.class);
+		User user = session.get(7, User.class);
 		int effected = session.delete(user, true);
 		//session.commit();
 		System.out.println("Effected: " + effected);

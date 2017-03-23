@@ -1,9 +1,9 @@
 package lazycat.series.sqljam.relational;
 
 import lazycat.series.beans.ToStringBuilder;
-import lazycat.series.sqljam.generator.IdentifierGenerator;
-import lazycat.series.sqljam.generator.SequenceAssignedIdentifierGenerator;
-import lazycat.series.sqljam.generator.SequenceIdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
+import lazycat.series.sqljam.generator.SequenceAssignedGenerator;
+import lazycat.series.sqljam.generator.SequenceGenerator;
 
 /**
  * StandardSequenceDefinition
@@ -20,7 +20,7 @@ public class StandardSequenceDefinition implements SequenceDefinition {
 	private int maxValue;
 	private int minValue;
 	private int cache;
-	private final IdentifierGenerator identifierGenerator;
+	private final Generator identifierGenerator;
 
 	StandardSequenceDefinition(SchemaDefinition schemaDefinition, String name, boolean assigned) {
 		this.schemaDefinition = schemaDefinition;
@@ -30,8 +30,8 @@ public class StandardSequenceDefinition implements SequenceDefinition {
 		this.maxValue = -1;
 		this.minValue = 1;
 		this.cache = 10;
-		this.identifierGenerator = assigned ? new SequenceAssignedIdentifierGenerator(name)
-				: new SequenceIdentifierGenerator(name);
+		this.identifierGenerator = assigned ? new SequenceAssignedGenerator(name)
+				: new SequenceGenerator(name);
 	}
 
 	public String getName() {
@@ -82,7 +82,7 @@ public class StandardSequenceDefinition implements SequenceDefinition {
 		return schemaDefinition;
 	}
 
-	public IdentifierGenerator getIdentifierGenerator() {
+	public Generator getIdentifierGenerator() {
 		return identifierGenerator;
 	}
 

@@ -1,6 +1,6 @@
 package lazycat.series.sqljam.relational;
 
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * SequenceDefinition
@@ -24,6 +24,6 @@ public interface SequenceDefinition {
 
 	SchemaDefinition getSchemaDefinition();
 	
-	IdentifierGenerator getIdentifierGenerator();
+	Generator getIdentifierGenerator();
 
 }

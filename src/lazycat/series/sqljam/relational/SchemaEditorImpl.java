@@ -1,6 +1,6 @@
 package lazycat.series.sqljam.relational;
 
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * SchemaEditorImpl
@@ -26,7 +26,7 @@ public class SchemaEditorImpl implements SchemaEditor {
 		return sequenceEditor;
 	}
 
-	public void addIdentifierGenerator(String generatorName, IdentifierGenerator identifierGenerator) {
+	public void addIdentifierGenerator(String generatorName, Generator identifierGenerator) {
 		schemaDefinition.identifiers.put(generatorName, identifierGenerator);
 	}
 

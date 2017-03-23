@@ -10,18 +10,18 @@ import lazycat.series.sqljam.feature.Feature;
  * @author Fred Feng
  * @version 1.0
  */
-public class IntegerGenerationIdentifier implements IdentifierGenerator {
+public class IntegerGenerator implements Generator {
 
 	public static final String GENERATOR_NAME = "integer";
 
 	private final AtomicPositiveInteger integer;
 	private final int interval;
 
-	public IntegerGenerationIdentifier() {
+	public IntegerGenerator() {
 		this(0, Integer.MAX_VALUE, 1);
 	}
 
-	public IntegerGenerationIdentifier(int startValue, int maxValue, int interval) {
+	public IntegerGenerator(int startValue, int maxValue, int interval) {
 		this.integer = new AtomicPositiveInteger(startValue, maxValue);
 		this.interval = interval;
 	}

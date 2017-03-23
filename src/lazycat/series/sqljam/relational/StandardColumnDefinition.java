@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 import lazycat.series.beans.PropertyFilters;
 import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * A description of table column
@@ -31,7 +31,7 @@ public class StandardColumnDefinition implements ColumnDefinition {
 	private String comment;
 	private String columnScript;
 	private String insertSql;
-	private IdentifierGenerator identifierGenerator;
+	private Generator identifierGenerator;
 
 	StandardColumnDefinition(TableDefinition tableDefinition, String mappedProperty, Type javaType, String columnName,
 			JdbcType jdbcType) {
@@ -142,11 +142,11 @@ public class StandardColumnDefinition implements ColumnDefinition {
 		this.autoIncrement = autoIncrement;
 	}
 
-	public IdentifierGenerator getIdentifierGenerator() {
+	public Generator getIdentifierGenerator() {
 		return identifierGenerator;
 	}
 
-	public void setIdentifierGenerator(IdentifierGenerator identifierGenerator) {
+	public void setIdentifierGenerator(Generator identifierGenerator) {
 		this.identifierGenerator = identifierGenerator;
 	}
 

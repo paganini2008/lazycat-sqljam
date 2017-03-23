@@ -11,7 +11,7 @@ import lazycat.series.sqljam.feature.Feature;
  * @author Fred Feng
  * @version 1.0
  */
-public class JdkUuidIdentifierGenerator implements IdentifierGenerator {
+public class JdkUuidGenerator implements Generator {
 
 	public static final String GENERATOR_NAME = "jdk_uuid";
 	

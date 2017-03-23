@@ -11,7 +11,7 @@ import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.beans.ToStringBuilder.PrintStyle;
 import lazycat.series.sqljam.AutoDdl;
 import lazycat.series.sqljam.MappingException;
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * Table Description
@@ -34,8 +34,8 @@ public class StardardTableDefinition implements TableDefinition {
 	Map<String, ForeignKeyDefinition> foreignKeys = new LinkedHashMap<String, ForeignKeyDefinition>();
 	Map<String, UniqueKeyDefinition> uniqueKeys = new LinkedHashMap<String, UniqueKeyDefinition>();
 
-	Map<String, IdentifierGenerator> sequences = new HashMap<String, IdentifierGenerator>();
-	Map<String, IdentifierGenerator> identifiers = new HashMap<String, IdentifierGenerator>();
+	Map<String, Generator> sequences = new HashMap<String, Generator>();
+	Map<String, Generator> identifiers = new HashMap<String, Generator>();
 
 	StardardTableDefinition(SchemaDefinition schemaDefinition, Class<?> mappedClass, String tableName) {
 		this.schemaDefinition = schemaDefinition;
@@ -87,11 +87,11 @@ public class StardardTableDefinition implements TableDefinition {
 		return null;
 	}
 
-	public IdentifierGenerator getSequenceGenerator(String propertyName) {
+	public Generator getSequenceGenerator(String propertyName) {
 		return sequences.get(propertyName);
 	}
 
-	public IdentifierGenerator getUserDefinedGenerator(String propertyName) {
+	public Generator getUserDefinedGenerator(String propertyName) {
 		return identifiers.get(propertyName);
 	}
 

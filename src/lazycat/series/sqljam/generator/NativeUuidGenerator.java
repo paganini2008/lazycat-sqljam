@@ -9,7 +9,7 @@ import lazycat.series.sqljam.feature.Feature;
  * @author Fred Feng
  * @version 1.0
  */
-public class NativeUuidIdentifierGenerator implements IdentifierGenerator {
+public class NativeUuidGenerator implements Generator {
 	
 	public static final String GENERATOR_NAME = "native_uuid";
 

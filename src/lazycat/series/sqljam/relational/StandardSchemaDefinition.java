@@ -3,7 +3,7 @@ package lazycat.series.sqljam.relational;
 import java.util.HashMap;
 import java.util.Map;
 
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * StandardSchemaDefinition
@@ -16,7 +16,7 @@ public class StandardSchemaDefinition implements SchemaDefinition {
 	private final String catalog;
 	private final String schema;
 	final Map<String, SequenceDefinition> sequences = new HashMap<String, SequenceDefinition>();
-	final Map<String, IdentifierGenerator> identifiers = new HashMap<String, IdentifierGenerator>();
+	final Map<String, Generator> identifiers = new HashMap<String, Generator>();
 
 	StandardSchemaDefinition(String catalog, String schema) {
 		this.catalog = catalog;
@@ -35,7 +35,7 @@ public class StandardSchemaDefinition implements SchemaDefinition {
 		return sequences.get(sequenceName);
 	}
 
-	public IdentifierGenerator getIdentifierGenerator(String generatorName) {
+	public Generator getIdentifierGenerator(String generatorName) {
 		return identifiers.get(generatorName);
 	}
 

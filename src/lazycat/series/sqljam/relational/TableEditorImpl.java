@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.AutoDdl;
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * TableEditorImpl
@@ -42,7 +42,7 @@ public class TableEditorImpl implements TableEditor {
 	}
 
 	public TableEditor useSequence(String propertyName, String sequenceName) {
-		IdentifierGenerator identifierGenerator = tableDefinition.getSchemaDefinition().getSequence(sequenceName)
+		Generator identifierGenerator = tableDefinition.getSchemaDefinition().getSequence(sequenceName)
 				.getIdentifierGenerator();
 		((StandardColumnDefinition) tableDefinition.columns.get(propertyName)).setIdentifierGenerator(identifierGenerator);
 		return this;

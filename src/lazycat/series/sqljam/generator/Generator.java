@@ -9,7 +9,7 @@ import lazycat.series.sqljam.feature.Feature;
  * @author Fred Feng
  * @version 1.0
  */
-public interface IdentifierGenerator {
+public interface Generator {
 
 	String getText(Feature feature, Session session);
 

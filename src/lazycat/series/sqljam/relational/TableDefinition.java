@@ -1,7 +1,7 @@
 package lazycat.series.sqljam.relational;
 
 import lazycat.series.sqljam.AutoDdl;
-import lazycat.series.sqljam.generator.IdentifierGenerator;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * TableDefinition
@@ -51,9 +51,9 @@ public interface TableDefinition {
 
 	PrimaryKeyDefinition[] getPrimaryKeyDefinitions();
 
-	IdentifierGenerator getSequenceGenerator(String propertyName);
+	Generator getSequenceGenerator(String propertyName);
 
-	IdentifierGenerator getUserDefinedGenerator(String propertyName);
+	Generator getUserDefinedGenerator(String propertyName);
 
 	String getFullTableName();
 

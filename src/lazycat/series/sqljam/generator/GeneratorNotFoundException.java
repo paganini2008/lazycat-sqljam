@@ -3,24 +3,24 @@ package lazycat.series.sqljam.generator;
 import lazycat.series.sqljam.ORMException;
 
 /**
- * IdentifierGeneratorNotFoundFault
+ * GeneratorNotFoundException
  * 
  * @author Fred Feng
  * @version 1.0
  */
-public class IdentifierGeneratorNotFoundFault extends ORMException {
+public class GeneratorNotFoundException extends ORMException {
 
 	private static final long serialVersionUID = -4312229114724742433L;
-	
-	public IdentifierGeneratorNotFoundFault() {
+
+	public GeneratorNotFoundException() {
 		super();
 	}
 
-	public IdentifierGeneratorNotFoundFault(String msg) {
+	public GeneratorNotFoundException(String msg) {
 		super(msg);
 	}
 
-	public IdentifierGeneratorNotFoundFault(String msg, Throwable e) {
+	public GeneratorNotFoundException(String msg, Throwable e) {
 		super(msg, e);
 	}
 
