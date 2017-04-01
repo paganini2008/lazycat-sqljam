@@ -4,7 +4,7 @@ import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.feature.Feature;
 
 /**
- * SequenceIdentifierGenerator
+ * SequenceGenerator
  * 
  * @author Fred Feng
  * @version 1.0

@@ -1,5 +1,6 @@
 package lazycat.series.sqljam.example;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class TestMySql {
 		Session session = sessionEngine.openSession();
 		System.out.println(session);
 
-		Batch batch = session.insert(Article.class).batch(10);
+		Batch batch = session.insert(Article.class).batch();
 
 		Article article = new Article();
 		article.setText("这是一篇体育文章");
@@ -128,10 +129,10 @@ public class TestMySql {
 	public static void main3(String[] args) {
 		Session session = openSession();
 		Query query = session.query(Article.class);
-		query.filter(Expressions.gte("score", 100));
+		//query.filter(Expressions.gte("score", 100));
 		query.desc("author");
 		System.out.println(query.rows());
-		List<Article> list = query.list();
+		List<Article> list = query.limit(5).lock().list();
 		for (Article a : list) {
 			System.out.println(a);
 		}
@@ -257,8 +258,8 @@ public class TestMySql {
 	public static void test10() {
 		Session session = openSession();
 		User user = new User();
-		user.setUsername("resin");
-		user.setPassword("111111");
+		user.setUsername("webkit");
+		user.setPassword("123456");
 		session.save(user);
 		session.commit();
 		System.out.println(user.getId());
@@ -309,8 +310,10 @@ public class TestMySql {
 		return session;
 	}
 
-	public static void main(String[] args) {
-		test11();
+	public static void main(String[] args) throws IOException {
+		main3(args);
+		System.in.read();
+		System.out.println("TestMySql.main()"); 
 	}
 
 }

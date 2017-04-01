@@ -14,7 +14,7 @@ import lazycat.series.io.ClassFinder;
 import lazycat.series.io.Handler;
 import lazycat.series.lang.Assert;
 import lazycat.series.lang.StringUtils;
-import lazycat.series.logger.LazyLogger;
+import lazycat.series.logger.MyLogger;
 import lazycat.series.logger.LoggerFactory;
 import lazycat.series.reflect.FieldUtils;
 import lazycat.series.sqljam.annotation.Column;
@@ -44,7 +44,7 @@ import lazycat.series.sqljam.relational.UniqueKeyEditor;
  */
 public class AnnotationMetadata implements MetaData {
 
-	private static final LazyLogger logger = LoggerFactory.getLogger(AnnotationMetadata.class);
+	private static final MyLogger logger = LoggerFactory.getLogger(AnnotationMetadata.class);
 
 	private final Map<String, Map<String, SchemaEditor>> schemaEditorRegistry = new HashMap<String, Map<String, SchemaEditor>>();
 	private final Map<Class<?>, TableEditor> tableEditorRegistry = new HashMap<Class<?>, TableEditor>();

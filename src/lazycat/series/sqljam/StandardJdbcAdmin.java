@@ -15,8 +15,8 @@ import lazycat.series.collection.CaseInsensitiveMap;
 import lazycat.series.jdbc.DBUtils;
 import lazycat.series.jdbc.DataSourceFactory;
 import lazycat.series.jdbc.TransactionIsolationLevel;
-import lazycat.series.logger.LazyLogger;
 import lazycat.series.logger.LoggerFactory;
+import lazycat.series.logger.MyLogger;
 import lazycat.series.sqljam.feature.Feature;
 import lazycat.series.sqljam.feature.MySqlFeature;
 import lazycat.series.sqljam.feature.PostgreSqlFeature;
@@ -31,7 +31,7 @@ import lazycat.series.sqljam.relational.TableDefinition;
  */
 public class StandardJdbcAdmin implements JdbcAdmin {
 
-	private static final LazyLogger logger = LoggerFactory.getLogger(StandardJdbcAdmin.class);
+	private static final MyLogger logger = LoggerFactory.getLogger(StandardJdbcAdmin.class);
 	private static final Map<String, Feature> featureRegistry = new CaseInsensitiveMap<Feature>();
 
 	static {
@@ -259,6 +259,10 @@ public class StandardJdbcAdmin implements JdbcAdmin {
 
 	public SessionFactory buildSessionEngine(TransactionIsolationLevel transactionIsolationLevel, boolean autoCommit) {
 		return new SessionEngine(this, transactionIsolationLevel, autoCommit, null);
+	}
+
+	public void closeConnections() {
+		connectionProvider.destroy();
 	}
 
 }

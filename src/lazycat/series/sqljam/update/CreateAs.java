@@ -1,5 +1,9 @@
 package lazycat.series.sqljam.update;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import lazycat.series.concurrent.FutureCallback;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
@@ -32,7 +36,21 @@ public class CreateAs implements Executor {
 	}
 
 	public int execute() {
-		return session.execute(this);
+		Configuration configuration = session.getSessionFactory().getConfiguration();
+		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
+			public Integer call() throws Exception {
+				return session.execute(CreateAs.this);
+			}
+		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
+	}
+
+	public void execute(FutureCallback<Integer> callback) {
+		Configuration configuration = session.getSessionFactory().getConfiguration();
+		session.getSessionFactory().getThreadPool().submit(new ExecutorCallable() {
+			public Integer call() throws Exception {
+				return session.execute(CreateAs.this);
+			}
+		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, callback);
 	}
 
 }

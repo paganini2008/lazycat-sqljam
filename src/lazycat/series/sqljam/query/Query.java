@@ -1,6 +1,5 @@
 package lazycat.series.sqljam.query;
 
-import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.expression.Expression;
 
 /**
@@ -11,7 +10,7 @@ import lazycat.series.sqljam.expression.Expression;
  */
 public interface Query extends From, ResultSet {
 
-	Class<?> getMappedClass();
+	Class<?> defaultMappedClass();
 
 	Query from(Class<?> mappedClass, String alias);
 
@@ -85,6 +84,6 @@ public interface Query extends From, ResultSet {
 
 	int rows();
 
-	Session getSession();
+	Query setTimeout(int timeout);
 
 }

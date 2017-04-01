@@ -20,7 +20,6 @@ import lazycat.series.sqljam.expression.Fields;
 import lazycat.series.sqljam.expression.RowCount;
 import lazycat.series.sqljam.update.CreateAs;
 import lazycat.series.sqljam.update.InsertImpl;
-import lazycat.series.sqljam.update.Pageable;
 
 /**
  * Select Clause Implementation
@@ -28,7 +27,6 @@ import lazycat.series.sqljam.update.Pageable;
  * @author Fred Feng
  * @version 1.0
  */
-@SuppressWarnings("unchecked")
 public class QueryImpl extends AbstractQuery implements Query {
 
 	private final Session session;
@@ -37,19 +35,22 @@ public class QueryImpl extends AbstractQuery implements Query {
 
 	public QueryImpl(Session session, Query source, String tableAlias) {
 		this.builder = new QueryBuilder(session, source, tableAlias);
-		this.mappedClass = source.getMappedClass();
+		this.mappedClass = source.defaultMappedClass();
+		this.resultSet = new LimitedResultSet(this, session, mappedClass);
 		this.session = session;
 	}
 
 	public QueryImpl(Session session, Class<?> mappedClass, String tableAlias) {
 		this.builder = new QueryBuilder(session, mappedClass, tableAlias);
 		this.mappedClass = mappedClass;
+		this.resultSet = new LimitedResultSet(this, session, mappedClass);
 		this.session = session;
 	}
 
+	private final ResultSet resultSet;
 	private LockMode lockMode;
 
-	public Class<?> getMappedClass() {
+	public Class<?> defaultMappedClass() {
 		return mappedClass;
 	}
 
@@ -70,6 +71,11 @@ public class QueryImpl extends AbstractQuery implements Query {
 
 	public Query relation(Expression expression) {
 		builder.relation = expression;
+		return this;
+	}
+
+	public Query setTimeout(int timeout) {
+		resultSet.setTimeout(timeout);
 		return this;
 	}
 
@@ -233,35 +239,35 @@ public class QueryImpl extends AbstractQuery implements Query {
 	}
 
 	public ResultSet limit(int offset, int limit) {
-		return new Pageable(this, offset, limit);
+		return new Pageable(this, session, defaultMappedClass(), offset, limit);
 	}
 
 	public <T> T first() {
-		return (T) session.first(this, mappedClass);
+		return resultSet.first();
 	}
 
 	public <T> T first(Class<T> beanClass) {
-		return session.first(this, beanClass);
+		return resultSet.first(beanClass);
 	}
 
 	public <T> List<T> list() {
-		return (List<T>) session.list(this, mappedClass);
+		return resultSet.list();
 	}
 
 	public <T> List<T> list(Class<T> beanClass) {
-		return session.list(this, beanClass);
+		return resultSet.list(beanClass);
 	}
 
 	public <T> Iterator<T> iterator() {
-		return (Iterator<T>) session.iterator(this, mappedClass);
+		return resultSet.iterator();
 	}
 
 	public <T> Iterator<T> iterator(Class<T> beanClass) {
-		return session.iterator(this, beanClass);
+		return resultSet.iterator(beanClass);
 	}
 
-	public <T> T getResult(Class<T> requiredType) {
-		return session.getResult(this, requiredType);
+	public <T> T getResult(Class<T> requiredType, T defaultValue) {
+		return resultSet.getResult(requiredType, defaultValue);
 	}
 
 	public int into(Class<?> mappedClass) {
@@ -278,7 +284,7 @@ public class QueryImpl extends AbstractQuery implements Query {
 	}
 
 	public Query cache(String name) {
-		session.addCache(name, this);
+		//session.addCache(name, this);
 		return this;
 	}
 
@@ -292,10 +298,6 @@ public class QueryImpl extends AbstractQuery implements Query {
 			size += builder.join.size();
 		}
 		return size;
-	}
-
-	public Session getSession() {
-		return session;
 	}
 
 	protected final String defaultTableAlias() {
@@ -320,6 +322,10 @@ public class QueryImpl extends AbstractQuery implements Query {
 
 	public Class<?> findMappedClass(String tableAlias, MetaData metaData) {
 		return builder.findMappedClass(tableAlias, metaData);
+	}
+
+	public ResultSet as(String name) {
+		return null;
 	}
 
 }

@@ -41,4 +41,7 @@ public class PooledConnectionProvider implements ConnectionProvider {
 		return connection;
 	}
 
+	public void destroy() {
+	}
+
 }

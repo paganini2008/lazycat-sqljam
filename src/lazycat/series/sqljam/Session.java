@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import lazycat.series.cache.Cache;
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.update.Delete;
@@ -19,7 +20,7 @@ import lazycat.series.sqljam.update.Update;
  */
 public interface Session {
 
-	KeyStore newKeyStore(Class<?> mappedClass);
+	KeyStore keyStore(Class<?> mappedClass);
 
 	int save(Object o);
 
@@ -77,12 +78,12 @@ public interface Session {
 
 	void close();
 
-	Configuration getConfiguration();
-
-	void addCache(String name, Query query);
-
 	Query namedQuery(String name);
-
-	SessionExecutor getSessionExecutor();
+	
+	SessionFactory getSessionFactory();
+	
+	Cache getCache();
+	
+	Cache getQueryCache();
 
 }

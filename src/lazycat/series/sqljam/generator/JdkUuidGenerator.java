@@ -26,9 +26,5 @@ public class JdkUuidGenerator implements Generator {
 	public Object getValue(Feature feature, Session session) {
 		return UUID.randomUUID().toString();
 	}
-	
-	public boolean ignoreValue() {
-		return false;
-	}
 
 }

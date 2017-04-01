@@ -44,7 +44,7 @@ public interface SessionExecutor {
 
 	int update(Transaction transaction, Executable executable, KeyStore keyStore);
 
-	KeyStore newKeyStore(Class<?> mappedClass);
+	KeyStore keyStore(Class<?> mappedClass);
 
 	int batch(Transaction transaction, Executable executable);
 
@@ -55,8 +55,6 @@ public interface SessionExecutor {
 	int update(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes);
 
 	int update(Transaction transaction, String sql, Object[] parameters);
-
-	Configuration getConfiguration();
 
 	TypeConverter getTypeConverter();
 

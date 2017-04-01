@@ -1,7 +1,10 @@
 package lazycat.series.sqljam.update;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
+import lazycat.series.concurrent.FutureCallback;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.KeyStore;
 import lazycat.series.sqljam.ParameterCollector;
@@ -55,19 +58,42 @@ public class InsertImpl implements Insert {
 	}
 
 	public int execute() {
-		return session.execute(this);
+		Configuration configuration = session.getSessionFactory().getConfiguration();
+		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
+			public Integer call() throws Exception {
+				return session.execute(InsertImpl.this);
+			}
+		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
 	}
 
-	public Batch batch(int flushSize) {
-		return new BatchImpl(this, flushSize);
+	public void execute(FutureCallback<Integer> callback) {
+		Configuration configuration = session.getSessionFactory().getConfiguration();
+		session.getSessionFactory().getThreadPool().submit(new ExecutorCallable() {
+			public Integer call() throws Exception {
+				return session.execute(InsertImpl.this);
+			}
+		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, callback);
+	}
+
+	public int execute(final KeyStore keyStore) {
+		Configuration configuration = session.getSessionFactory().getConfiguration();
+		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
+			public Integer call() throws Exception {
+				return session.execute(InsertImpl.this, keyStore);
+			}
+		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
+	}
+
+	public Batch batch() {
+		return new BatchImpl(this, session);
 	}
 
 	public int batch(Batch batch) {
 		return session.batch(batch);
 	}
 
-	public int execute(KeyStore keyStore) {
-		return session.execute(this, keyStore);
+	public Session getSession() {
+		return session;
 	}
 
 	public String getText(Configuration configuration) {

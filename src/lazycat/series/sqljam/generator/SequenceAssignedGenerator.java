@@ -1,19 +1,19 @@
 package lazycat.series.sqljam.generator;
 
-import lazycat.series.logger.LazyLogger;
+import lazycat.series.logger.MyLogger;
 import lazycat.series.logger.LoggerFactory;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.feature.Feature;
 
 /**
- * SequenceAssignedIdentifierGenerator
+ * SequenceAssignedGenerator
  * 
  * @author Fred Feng
  * @version 1.0
  */
 public class SequenceAssignedGenerator implements Generator {
 
-	private static final LazyLogger logger = LoggerFactory.getLogger(SequenceAssignedGenerator.class);
+	private static final MyLogger logger = LoggerFactory.getLogger(SequenceAssignedGenerator.class);
 
 	private final String generator;
 

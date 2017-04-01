@@ -3,8 +3,8 @@ package lazycat.series.sqljam.example;
 import java.math.BigDecimal;
 import java.util.List;
 
-import lazycat.series.logger.LazyLogger;
 import lazycat.series.logger.LoggerFactory;
+import lazycat.series.logger.MyLogger;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ConfigurationInitializer;
 import lazycat.series.sqljam.Session;
@@ -12,9 +12,7 @@ import lazycat.series.sqljam.SessionEngine;
 import lazycat.series.sqljam.example.model.Article;
 import lazycat.series.sqljam.example.model.Order;
 import lazycat.series.sqljam.example.model.User;
-import lazycat.series.sqljam.expression.Column;
 import lazycat.series.sqljam.expression.Expressions;
-import lazycat.series.sqljam.expression.Fields;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.update.Batch;
 
@@ -31,7 +29,7 @@ public class TestPgSql {
 		System.setProperty("lazycat.logger.level.lazycat.series.jdbc", "DEBUG");
 	}
 
-	private static final LazyLogger logger = LoggerFactory.getLogger(TestPgSql.class);
+	private static final MyLogger logger = LoggerFactory.getLogger(TestPgSql.class);
 
 	public static void main1(String[] args) {
 		String driverClassName = "org.postgresql.Driver";
@@ -61,7 +59,7 @@ public class TestPgSql {
 		Session session = sessionEngine.openSession();
 		System.out.println(session);
 
-		Batch batch = session.insert(Article.class).batch(10);
+		Batch batch = session.insert(Article.class).batch();
 
 		Article article = new Article();
 		article.setText("这是一篇美声文章");

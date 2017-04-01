@@ -15,5 +15,7 @@ public interface ConnectionProvider {
 	Connection openConnectionImplicitly();
 
 	void closeConnection(Connection connection);
+	
+	void destroy();
 
 }

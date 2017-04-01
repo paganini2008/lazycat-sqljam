@@ -53,4 +53,6 @@ public interface JdbcAdmin {
 
 	SessionFactory buildSessionEngine(TransactionIsolationLevel transactionIsolationLevel, boolean autoCommit);
 
+	void closeConnections();
+
 }

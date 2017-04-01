@@ -17,7 +17,11 @@ public interface ResultSet extends Executable {
 
 	ResultSet lock(int timeout);
 
-	<T> T getResult(Class<T> requiredType);
+	ResultSet setTimeout(int timeout);
+
+	ResultSet as(String name);
+
+	<T> T getResult(Class<T> requiredType, T defaultValue);
 
 	<T> T first();
 

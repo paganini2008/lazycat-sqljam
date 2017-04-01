@@ -2,14 +2,17 @@ package lazycat.series.sqljam.update;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
+import lazycat.series.concurrent.FutureCallback;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
+import lazycat.series.sqljam.expression.ClassRelationShip;
 import lazycat.series.sqljam.expression.Expression;
 import lazycat.series.sqljam.expression.Expressions;
 import lazycat.series.sqljam.expression.Label;
-import lazycat.series.sqljam.expression.ClassRelationShip;
 import lazycat.series.sqljam.query.Query;
 
 /**
@@ -27,10 +30,10 @@ public class CascadeDelete implements Delete {
 	public CascadeDelete(Session session, Class<?> mappedClass, String tableAlias) {
 		this.mappedClass = mappedClass;
 		this.last = session.delete(mappedClass);
-		List<Class<?>> references = session.getConfiguration().getMetaData().getReferences(mappedClass);
+		List<Class<?>> references = session.getSessionFactory().getConfiguration().getMetaData().getReferences(mappedClass);
 		for (Class<?> reference : references) {
-			cascades.add(session.query(mappedClass).relation(new ClassRelationShip(reference, "reference", mappedClass, tableAlias))
-					.column(Label.ONE));
+			cascades.add(session.query(mappedClass)
+					.relation(new ClassRelationShip(reference, "reference", mappedClass, tableAlias)).column(Label.ONE));
 		}
 		this.session = session;
 	}
@@ -41,8 +44,26 @@ public class CascadeDelete implements Delete {
 	private final List<Query> cascades = new ArrayList<Query>();
 
 	public int execute() {
+		Configuration configuration = session.getSessionFactory().getConfiguration();
+		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
+			public Integer call() throws Exception {
+				return doExecute();
+			}
+		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
+	}
+
+	public void execute(FutureCallback<Integer> callback) {
+		Configuration configuration = session.getSessionFactory().getConfiguration();
+		session.getSessionFactory().getThreadPool().submit(new ExecutorCallable() {
+			public Integer call() throws Exception {
+				return doExecute();
+			}
+		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, callback);
+	}
+
+	private int doExecute() {
 		int effected = 0;
-		List<Class<?>> references = session.getConfiguration().getMetaData().getReferences(mappedClass);
+		List<Class<?>> references = session.getSessionFactory().getConfiguration().getMetaData().getReferences(mappedClass);
 		for (int i = 0; i < references.size(); i++) {
 			effected += session.delete(references.get(i), "reference").filter(Expressions.exists(cascades.get(i))).execute();
 		}

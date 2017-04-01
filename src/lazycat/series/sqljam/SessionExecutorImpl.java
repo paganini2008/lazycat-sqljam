@@ -14,8 +14,8 @@ import lazycat.series.jdbc.TypeHandlerRegistry;
 import lazycat.series.jdbc.mapper.ColumnIndexRowMapper;
 import lazycat.series.jdbc.mapper.ObjectRowMapper;
 import lazycat.series.jdbc.mapper.RowMapper;
-import lazycat.series.logger.LazyLogger;
 import lazycat.series.logger.LoggerFactory;
+import lazycat.series.logger.MyLogger;
 import lazycat.series.sqljam.transcation.Transaction;
 
 /**
@@ -26,7 +26,7 @@ import lazycat.series.sqljam.transcation.Transaction;
  */
 public class SessionExecutorImpl implements SessionExecutor {
 
-	private static final LazyLogger logger = LoggerFactory.getLogger(SessionExecutor.class);
+	private static final MyLogger logger = LoggerFactory.getLogger(SessionExecutor.class);
 	private final Configuration configuration;
 	private final ParsedSqlRunner sqlRunner;
 
@@ -170,7 +170,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 		}
 	}
 
-	public KeyStore newKeyStore(Class<?> mappedClass) {
+	public KeyStore keyStore(Class<?> mappedClass) {
 		return new GeneratedKeyStore(configuration.getMetaData().getTable(mappedClass));
 	}
 
@@ -221,10 +221,6 @@ public class SessionExecutorImpl implements SessionExecutor {
 		} catch (SQLException e) {
 			throw new SessionException(e);
 		}
-	}
-
-	public Configuration getConfiguration() {
-		return configuration;
 	}
 
 	public TypeConverter getTypeConverter() {

@@ -89,4 +89,7 @@ public class UnpooledConnectionProvider implements ConnectionProvider {
 		return connection;
 	}
 
+	public void destroy() {
+	}
+
 }

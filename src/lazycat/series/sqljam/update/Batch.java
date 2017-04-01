@@ -10,4 +10,8 @@ public interface Batch extends Executor {
 
 	Batch push(Object object);
 
+	void flush();
+
+	Batch setFlushSize(int flushSize);
+
 }
