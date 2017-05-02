@@ -12,8 +12,8 @@ public interface SchemaEditor {
 
 	SchemaDefinition getSchemaDefinition();
 
-	SequenceEditor addSequence(String sequenceName, boolean assigned); 
+	SequenceEditor addSequence(String sequenceName);
 
-	void addIdentifierGenerator(String generatorName, Generator identifierGenerator);
+	SchemaEditor registerGenerator(String generatorType, String name, Generator generator);
 
 }

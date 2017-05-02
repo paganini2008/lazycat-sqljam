@@ -3,6 +3,7 @@ package lazycat.series.sqljam.feature;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,10 +11,11 @@ import lazycat.series.jdbc.JdbcType;
 import lazycat.series.lang.Booleans;
 import lazycat.series.lang.Ints;
 import lazycat.series.lang.StringUtils;
-import lazycat.series.sqljam.JdbcFault;
+import lazycat.series.sqljam.JdbcException;
 import lazycat.series.sqljam.JdbcUtils;
 import lazycat.series.sqljam.MappingException;
 import lazycat.series.sqljam.relational.ColumnDefinition;
+import lazycat.series.sqljam.relational.PrimaryKeyDefinition;
 import lazycat.series.sqljam.relational.TableDefinition;
 
 /**
@@ -58,8 +60,6 @@ public class MySqlFeature extends BasicFeature {
 
 		mapMetadataColumn("PK_NAME", "INDEX_NAME");
 
-		registerFunction("left", "left(?,?)");
-		registerFunction("right", "right(?,?)");
 	}
 
 	protected String getAddTableCommentSqlString() {
@@ -131,56 +131,56 @@ public class MySqlFeature extends BasicFeature {
 	}
 
 	protected String defineColumn(ColumnDefinition columnDefinition) {
-		if (StringUtils.isNotBlank(columnDefinition.getColumnScript())) {
-			return columnDefinition.getColumnScript();
-		} else {
-			StringBuilder str = new StringBuilder();
-			str.append(columnDefinition.getColumnName());
-			JdbcType jdbcType = columnDefinition.getJdbcType();
-			if (jdbcType == null) {
-				throw new MappingException("Undefined jdbcType.");
-			}
-			if (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT) {
-				jdbcType = getJdbcType(columnDefinition.getJavaType());
-			}
-			if (JdbcUtils.isNumeric(jdbcType)) {
-				str.append(" ").append(getColumnType(jdbcType, columnDefinition.getPrecision(), columnDefinition.getScale()));
-			} else if (JdbcUtils.isInteger(jdbcType)) {
-				str.append(" ").append(getColumnType(jdbcType));
-			} else {
-				str.append(" ").append(getColumnType(jdbcType, columnDefinition.getLength()));
-			}
-			if (columnDefinition.isUnsigned()) {
-				str.append(" unsigned");
-			}
-			if (!columnDefinition.isNullable()) {
-				str.append(" not null");
-			}
-			if (columnDefinition.isAutoIncrement()) {
-				str.append(" ").append(getIdentitySqlString());
-			}
-			if (StringUtils.isNotBlank(columnDefinition.getDefaultValue())) {
-				str.append(" default ").append(columnDefinition.getDefaultValue());
-			}
-			if (StringUtils.isNotBlank(columnDefinition.getComment())) {
-				str.append(" comment '").append(columnDefinition.getComment()).append("'");
-			}
-			return str.toString();
+		return defineColumn(columnDefinition,
+				columnDefinition.isAutoIncrement() && columnDefinition.getTableDefinition().isDefineConstraintOnCreate());
+	}
+
+	private String defineColumn(ColumnDefinition columnDefinition, boolean autoIncrement) {
+		StringBuilder str = new StringBuilder();
+		str.append(columnDefinition.getColumnName());
+		JdbcType jdbcType = columnDefinition.getJdbcType();
+		if (jdbcType == null) {
+			throw new MappingException("Undefined jdbcType.");
 		}
+		if (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT) {
+			jdbcType = getJdbcType(columnDefinition.getJavaType());
+		}
+		if (JdbcUtils.isNumeric(jdbcType)) {
+			str.append(" ").append(getColumnType(jdbcType, columnDefinition.getPrecision(), columnDefinition.getScale()));
+		} else if (JdbcUtils.isInteger(jdbcType)) {
+			str.append(" ").append(getColumnType(jdbcType));
+		} else {
+			str.append(" ").append(getColumnType(jdbcType, columnDefinition.getLength()));
+		}
+		if (columnDefinition.isUnsigned()) {
+			str.append(" unsigned");
+		}
+		if (columnDefinition.isNullable()) {
+			str.append(" null");
+		} else {
+			str.append(" not null");
+		}
+		if (autoIncrement) {
+			str.append(" ").append(getIdentitySqlString());
+		}
+		if (StringUtils.isNotBlank(columnDefinition.getDefaultValue())) {
+			str.append(" default ").append(columnDefinition.getDefaultValue());
+		}
+		if (StringUtils.isNotBlank(columnDefinition.getComment())) {
+			str.append(" comment '").append(columnDefinition.getComment()).append("'");
+		}
+		return str.toString();
 	}
 
 	protected int[] getColumnModified(ColumnDefinition columnDefinition, DatabaseMetaData dbmd) {
-		if (columnDefinition.getColumnName().equals("price")) {
-			System.out.println();
-		}
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		boolean result = true;
 		Map<String, Object> metadata;
 		try {
-			metadata = JdbcUtils.getColumnMetadata(dbmd, tableDefinition.getCatalog(), tableDefinition.getSchema(),
-					tableDefinition.getTableName(), columnDefinition.getColumnName());
+			metadata = JdbcUtils.getColumnMetadata(dbmd, null, tableDefinition.getSchema(), tableDefinition.getTableName(),
+					columnDefinition.getColumnName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e.getMessage(), e);
 		}
 
 		Set<Integer> effects = new HashSet<Integer>();
@@ -200,12 +200,6 @@ public class MySqlFeature extends BasicFeature {
 			if (!result) {
 				effects.add(MODIFY_AUTO_INCREMENT);
 			}
-		}
-
-		String defaultValue = (String) metadata.get("COLUMN_DEF");
-		result = !StringUtils.hasContent(columnDefinition.getDefaultValue(), defaultValue);
-		if (!result) {
-			effects.add(MODIFY_DEFAULT);
 		}
 
 		String comment = (String) metadata.get("REMARKS");
@@ -250,7 +244,21 @@ public class MySqlFeature extends BasicFeature {
 				effects.add(MODIFY_DATA_TYPE);
 			}
 		}
+		if (effects.size() > 0) {
+			System.out.println("MySqlFeature.getColumnModified()");
+		}
 		return effects.size() > 0 ? Ints.toIntArray(effects) : null;
+	}
+
+	protected List<String> defineAddPrimaryKey(TableDefinition tableDefinition) {
+		List<String> sqls = super.defineAddPrimaryKey(tableDefinition);
+		for (PrimaryKeyDefinition pkDefinition : tableDefinition.getPrimaryKeyDefinitions()) {
+			if (pkDefinition.getColumnDefinition().isAutoIncrement()) {
+				sqls.add(defineColumn(pkDefinition.getColumnDefinition(), true));
+				break;
+			}
+		}
+		return sqls;
 	}
 
 	public String getPageableSqlString(String sql, int offset, int limit) {

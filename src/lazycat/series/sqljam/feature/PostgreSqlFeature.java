@@ -12,7 +12,7 @@ import lazycat.series.jdbc.JdbcType;
 import lazycat.series.lang.Booleans;
 import lazycat.series.lang.Ints;
 import lazycat.series.lang.StringUtils;
-import lazycat.series.sqljam.JdbcFault;
+import lazycat.series.sqljam.JdbcException;
 import lazycat.series.sqljam.JdbcUtils;
 import lazycat.series.sqljam.MappingException;
 import lazycat.series.sqljam.relational.ColumnDefinition;
@@ -148,10 +148,10 @@ public class PostgreSqlFeature extends BasicFeature {
 		boolean result = true;
 		Map<String, Object> metadata;
 		try {
-			metadata = JdbcUtils.getColumnMetadata(dbmd, tableDefinition.getCatalog(), tableDefinition.getSchema(),
+			metadata = JdbcUtils.getColumnMetadata(dbmd, null, tableDefinition.getSchemaDefinition().getSchema(),
 					tableDefinition.getTableName(), columnDefinition.getColumnName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		}
 
 		Set<Integer> effects = new HashSet<Integer>();
@@ -173,14 +173,6 @@ public class PostgreSqlFeature extends BasicFeature {
 			}
 		}
 
-		if (!columnDefinition.isAutoIncrement()) {
-			String defaultValue = (String) metadata.get("COLUMN_DEF");
-			result = !StringUtils.hasContent(columnDefinition.getDefaultValue(), defaultValue);
-			if (!result) {
-				effects.add(MODIFY_DEFAULT);
-			}
-		}
-
 		String comment = (String) metadata.get("REMARKS");
 		result = StringUtils.equalsIgnoreCaseStrictly(columnDefinition.getComment(), comment);
 		if (!result) {
@@ -190,9 +182,8 @@ public class PostgreSqlFeature extends BasicFeature {
 		String typeName = (String) metadata.get("TYPE_NAME");
 		JdbcType jdbcType = JdbcType.find((Integer) metadata.get("DATA_TYPE"));
 		if (StringUtils.isNotBlank(typeName) && jdbcType != null) {
-			JdbcType jdbcTypeFind = (columnDefinition.getJdbcType() == JdbcType.OTHER
-					|| columnDefinition.getJdbcType() == JdbcType.OBJECT) ? getJdbcType(columnDefinition.getJavaType())
-							: columnDefinition.getJdbcType();
+			JdbcType jdbcTypeFind = (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT)
+					? getJdbcType(columnDefinition.getJavaType()) : columnDefinition.getJdbcType();
 			String typeNameFind;
 			if (JdbcUtils.isNumeric(jdbcTypeFind)) {
 				typeNameFind = getColumnType(jdbcTypeFind, columnDefinition.getPrecision(), columnDefinition.getScale());
@@ -258,16 +249,9 @@ public class PostgreSqlFeature extends BasicFeature {
 							new String[] { tableDefinition.getTableName(), columnDefinition.getColumnName() }));
 				}
 				break;
-			case MODIFY_DEFAULT:
-				if (StringUtils.isNotBlank(columnDefinition.getDefaultValue())) {
-					sqls.add(formatString(getSetDefaultValueSqlString(), new String[] { tableDefinition.getTableName(),
-							columnDefinition.getColumnName(), columnDefinition.getDefaultValue() }));
-				}
-				break;
 			case MODIFY_COMMENT:
 				if (StringUtils.isNotBlank(columnDefinition.getComment())) {
-					String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(),
-							columnDefinition.getComment() };
+					String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(), columnDefinition.getComment() };
 					sqls.add(formatString(getAddTableColumnCommentSqlString(), args));
 				}
 				break;
@@ -282,47 +266,38 @@ public class PostgreSqlFeature extends BasicFeature {
 				String seqName = getDefaultSequenceName(tableDefinition.getTableName(), columnDefinition.getColumnName());
 				ddls.add(formatString(getCreateSequenceSqlString(),
 						new String[] { seqName, tableDefinition.getTableName() + "." + columnDefinition.getColumnName() }));
-				ddls.add(formatString(getSetDefaultValueSqlString(), new String[] { tableDefinition.getTableName(),
-						columnDefinition.getColumnName(), "nextval('" + seqName + "')" }));
+				ddls.add(formatString(getSetDefaultValueSqlString(),
+						new String[] { tableDefinition.getTableName(), columnDefinition.getColumnName(), "nextval('" + seqName + "')" }));
 			}
 			if (!columnDefinition.isNullable()) {
 				ddls.add(formatString(getSetNullableSqlString(),
 						new String[] { tableDefinition.getTableName(), columnDefinition.getColumnName() }));
 			}
-			if (StringUtils.isNotBlank(columnDefinition.getDefaultValue())) {
-				ddls.add(formatString(getSetDefaultValueSqlString(), new String[] { tableDefinition.getTableName(),
-						columnDefinition.getColumnName(), columnDefinition.getDefaultValue() }));
-			}
 			if (StringUtils.isNotBlank(columnDefinition.getComment())) {
-				String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(),
-						columnDefinition.getComment() };
+				String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName(), columnDefinition.getComment() };
 				ddls.add(formatString(getAddTableColumnCommentSqlString(), args));
 			}
 		}
 	}
 
 	protected String defineColumn(ColumnDefinition columnDefinition) {
-		if (StringUtils.isNotBlank(columnDefinition.getColumnScript())) {
-			return columnDefinition.getColumnScript();
-		} else {
-			StringBuilder str = new StringBuilder();
-			str.append(columnDefinition.getColumnName());
-			JdbcType jdbcType = columnDefinition.getJdbcType();
-			if (jdbcType == null) {
-				throw new MappingException("Undefined jdbcType.");
-			}
-			if (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT) {
-				jdbcType = getJdbcType(columnDefinition.getJavaType());
-			}
-			if (JdbcUtils.isNumeric(jdbcType)) {
-				str.append(" ").append(getColumnType(jdbcType, columnDefinition.getPrecision(), columnDefinition.getScale()));
-			} else if (JdbcUtils.isInteger(jdbcType)) {
-				str.append(" ").append(getColumnType(jdbcType));
-			} else {
-				str.append(" ").append(getColumnType(jdbcType, columnDefinition.getLength()));
-			}
-			return str.toString();
+		StringBuilder str = new StringBuilder();
+		str.append(columnDefinition.getColumnName());
+		JdbcType jdbcType = columnDefinition.getJdbcType();
+		if (jdbcType == null) {
+			throw new MappingException("Undefined jdbcType.");
 		}
+		if (columnDefinition.getJdbcType() == JdbcType.OTHER || columnDefinition.getJdbcType() == JdbcType.OBJECT) {
+			jdbcType = getJdbcType(columnDefinition.getJavaType());
+		}
+		if (JdbcUtils.isNumeric(jdbcType)) {
+			str.append(" ").append(getColumnType(jdbcType, columnDefinition.getPrecision(), columnDefinition.getScale()));
+		} else if (JdbcUtils.isInteger(jdbcType)) {
+			str.append(" ").append(getColumnType(jdbcType));
+		} else {
+			str.append(" ").append(getColumnType(jdbcType, columnDefinition.getLength()));
+		}
+		return str.toString();
 	}
 
 	public String columnAs(String left, String right) {

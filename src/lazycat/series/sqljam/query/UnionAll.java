@@ -1,7 +1,6 @@
 package lazycat.series.sqljam.query;
 
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.MetaData;
 import lazycat.series.sqljam.ParameterCollector;
 
 /**
@@ -21,7 +20,7 @@ public class UnionAll extends AbstractQuery {
 	private final From right;
 
 	public String getText(Configuration configuration) {
-		return configuration.getFeature().unionAll(left.getText(configuration), right.getText(configuration));
+		return configuration.getJdbcAdmin().getFeature().unionAll(left.getText(configuration), right.getText(configuration));
 	}
 
 	public void setParameters(ParameterCollector parameterCollector, Configuration configuration) {
@@ -29,7 +28,7 @@ public class UnionAll extends AbstractQuery {
 		right.setParameters(parameterCollector, configuration);
 	}
 
-	public Class<?> findMappedClass(String tableAlias, MetaData metaData) {
+	public Class<?> findMappedClass(String tableAlias, Configuration metaData) {
 		Class<?> type = left.findMappedClass(tableAlias, metaData);
 		return type != null ? type : right.findMappedClass(tableAlias, metaData);
 	}

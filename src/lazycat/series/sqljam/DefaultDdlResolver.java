@@ -12,7 +12,7 @@ public class DefaultDdlResolver implements DdlResolver {
 
 	public void resolve(JdbcAdmin jdbcAdmin, Class<?> mappedClass) {
 		if (!jdbcAdmin.tableExists(mappedClass)) {
-			TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(mappedClass);
+			TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(mappedClass);
 			throw new DdlResolverException(tableDefinition.getTableName() + " is not existed.");
 		}
 	}

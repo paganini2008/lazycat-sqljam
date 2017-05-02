@@ -10,16 +10,16 @@ import java.sql.Connection;
  */
 public interface Transaction {
 
-	String getId();
+	long getId();
 
 	long getElapsed();
 
-	Connection getConnection() throws TransactionFault;
+	Connection getConnection() throws TransactionException;
 
-	void commit() throws TransactionFault;
+	void commit() throws TransactionException;
 
-	void rollback() throws TransactionFault;
+	void rollback() throws TransactionException;
 
-	void close() throws TransactionFault;
+	void close() throws TransactionException;
 
 }

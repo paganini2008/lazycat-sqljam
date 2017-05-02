@@ -1,9 +1,8 @@
 package lazycat.series.sqljam.expression;
 
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
-import lazycat.series.sqljam.expression.tag.Field;
 
 /**
  * Distinct
@@ -11,26 +10,17 @@ import lazycat.series.sqljam.expression.tag.Field;
  * @author Fred Feng
  * @version 1.0
  */
-@Field
-public class Distinct implements Expression {
+public class Distinct extends Column {
 
-	private final Expression expression;
+	private final Field expression;
 
-	public Distinct(String property) {
-		this.expression = new Column(property);
-	}
-
-	public Distinct(Expression expression) {
+	public Distinct(Field expression) {
 		this.expression = expression;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		String sql = expression.getText(translator, configuration);
-		return configuration.getFeature().distinct(sql);
-	}
-
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		expression.setParameter(translator, parameterCollector, configuration);
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		String text = expression.getText(session, translator, configuration);
+		return "distinct " + text;
 	}
 
 }

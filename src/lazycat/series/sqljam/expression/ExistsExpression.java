@@ -2,6 +2,7 @@ package lazycat.series.sqljam.expression;
 
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.query.From;
 
@@ -19,11 +20,12 @@ public class ExistsExpression implements Expression {
 
 	private final From query;
 
-	public String getText(Translator translator, Configuration configuration) {
-		return configuration.getFeature().exists(query.getText(configuration));
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		return configuration.getJdbcAdmin().getFeature().exists(query.getText(configuration));
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector,
+			Configuration configuration) {
 		query.setParameters(parameterCollector, configuration);
 	}
 

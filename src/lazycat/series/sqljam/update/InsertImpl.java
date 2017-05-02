@@ -1,10 +1,7 @@
 package lazycat.series.sqljam.update;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
-import lazycat.series.concurrent.FutureCallback;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.KeyStore;
 import lazycat.series.sqljam.ParameterCollector;
@@ -18,18 +15,17 @@ import lazycat.series.sqljam.query.From;
  * @author Fred Feng
  * @version 1.0
  */
-public class InsertImpl implements Insert {
+public class InsertImpl extends AbstractExecutor implements Insert {
 
-	private final Session session;
 	private final InsertBuilder builder;
 
 	public InsertImpl(Session session, Class<?> mappedClass) {
 		this(session, new InsertBuilder(session, mappedClass));
 	}
 
-	protected InsertImpl(Session session, InsertBuilder builder) {
+	InsertImpl(Session session, InsertBuilder builder) {
+		super(session);
 		this.builder = builder;
-		this.session = session;
 	}
 
 	public Insert values(Object object) {
@@ -57,35 +53,12 @@ public class InsertImpl implements Insert {
 		return this;
 	}
 
-	public int execute() {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
-			public Integer call() throws Exception {
-				return session.execute(InsertImpl.this);
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
-	}
-
-	public void execute(FutureCallback<Integer> callback) {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		session.getSessionFactory().getThreadPool().submit(new ExecutorCallable() {
-			public Integer call() throws Exception {
-				return session.execute(InsertImpl.this);
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, callback);
-	}
-
-	public int execute(final KeyStore keyStore) {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
-			public Integer call() throws Exception {
-				return session.execute(InsertImpl.this, keyStore);
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
+	public int execute(KeyStore keyStore) {
+		return session.execute(this, keyStore);
 	}
 
 	public Batch batch() {
-		return new BatchImpl(this, session);
+		return new BatchImpl(session, this);
 	}
 
 	public int batch(Batch batch) {

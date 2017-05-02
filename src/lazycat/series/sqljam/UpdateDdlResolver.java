@@ -13,12 +13,13 @@ public class UpdateDdlResolver implements DdlResolver {
 
 	public void resolve(JdbcAdmin jdbcAdmin, Class<?> mappedClass) {
 		if (jdbcAdmin.tableExists(mappedClass)) {
-			jdbcAdmin.updateTable(mappedClass);
+			jdbcAdmin.alterTable(mappedClass);
 		} else {
-			TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(mappedClass);
-			ForeignKeyDefinition[] definitions = tableDefinition.getForeignKeyDefinitions();
-			if (definitions != null) {
-				for (ForeignKeyDefinition fkDefinition : definitions) {
+			TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(mappedClass);
+			ForeignKeyDefinition[] fkDefinitions = tableDefinition.getForeignKeyDefinitions();
+			if (fkDefinitions != null) {
+				for (ForeignKeyDefinition fkDefinition : fkDefinitions) {
+
 					jdbcAdmin.resolve(fkDefinition.getRefMappedClass());
 				}
 			}

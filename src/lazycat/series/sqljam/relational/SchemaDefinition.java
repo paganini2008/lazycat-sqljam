@@ -10,12 +10,10 @@ import lazycat.series.sqljam.generator.Generator;
  */
 public interface SchemaDefinition {
 
-	String getCatalog();
-
 	String getSchema();
 
-	SequenceDefinition getSequence(String sequenceName);
+	SequenceDefinition getSequenceDefinition(String sequenceName);
 
-	Generator getIdentifierGenerator(String generatorName);
+	Generator getGenerator(String generator, String name);
 
 }

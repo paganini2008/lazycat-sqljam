@@ -55,23 +55,13 @@ public class ColumnEditorImpl implements ColumnEditor {
 		return this;
 	}
 
-	public ColumnEditor setDefaultValue(String defaultValue) {
-		this.columnDefinition.setDefaultValue(defaultValue);
-		return this;
-	}
-
 	public ColumnEditor setComment(String comment) {
 		this.columnDefinition.setComment(comment);
 		return this;
 	}
 
-	public ColumnEditor setColumnScript(String columnScript) {
-		this.columnDefinition.setColumnScript(columnScript);
-		return this;
-	}
-
-	public ColumnEditor setInsertSql(String insertSql) {
-		this.columnDefinition.setInsertSql(insertSql);
+	public ColumnEditor setDefaultValue(String defaultValue) {
+		this.columnDefinition.setDefaultValue(defaultValue);
 		return this;
 	}
 
@@ -87,16 +77,20 @@ public class ColumnEditorImpl implements ColumnEditor {
 		return tableEditor.addUniqueKey(columnDefinition.getMappedProperty());
 	}
 
-	public ColumnEditor useIdentifierGenerator(String generatorName) {
-		tableEditor.useIdentifierGenerator(columnDefinition.getMappedProperty(), generatorName);
+	public DefaultEditor addDefault() {
+		return tableEditor.addDefault(columnDefinition.getMappedProperty());
+	}
+
+	public ColumnEditor useGenerator(String generatorType, String name) {
+		tableEditor.useGenerator(columnDefinition.getMappedProperty(), generatorType, name);
 		return this;
 	}
 
-	public ColumnEditor useSequence(String sequenceName) {
-		tableEditor.useSequence(columnDefinition.getMappedProperty(), sequenceName);
+	public ColumnEditor useGenerator(String generatorType) {
+		tableEditor.useGenerator(columnDefinition.getMappedProperty(), generatorType);
 		return this;
 	}
-	
+
 	public ColumnDefinition getColumnDefinition() {
 		return columnDefinition;
 	}

@@ -10,7 +10,7 @@ import lazycat.series.sqljam.expression.Expression;
  */
 public interface Delete extends Executor {
 
-	Delete self();
+	Delete self(boolean show);
 
 	Delete filter(Expression expression);
 

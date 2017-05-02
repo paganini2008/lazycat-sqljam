@@ -3,9 +3,11 @@ package lazycat.series.sqljam.relational;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.beans.ToStringBuilder.PrintStyle;
@@ -22,80 +24,82 @@ import lazycat.series.sqljam.generator.Generator;
  */
 public class StardardTableDefinition implements TableDefinition {
 
-	private final SchemaDefinition schemaDefinition;
 	private final Class<?> mappedClass;
-	private final String tableName;
-	private AutoDdl autoDdl;
-	private boolean ddlContainsConstraint;
+	private SchemaDefinition schemaDefinition;
+	private String tableName;
+	private boolean defineConstraintOnCreate;
 	private String comment;
+	private AutoDdl autoDdl;
 
-	Map<String, ColumnDefinition> columns = new LinkedHashMap<String, ColumnDefinition>();
-	Map<String, PrimaryKeyDefinition> primaryKeys = new LinkedHashMap<String, PrimaryKeyDefinition>();
-	Map<String, ForeignKeyDefinition> foreignKeys = new LinkedHashMap<String, ForeignKeyDefinition>();
-	Map<String, UniqueKeyDefinition> uniqueKeys = new LinkedHashMap<String, UniqueKeyDefinition>();
+	final Map<String, ColumnDefinition> columns = new LinkedHashMap<String, ColumnDefinition>();
+	final Map<String, PrimaryKeyDefinition> primaryKeys = new LinkedHashMap<String, PrimaryKeyDefinition>();
+	final Map<String, ForeignKeyDefinition> foreignKeys = new LinkedHashMap<String, ForeignKeyDefinition>();
+	final Map<String, UniqueKeyDefinition> uniqueKeys = new LinkedHashMap<String, UniqueKeyDefinition>();
+	final Map<String, DefaultDefinition> defaults = new LinkedHashMap<String, DefaultDefinition>();
+	final Map<String, Generator> generators = new HashMap<String, Generator>();
+	final Set<TableDefinition> references = new HashSet<TableDefinition>();
 
-	Map<String, Generator> sequences = new HashMap<String, Generator>();
-	Map<String, Generator> identifiers = new HashMap<String, Generator>();
-
-	StardardTableDefinition(SchemaDefinition schemaDefinition, Class<?> mappedClass, String tableName) {
-		this.schemaDefinition = schemaDefinition;
+	StardardTableDefinition(Class<?> mappedClass) {
 		this.mappedClass = mappedClass;
-		this.tableName = tableName;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public AutoDdl getAutoDdl() {
-		return autoDdl;
-	}
-
-	public Class<?> getMappedClass() {
-		return mappedClass;
-	}
-
-	public String getTableName() {
-		return tableName;
-	}
-
-	public boolean isDdlContainsConstraint() {
-		return ddlContainsConstraint;
-	}
-
-	public void setDdlContainsConstraint(boolean ddlContainsConstraint) {
-		this.ddlContainsConstraint = ddlContainsConstraint;
 	}
 
 	public void setAutoDdl(AutoDdl autoDdl) {
 		this.autoDdl = autoDdl;
 	}
 
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	public AutoDdl getAutoDdl() {
+		return autoDdl;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public Class<?> getMappedClass() {
+		return mappedClass;
+	}
+
+	public TableDefinition[] getReferences() {
+		return references.toArray(new TableDefinition[0]);
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public boolean isDefineConstraintOnCreate() {
+		return defineConstraintOnCreate;
+	}
+
+	public void setDefineConstraintOnCreate(boolean defineConstraintOnCreate) {
+		this.defineConstraintOnCreate = defineConstraintOnCreate;
+	}
+
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
-	public String getCatalog() {
-		return getSchemaDefinition().getCatalog();
-	}
-
 	public String getSchema() {
-		return getSchemaDefinition().getSchema();
+		return schemaDefinition != null ? schemaDefinition.getSchema() : null;
 	}
 
-	public String getFullTableName() {
-		return null;
+	public void setSchemaDefinition(SchemaDefinition schemaDefinition) {
+		this.schemaDefinition = schemaDefinition;
 	}
 
-	public Generator getSequenceGenerator(String propertyName) {
-		return sequences.get(propertyName);
+	public Generator getGenerator(String propertyName) {
+		return generators.get(propertyName);
 	}
 
-	public Generator getUserDefinedGenerator(String propertyName) {
-		return identifiers.get(propertyName);
+	public DefaultDefinition getDefaultDefinition(String propertyName) {
+		return defaults.get(propertyName);
 	}
 
-	public ColumnDefinition getColumn(String mappedProperty) {
+	public ColumnDefinition getColumnDefinition(String mappedProperty) {
 		return columns.get(mappedProperty);
 	}
 

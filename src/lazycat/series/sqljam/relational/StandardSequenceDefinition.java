@@ -1,9 +1,6 @@
 package lazycat.series.sqljam.relational;
 
 import lazycat.series.beans.ToStringBuilder;
-import lazycat.series.sqljam.generator.Generator;
-import lazycat.series.sqljam.generator.SequenceAssignedGenerator;
-import lazycat.series.sqljam.generator.SequenceGenerator;
 
 /**
  * StandardSequenceDefinition
@@ -20,9 +17,8 @@ public class StandardSequenceDefinition implements SequenceDefinition {
 	private int maxValue;
 	private int minValue;
 	private int cache;
-	private final Generator identifierGenerator;
 
-	StandardSequenceDefinition(SchemaDefinition schemaDefinition, String name, boolean assigned) {
+	StandardSequenceDefinition(SchemaDefinition schemaDefinition, String name) {
 		this.schemaDefinition = schemaDefinition;
 		this.name = name;
 		this.startWith = 1;
@@ -30,8 +26,6 @@ public class StandardSequenceDefinition implements SequenceDefinition {
 		this.maxValue = -1;
 		this.minValue = 1;
 		this.cache = 10;
-		this.identifierGenerator = assigned ? new SequenceAssignedGenerator(name)
-				: new SequenceGenerator(name);
 	}
 
 	public String getName() {
@@ -82,12 +76,8 @@ public class StandardSequenceDefinition implements SequenceDefinition {
 		return schemaDefinition;
 	}
 
-	public Generator getIdentifierGenerator() {
-		return identifierGenerator;
-	}
-
 	public String toString() {
-		return ToStringBuilder.reflectInvokeToString(this, new String[] { "tableDefinition" });
+		return ToStringBuilder.reflectInvokeToString(this, new String[] { "schemaDefinition" });
 	}
 
 }

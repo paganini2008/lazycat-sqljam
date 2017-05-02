@@ -8,7 +8,7 @@ package lazycat.series.sqljam;
  */
 public interface Context {
 
-	Class<?> findMappedClass(String tableAlias, MetaData metaData);
+	Class<?> findMappedClass(String tableAlias, Configuration configuration);
 
 	String getTableAlias();
 

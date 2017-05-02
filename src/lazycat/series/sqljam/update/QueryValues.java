@@ -9,6 +9,7 @@ import java.util.Set;
 import lazycat.series.collection.CollectionUtils;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
 import lazycat.series.sqljam.query.From;
@@ -36,9 +37,9 @@ public class QueryValues implements Expression {
 		return this;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
 		final List<String> columns = new ArrayList<String>();
-		ColumnDefinition[] definitions = translator.getColumns(null, configuration.getMetaData());
+		ColumnDefinition[] definitions = translator.getColumns(null, configuration);
 		for (ColumnDefinition definition : definitions) {
 			if (includedProperties.contains(definition.getMappedProperty())) {
 				columns.add(definition.getColumnName());
@@ -47,7 +48,7 @@ public class QueryValues implements Expression {
 		StringBuilder text = new StringBuilder();
 		if (columns.size() > 0) {
 			text.append(" (");
-			text.append(CollectionUtils.join(columns, ","));
+			text.append(CollectionUtils.join(columns, ", "));
 			text.append(")");
 		}
 		text.append(" (");
@@ -56,7 +57,7 @@ public class QueryValues implements Expression {
 		return text.toString();
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
 		source.setParameters(parameterCollector, configuration);
 	}
 

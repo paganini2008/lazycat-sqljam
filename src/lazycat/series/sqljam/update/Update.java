@@ -19,7 +19,7 @@ public interface Update extends Executor {
 
 	Update set(String property, From query);
 
-	Update set(String property, String anotherProperty);
+	Update setProperty(String property, String anotherProperty);
 
 	Update set(Expression expression);
 

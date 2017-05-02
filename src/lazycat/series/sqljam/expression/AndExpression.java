@@ -2,10 +2,11 @@ package lazycat.series.sqljam.expression;
 
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
- * And
+ * AndExpression
  * 
  * @author Fred Feng
  * @version 1.0
@@ -20,13 +21,16 @@ public class AndExpression extends LogicalExpression {
 		this.right = right;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		return configuration.getFeature().and(left.getText(translator, configuration), right.getText(translator, configuration));
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		String leftContent = left.getText(session, translator, configuration);
+		String rightContent = right.getText(session, translator, configuration);
+		return configuration.getJdbcAdmin().getFeature().and(leftContent, rightContent);
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		left.setParameter(translator, parameterCollector, configuration);
-		right.setParameter(translator, parameterCollector, configuration);
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector,
+			Configuration configuration) {
+		left.setParameter(session, translator, parameterCollector, configuration);
+		right.setParameter(session, translator, parameterCollector, configuration);
 	}
 
 }

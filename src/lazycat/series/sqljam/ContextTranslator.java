@@ -3,7 +3,6 @@ package lazycat.series.sqljam;
 import java.util.ArrayList;
 import java.util.List;
 
-import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 import lazycat.series.sqljam.relational.PrimaryKeyDefinition;
 import lazycat.series.sqljam.relational.TableDefinition;
@@ -16,60 +15,63 @@ import lazycat.series.sqljam.relational.TableDefinition;
  */
 public class ContextTranslator implements Translator {
 
-	private final Session session;
 	private final Context delegate;
 
-	public ContextTranslator(Session session, Context delegate) {
-		this.session = session;
+	public ContextTranslator(Context delegate) {
 		this.delegate = delegate;
 	}
 
-	public boolean isPrimaryKey(String tableAlias, String mappedProperty, MetaData metaData) {
-		Class<?> mappedClass = delegate.findMappedClass(tableAlias, metaData);
-		if (mappedClass == null) {
-			return false;
-		}
-		TableDefinition td = metaData.getTable(mappedClass);
-		return td.isPrimaryKey(mappedProperty);
+	public TableDefinition getTableDefinition(Configuration configuration) {
+		return getTableDefinition(null, configuration);
 	}
 
-	public String getTableName(String tableAlias, MetaData metaData) {
-		Class<?> mappedClass = delegate.findMappedClass(tableAlias, metaData);
+	public TableDefinition getTableDefinition(String tableAlias, Configuration configuration) {
+		Class<?> mappedClass = delegate.findMappedClass(tableAlias, configuration);
+		return configuration.getTableDefinition(mappedClass);
+	}
+
+	public boolean isPrimaryKey(String tableAlias, String property, Configuration configuration) {
+		TableDefinition tableDefinition = getTableDefinition(tableAlias, configuration);
+		return tableDefinition.isPrimaryKey(property);
+	}
+
+	public String getTableName(String tableAlias, Configuration configuration) {
+		Class<?> mappedClass = delegate.findMappedClass(tableAlias, configuration);
 		if (mappedClass == null) {
 			return null;
 		}
-		TableDefinition td = metaData.getTable(mappedClass);
+		TableDefinition td = configuration.getTableDefinition(mappedClass);
 		return td.getTableName();
 	}
 
-	public String getColumnName(String tableAlias, String mappedProperty, MetaData metaData) {
-		Class<?> mappedClass = delegate.findMappedClass(tableAlias, metaData);
+	public String getColumnName(String tableAlias, String property, Configuration configuration) {
+		Class<?> mappedClass = delegate.findMappedClass(tableAlias, configuration);
 		if (mappedClass == null) {
 			return null;
 		}
-		ColumnDefinition cd = metaData.getColumn(mappedClass, mappedProperty);
+		ColumnDefinition cd = configuration.getColumnDefinition(mappedClass, property);
 		return cd != null ? cd.getColumnName() : null;
 	}
 
-	public String getPrimaryKeyName(String tableAlias, MetaData metaData) {
-		ColumnDefinition[] definitions = getPrimaryKeys(tableAlias, metaData);
+	public String getPrimaryKeyName(String tableAlias, Configuration configuration) {
+		ColumnDefinition[] definitions = getPrimaryKeys(tableAlias, configuration);
 		return definitions != null ? definitions[0].getColumnName() : null;
 	}
 
-	public String[] getPrimaryKeyNames(String tableAlias, MetaData metaData) {
+	public String[] getPrimaryKeyNames(String tableAlias, Configuration configuration) {
 		List<String> columns = new ArrayList<String>();
-		for (ColumnDefinition definition : getPrimaryKeys(tableAlias, metaData)) {
+		for (ColumnDefinition definition : getPrimaryKeys(tableAlias, configuration)) {
 			columns.add(definition.getColumnName());
 		}
 		return columns.toArray(new String[0]);
 	}
 
-	public ColumnDefinition[] getPrimaryKeys(String tableAlias, MetaData metaData) {
-		Class<?> mappedClass = delegate.findMappedClass(tableAlias, metaData);
+	public ColumnDefinition[] getPrimaryKeys(String tableAlias, Configuration configuration) {
+		Class<?> mappedClass = delegate.findMappedClass(tableAlias, configuration);
 		if (mappedClass == null) {
 			return null;
 		}
-		TableDefinition td = metaData.getTable(mappedClass);
+		TableDefinition td = configuration.getTableDefinition(mappedClass);
 		PrimaryKeyDefinition[] definitions = td.getPrimaryKeyDefinitions();
 		if (definitions != null) {
 			ColumnDefinition[] results = new ColumnDefinition[definitions.length];
@@ -81,33 +83,26 @@ public class ContextTranslator implements Translator {
 		return null;
 	}
 
-	public ColumnDefinition[] getColumns(String tableAlias, MetaData metaData) {
-		Class<?> mappedClass = delegate.findMappedClass(tableAlias, metaData);
+	public ColumnDefinition[] getColumns(String tableAlias, Configuration configuration) {
+		Class<?> mappedClass = delegate.findMappedClass(tableAlias, configuration);
 		if (mappedClass == null) {
 			return null;
 		}
-		TableDefinition td = metaData.getTable(mappedClass);
+		TableDefinition td = configuration.getTableDefinition(mappedClass);
 		return td.getColumnDefinitions();
 	}
 
-	public boolean hasPrimaryKey(String tableAlias, MetaData metaData) {
-		Class<?> mappedClass = delegate.findMappedClass(tableAlias, metaData);
+	public boolean hasPrimaryKey(String tableAlias, Configuration configuration) {
+		Class<?> mappedClass = delegate.findMappedClass(tableAlias, configuration);
 		if (mappedClass == null) {
 			return false;
 		}
-		TableDefinition td = metaData.getTable(mappedClass);
+		TableDefinition td = configuration.getTableDefinition(mappedClass);
 		return td.hasPrimaryKey();
 	}
 
-	public String getTableAlias(String tableAlias) {
-		if (StringUtils.isBlank(tableAlias)) {
-			return delegate.getTableAlias();
-		}
-		return tableAlias;
-	}
-
-	public Session getCurrentSession() {
-		return session;
+	public String getTableAlias() {
+		return delegate.getTableAlias();
 	}
 
 }

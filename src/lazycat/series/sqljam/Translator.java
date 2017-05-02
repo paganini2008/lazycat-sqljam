@@ -1,6 +1,7 @@
 package lazycat.series.sqljam;
 
 import lazycat.series.sqljam.relational.ColumnDefinition;
+import lazycat.series.sqljam.relational.TableDefinition;
 
 /**
  * A translator serves to this query
@@ -10,24 +11,26 @@ import lazycat.series.sqljam.relational.ColumnDefinition;
  */
 public interface Translator {
 
-	String getTableName(String tableAlias, MetaData metaData);
+	TableDefinition getTableDefinition(Configuration configuration);
 
-	String getColumnName(String tableAlias, String mappedProperty, MetaData metaData);
+	TableDefinition getTableDefinition(String tableAlias, Configuration configuration);
 
-	String getPrimaryKeyName(String tableAlias, MetaData metaData);
+	String getTableName(String tableAlias, Configuration configuration);
 
-	String[] getPrimaryKeyNames(String tableAlias, MetaData metaData);
+	String getColumnName(String tableAlias, String mappedProperty, Configuration configuration);
 
-	boolean isPrimaryKey(String tableAlias, String mappedProperty, MetaData metaData);
+	String getPrimaryKeyName(String tableAlias, Configuration configuration);
 
-	boolean hasPrimaryKey(String tableAlias, MetaData metaData);
+	String[] getPrimaryKeyNames(String tableAlias, Configuration configuration);
 
-	ColumnDefinition[] getPrimaryKeys(String tableAlias, MetaData metaData);
+	boolean isPrimaryKey(String tableAlias, String mappedProperty, Configuration configuration);
 
-	ColumnDefinition[] getColumns(String tableAlias, MetaData metaData);
-	
-	String getTableAlias(String tableAlias);
+	boolean hasPrimaryKey(String tableAlias, Configuration configuration);
 
-	Session getCurrentSession();
+	ColumnDefinition[] getPrimaryKeys(String tableAlias, Configuration configuration);
+
+	ColumnDefinition[] getColumns(String tableAlias, Configuration configuration);
+
+	String getTableAlias();
 
 }

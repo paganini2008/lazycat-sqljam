@@ -2,7 +2,6 @@ package lazycat.series.sqljam.query;
 
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.MetaData;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.relational.TableDefinition;
 
@@ -29,14 +28,14 @@ public class SimpleFrom extends StandardFrom {
 	}
 
 	public String getText(Configuration configuration) {
-		TableDefinition tableDefinition = configuration.getMetaData().getTable(mappedClass);
+		TableDefinition tableDefinition = configuration.getTableDefinition(mappedClass);
 		StringBuilder text = new StringBuilder();
 		if (last != null) {
 			text.append(last.getText(configuration));
 			text.append(",");
 		}
 		if (StringUtils.isNotBlank(tableAlias)) {
-			text.append(configuration.getFeature().tableAs(tableDefinition.getTableName(), tableAlias));
+			text.append(configuration.getJdbcAdmin().getFeature().tableAs(tableDefinition.getTableName(), tableAlias));
 		} else {
 			text.append(tableDefinition.getTableName());
 		}
@@ -49,7 +48,7 @@ public class SimpleFrom extends StandardFrom {
 		}
 	}
 
-	public Class<?> findMappedClass(String tableAlias, MetaData metaData) {
+	public Class<?> findMappedClass(String tableAlias, Configuration metaData) {
 		if (StringUtils.isBlank(tableAlias) || this.tableAlias.equals(tableAlias)) {
 			return mappedClass;
 		}

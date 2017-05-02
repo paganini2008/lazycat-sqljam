@@ -11,23 +11,19 @@ import lazycat.series.sqljam.generator.Generator;
  */
 public interface TableDefinition {
 
-	String getCatalog();
-
-	String getSchema();
+	AutoDdl getAutoDdl();
 
 	String getComment();
-
-	AutoDdl getAutoDdl();
 
 	Class<?> getMappedClass();
 
 	String getTableName();
 
-	boolean isDdlContainsConstraint();
+	boolean isDefineConstraintOnCreate();
 
-	ColumnDefinition getColumn(String mappedProperty);
+	ColumnDefinition getColumnDefinition(String property);
 
-	boolean hasProperty(String mappedProperty);
+	boolean hasProperty(String property);
 
 	ColumnDefinition[] getColumnDefinitions();
 
@@ -37,11 +33,11 @@ public interface TableDefinition {
 
 	boolean hasUniqueKey();
 
-	boolean isPrimaryKey(String mappedProperty);
+	boolean isPrimaryKey(String property);
 
 	PrimaryKeyDefinition getPrimaryKeyDefinition();
 
-	boolean isAutoIncrement(String mappedProperty);
+	boolean isAutoIncrement(String property);
 
 	UniqueKeyDefinition[] getUniqueKeyDefinitions();
 
@@ -51,12 +47,14 @@ public interface TableDefinition {
 
 	PrimaryKeyDefinition[] getPrimaryKeyDefinitions();
 
-	Generator getSequenceGenerator(String propertyName);
+	DefaultDefinition getDefaultDefinition(String property);
 
-	Generator getUserDefinedGenerator(String propertyName);
-
-	String getFullTableName();
+	String getSchema();
 
 	SchemaDefinition getSchemaDefinition();
+
+	Generator getGenerator(String propertyName);
+
+	TableDefinition[] getReferences();
 
 }

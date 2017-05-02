@@ -3,6 +3,7 @@ package lazycat.series.sqljam.expression;
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.LikeExpression.MatchMode;
 
@@ -21,27 +22,27 @@ public class AndFilter extends LogicalExpression {
 	private LogicalExpression delegate;
 
 	public AndFilter eq(String propertyName, Object parameter, JdbcType jdbcType) {
-		return and(new SqlParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.EQ));
+		return and(new JdbcParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.EQ));
 	}
 
 	public AndFilter ne(String propertyName, Object parameter, JdbcType jdbcType) {
-		return and(new SqlParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.NE));
+		return and(new JdbcParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.NE));
 	}
 
 	public AndFilter gt(String propertyName, Object parameter, JdbcType jdbcType) {
-		return and(new SqlParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.GT));
+		return and(new JdbcParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.GT));
 	}
 
 	public AndFilter lt(String propertyName, Object parameter, JdbcType jdbcType) {
-		return and(new SqlParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.LT));
+		return and(new JdbcParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.LT));
 	}
 
 	public AndFilter gte(String propertyName, Object parameter, JdbcType jdbcType) {
-		return and(new SqlParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.GTE));
+		return and(new JdbcParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.GTE));
 	}
 
 	public AndFilter lte(String propertyName, Object parameter, JdbcType jdbcType) {
-		return and(new SqlParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.LTE));
+		return and(new JdbcParameterExpression(propertyName, parameter, jdbcType, ComparisonOperator.LTE));
 	}
 
 	public AndFilter between(String propertyName, Object lower, Object high, JdbcType jdbcType) {
@@ -69,12 +70,12 @@ public class AndFilter extends LogicalExpression {
 		return this;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		return delegate.getText(translator, configuration);
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		return delegate.getText(session, translator, configuration);
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		delegate.setParameter(translator, parameterCollector, configuration);
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+		delegate.setParameter(session, translator, parameterCollector, configuration);
 	}
 
 	public static AndFilter newFilter(Expression expression) {

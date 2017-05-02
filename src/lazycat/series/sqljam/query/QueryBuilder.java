@@ -2,13 +2,12 @@ package lazycat.series.sqljam.query;
 
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ContextTranslator;
-import lazycat.series.sqljam.MetaData;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.expression.All;
 import lazycat.series.sqljam.expression.Expression;
-import lazycat.series.sqljam.expression.Expressions;
-import lazycat.series.sqljam.expression.SelectAll;
+import lazycat.series.sqljam.expression.Field;
 import lazycat.series.sqljam.feature.Feature;
 import lazycat.series.sqljam.update.SqlBuilder;
 
@@ -22,95 +21,93 @@ public class QueryBuilder implements SqlBuilder {
 
 	From query;
 	Join join;
-	Expression field;
-	Expression relation;
+	Field columns;
 	Expression where;
-	Expression group;
+	Field group;
 	Expression having;
-	Expression order;
+	Field order;
 
-	private final Translator translator;
+	private Translator translator;
+	private Session session;
 
-	QueryBuilder(Session session, Class<?> mappedClass, String tableAlias) {
+	public QueryBuilder(Session session, Class<?> mappedClass, String tableAlias) {
 		this.query = new SimpleFrom(mappedClass, tableAlias);
-		this.translator = new ContextTranslator(session, this);
+		this.translator = new ContextTranslator(this);
+		this.session = session;
 	}
 
 	public QueryBuilder(Session session, From source, String tableAlias) {
 		this.query = new View(source, tableAlias);
-		this.translator = new ContextTranslator(session, this);
+		this.translator = new ContextTranslator(this);
+		this.session = session;
+	}
+
+	QueryBuilder() {
 	}
 
 	public String getTableAlias() {
 		return query.getTableAlias();
 	}
 
-	public Class<?> findMappedClass(String tableAlias, MetaData metaData) {
-		Class<?> find = query.findMappedClass(tableAlias, metaData);
+	public Class<?> findMappedClass(String tableAlias, Configuration configuration) {
+		Class<?> find = query.findMappedClass(tableAlias, configuration);
 		if (find == null) {
-			find = join != null ? join.findMappedClass(tableAlias, metaData) : null;
+			find = join != null ? join.findMappedClass(tableAlias, configuration) : null;
 		}
 		return find;
 	}
 
 	public String getText(Configuration configuration) {
-		final Feature feature = configuration.getFeature();
+		final Feature feature = configuration.getJdbcAdmin().getFeature();
 		StringBuilder text = new StringBuilder();
 		text.append(feature.select(false));
-		if (field == null) {
-			field = new SelectAll();
+		if (columns == null) {
+			columns = All.THIS;
 		}
-		text.append(field.getText(translator, configuration));
+		text.append(columns.getText(session, translator, configuration));
 		text.append(feature.from(query.getText(configuration)));
-		if (relation != null && where != null) {
-			Expression all = Expressions.and(relation, where);
-			text.append(feature.where(all.getText(translator, configuration)));
-		} else {
-			if (relation != null) {
-				text.append(feature.where(relation.getText(translator, configuration)));
-			}
-			if (where != null) {
-				text.append(feature.where(where.getText(translator, configuration)));
-			}
+		if (where != null) {
+			text.append(feature.where(where.getText(session, translator, configuration)));
 		}
 		if (join != null) {
-			text.append(join.getText(translator, configuration));
+			text.append(join.getText(session, translator, configuration));
 		}
 		if (group != null) {
-			text.append(feature.groupBy(group.getText(translator, configuration)));
+			text.append(feature.groupBy(group.getText(session, translator, configuration)));
 			if (having != null) {
-				text.append(feature.having(having.getText(translator, configuration)));
+				text.append(feature.having(having.getText(session, translator, configuration)));
 			}
 		}
 		if (order != null) {
-			text.append(feature.order(order.getText(translator, configuration)));
+			text.append(feature.order(order.getText(session, translator, configuration)));
 		}
 		return text.toString();
 	}
 
 	public void setParameters(ParameterCollector parameterCollector, Configuration configuration) {
 		query.setParameters(parameterCollector, configuration);
-		if (field != null) {
-			field.setParameter(translator, parameterCollector, configuration);
-		}
-		if (relation != null) {
-			relation.setParameter(translator, parameterCollector, configuration);
-		}
 		if (where != null) {
-			where.setParameter(translator, parameterCollector, configuration);
+			where.setParameter(session, translator, parameterCollector, configuration);
 		}
 		if (join != null) {
-			join.setParameter(translator, parameterCollector, configuration);
+			join.setParameter(session, translator, parameterCollector, configuration);
 		}
-		if (group != null) {
-			group.setParameter(translator, parameterCollector, configuration);
-			if (having != null) {
-				having.setParameter(translator, parameterCollector, configuration);
-			}
+		if (group != null && having != null) {
+			having.setParameter(session, translator, parameterCollector, configuration);
 		}
-		if (order != null) {
-			order.setParameter(translator, parameterCollector, configuration);
-		}
+	}
+
+	public SqlBuilder copy() {
+		QueryBuilder builder = new QueryBuilder();
+		builder.columns = columns;
+		builder.group = group;
+		builder.having = having;
+		builder.join = join;
+		builder.order = order;
+		builder.query = query;
+		builder.where = where;
+		builder.translator = translator;
+		return builder;
 	}
 
 }

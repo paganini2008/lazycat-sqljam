@@ -1,7 +1,8 @@
 package lazycat.series.sqljam.expression;
 
+import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
@@ -10,19 +11,22 @@ import lazycat.series.sqljam.Translator;
  * @author Fred Feng
  * @version 1.0
  */
-public class TableName implements Expression {
+public class TableName extends AbstractField {
 
-	private final String tableAlias;
+	public static final TableName THIS = new TableName();
+	private final String exp;
 
-	public TableName(String tableAlias) {
-		this.tableAlias = tableAlias;
+	TableName() {
+		this(null);
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		return translator.getTableName(tableAlias, configuration.getMetaData());
+	public TableName(String exp) {
+		this.exp = exp;
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		String alias = StringUtils.isBlank(exp) ? translator.getTableAlias() : exp;
+		return translator.getTableDefinition(alias, configuration).getTableName();
 	}
 
 }

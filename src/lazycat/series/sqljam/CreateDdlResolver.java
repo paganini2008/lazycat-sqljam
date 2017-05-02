@@ -12,7 +12,7 @@ import lazycat.series.sqljam.relational.TableDefinition;
 public class CreateDdlResolver implements DdlResolver {
 
 	public void resolve(JdbcAdmin jdbcAdmin, Class<?> mappedClass) {
-		TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(mappedClass);
+		TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(mappedClass);
 		ForeignKeyDefinition[] definitions = tableDefinition.getForeignKeyDefinitions();
 		if (definitions != null) {
 			for (ForeignKeyDefinition fkDefinition : definitions) {

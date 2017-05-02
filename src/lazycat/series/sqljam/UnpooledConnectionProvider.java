@@ -10,7 +10,7 @@ import java.sql.SQLException;
  * @author Fred Feng
  * @version 1.0
  */
-public class UnpooledConnectionProvider implements ConnectionProvider {
+public class UnpooledConnectionProvider extends AbstractConnectionProvider {
 
 	private String driverClassName;
 	private String username;
@@ -67,29 +67,6 @@ public class UnpooledConnectionProvider implements ConnectionProvider {
 		} catch (SQLException e) {
 			throw new ConnectionException(e);
 		}
-	}
-
-	public void closeConnection(Connection connection) {
-		try {
-			if (connection != null && !connection.isClosed()) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			throw new ConnectionException(e);
-		}
-	}
-
-	public Connection openConnectionImplicitly() {
-		Connection connection = openConnection();
-		try {
-			connection.setAutoCommit(true);
-		} catch (SQLException e) {
-			throw new ConnectionException(e);
-		}
-		return connection;
-	}
-
-	public void destroy() {
 	}
 
 }

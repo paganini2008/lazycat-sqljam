@@ -6,17 +6,18 @@ import java.util.Date;
 import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.sqljam.AutoDdl;
 import lazycat.series.sqljam.annotation.Column;
+import lazycat.series.sqljam.annotation.Generator;
 import lazycat.series.sqljam.annotation.PrimaryKey;
 import lazycat.series.sqljam.annotation.Table;
 
 @Table(name = "tb_article_clone", autoDdl = AutoDdl.UPDATE, comment = "This is a article clone table.")
 public class ArticleCopy {
-	
+
 	@PrimaryKey
 	@Column(autoIncrement = true)
 	private int id;
 	@PrimaryKey
-	@Column(length=255)
+	@Column(length = 255)
 	private String author;
 	@Column(length = 255, nullable = false)
 	private String title;
@@ -28,7 +29,8 @@ public class ArticleCopy {
 	private String url;
 	@Column
 	private float score;
-	@Column(comment = "最后更新时间", defaultValue = "current_timestamp")
+
+	@Column(comment = "最后更新时间", defaultValue = "current_timestamp", nullable = false)
 	private Date lastModified;
 
 	@Column
@@ -105,8 +107,8 @@ public class ArticleCopy {
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		return ToStringBuilder.reflectInvokeToString(this);
 	}
 }

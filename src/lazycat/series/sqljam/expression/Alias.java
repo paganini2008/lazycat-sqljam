@@ -2,7 +2,7 @@ package lazycat.series.sqljam.expression;
 
 import lazycat.series.lang.Assert;
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
@@ -11,27 +11,20 @@ import lazycat.series.sqljam.Translator;
  * @author Fred Feng
  * @version 1.0
  */
-public class Alias implements Expression {
+public class Alias extends AbstractField {
 
-	private final Expression expression;
+	private final Column column;
 	private final String alias;
 
-	public Alias(String property, String alias) {
-		this(new Column(property), alias);
-	}
-
-	public Alias(Expression expression, String alias) {
+	public Alias(Column column, String alias) {
 		Assert.hasNoText(alias, "Undefined alias.");
-		this.expression = expression;
+		this.column = column;
 		this.alias = alias;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		return configuration.getFeature().columnAs(expression.getText(translator, configuration), alias);
-	}
-
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		expression.setParameter(translator, parameterCollector, configuration);
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		String str = column.getText(session, translator, configuration);
+		return configuration.getJdbcAdmin().getFeature().columnAs(str, alias);
 	}
 
 }

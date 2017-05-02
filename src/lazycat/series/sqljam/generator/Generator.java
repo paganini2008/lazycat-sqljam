@@ -1,7 +1,7 @@
 package lazycat.series.sqljam.generator;
 
+import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.Session;
-import lazycat.series.sqljam.feature.Feature;
 
 /**
  * Generator
@@ -11,10 +11,10 @@ import lazycat.series.sqljam.feature.Feature;
  */
 public interface Generator {
 
-	String getText(Feature feature, Session session);
+	static final String INSTANCE = "global";
 
-	boolean hasValue(Feature feature, Session session);
+	boolean hasValue(Session session, Configuration configuration);
 
-	Object getValue(Feature feature, Session session);
+	Object postValue(Session session, Configuration configuration);
 
 }

@@ -32,115 +32,119 @@ public class Expressions {
 	}
 
 	public static Expression eq(String property, Object parameter) {
-		return new SqlParameterExpression(property, parameter, ComparisonOperator.EQ);
+		return new JdbcParameterExpression(property, parameter, ComparisonOperator.EQ);
+	}
+
+	public static Expression eq(Field field, Object parameter) {
+		return new JdbcParameterExpression(field, parameter, ComparisonOperator.EQ);
 	}
 
 	public static Expression eq(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.EQ);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.EQ);
 	}
 
 	public static Expression ne(String property, Object parameter) {
-		return new SqlParameterExpression(property, parameter, ComparisonOperator.NE);
+		return new JdbcParameterExpression(property, parameter, ComparisonOperator.NE);
 	}
 
 	public static Expression ne(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.NE);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.NE);
 	}
 
 	public static Expression neAny(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.NE_ANY);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.NE_ANY);
 	}
 
 	public static Expression neAll(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.NE_ALL);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.NE_ALL);
 	}
 
 	public static Expression lt(String property, Object parameter) {
-		return new SqlParameterExpression(property, parameter, ComparisonOperator.LT);
+		return new JdbcParameterExpression(property, parameter, ComparisonOperator.LT);
 	}
 
 	public static Expression lt(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.LT);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.LT);
 	}
 
 	public static Expression ltAny(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.LT_ANY);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.LT_ANY);
 	}
 
 	public static Expression ltAll(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.LT_ALL);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.LT_ALL);
 	}
 
 	public static Expression gt(String property, Object parameter) {
-		return new SqlParameterExpression(property, parameter, ComparisonOperator.GT);
+		return new JdbcParameterExpression(property, parameter, ComparisonOperator.GT);
 	}
 
 	public static Expression gt(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.GT);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.GT);
 	}
 
 	public static Expression gtAny(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.GT_ANY);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.GT_ANY);
 	}
 
 	public static Expression gtAll(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.GT_ALL);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.GT_ALL);
 	}
 
 	public static Expression lte(String property, Object parameter) {
-		return new SqlParameterExpression(property, parameter, ComparisonOperator.LTE);
+		return new JdbcParameterExpression(property, parameter, ComparisonOperator.LTE);
 	}
 
 	public static Expression lte(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.LTE);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.LTE);
 	}
 
 	public static Expression lteAny(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.LTE_ANY);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.LTE_ANY);
 	}
 
 	public static Expression lteAll(String property, From query) {
-		return new SqlParameterExpression(property, query, ComparisonOperator.LTE_ALL);
+		return new JdbcParameterExpression(property, query, ComparisonOperator.LTE_ALL);
 	}
 
 	public static Expression gte(String property, Object parameter) {
-		return new SqlParameterExpression(property, parameter, ComparisonOperator.GTE);
+		return new JdbcParameterExpression(property, parameter, ComparisonOperator.GTE);
 	}
 
 	public static Expression gte(String property, From query) {
-		return new SqlParameterExpression(property, query(query), ComparisonOperator.GTE);
+		return new JdbcParameterExpression(property, query(query), ComparisonOperator.GTE);
 	}
 
 	public static Expression gteAny(String property, From query) {
-		return new SqlParameterExpression(property, query(query), ComparisonOperator.GTE_ANY);
+		return new JdbcParameterExpression(property, query(query), ComparisonOperator.GTE_ANY);
 	}
 
 	public static Expression gteAll(String property, From query) {
-		return new SqlParameterExpression(property, query(query), ComparisonOperator.GTE_ALL);
+		return new JdbcParameterExpression(property, query(query), ComparisonOperator.GTE_ALL);
 	}
 
 	public static Expression eqProperty(String property, String anotherProperty) {
-		return new ComparisonExpression(property, anotherProperty, ComparisonOperator.EQ);
+		return new FieldExpression(property, anotherProperty, ComparisonOperator.EQ);
 	}
 
 	public static Expression neProperty(String property, String anotherProperty) {
-		return new ComparisonExpression(property, anotherProperty, ComparisonOperator.NE);
+		return new FieldExpression(property, anotherProperty, ComparisonOperator.NE);
 	}
 
 	public static Expression ltProperty(String property, String anotherProperty) {
-		return new ComparisonExpression(property, anotherProperty, ComparisonOperator.LT);
+		return new FieldExpression(property, anotherProperty, ComparisonOperator.LT);
 	}
 
 	public static Expression gtProperty(String property, String anotherProperty) {
-		return new ComparisonExpression(property, anotherProperty, ComparisonOperator.GT);
+		return new FieldExpression(property, anotherProperty, ComparisonOperator.GT);
 	}
 
 	public static Expression lteProperty(String property, String anotherProperty) {
-		return new ComparisonExpression(property, anotherProperty, ComparisonOperator.LTE);
+		return new FieldExpression(property, anotherProperty, ComparisonOperator.LTE);
 	}
 
 	public static Expression gteProperty(String property, String anotherProperty) {
-		return new ComparisonExpression(property, anotherProperty, ComparisonOperator.GTE);
+		return new FieldExpression(property, anotherProperty, ComparisonOperator.GTE);
 	}
 
 	public static Expression isNull(String property) {

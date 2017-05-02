@@ -1,6 +1,7 @@
 package lazycat.series.sqljam.query;
 
 import lazycat.series.sqljam.expression.Expression;
+import lazycat.series.sqljam.expression.Field;
 
 /**
  * Select Clause
@@ -10,47 +11,43 @@ import lazycat.series.sqljam.expression.Expression;
  */
 public interface Query extends From, ResultSet {
 
-	Class<?> defaultMappedClass();
+	Query from(Class<?> mappedClass, String label);
 
-	Query from(Class<?> mappedClass, String alias);
-
-	Query from(Query subQuery, String alias);
-
-	Query relation(Expression expression);
+	Query from(Query subQuery, String label);
 
 	Query filter(Expression expression);
 
-	Query crossJoin(Class<?> mappedClass, String alias, Expression on);
+	Query crossJoin(Class<?> mappedClass, String label, Expression on);
 
-	Query crossJoin(Query subQuery, String alias, Expression on);
+	Query crossJoin(Query subQuery, String label, Expression on);
 
-	Query leftJoin(Class<?> mappedClass, String alias, Expression on);
+	Query leftJoin(Class<?> mappedClass, String label, Expression on);
 
-	Query leftJoin(Query subQuery, String alias, Expression on);
+	Query leftJoin(Query subQuery, String label, Expression on);
 
-	Query rightJoin(Class<?> mappedClass, String alias, Expression on);
+	Query rightJoin(Class<?> mappedClass, String label, Expression on);
 
-	Query rightJoin(Query subQuery, String alias, Expression on);
+	Query rightJoin(Query subQuery, String label, Expression on);
 
-	Query innerJoin(Query subQuery, String alias, Expression on);
+	Query innerJoin(Query subQuery, String label, Expression on);
 
-	Query innerJoin(Class<?> mappedClass, String alias, Expression on);
+	Query innerJoin(Class<?> mappedClass, String label, Expression on);
 
-	Query fullJoin(Query subQuery, String alias, Expression on);
+	Query fullJoin(Query subQuery, String label, Expression on);
 
-	Query fullJoin(Class<?> mappedClass, String alias, Expression on);
+	Query fullJoin(Class<?> mappedClass, String label, Expression on);
 
-	Query column(String property);
+	Query relate(Class<?> mappedClass, String label);
 
-	Query column(String property, String alias);
+	Query column(String property, String label);
 
-	Query column(Expression expression);
+	Query column(Field field);
 
-	Query column(Expression expression, String alias);
+	Query columns(String... properties);
 
 	Query group(String property);
 
-	Query group(Expression expression);
+	Query group(Field field);
 
 	Query having(Expression expression);
 
@@ -58,32 +55,34 @@ public interface Query extends From, ResultSet {
 
 	Query desc(String property);
 
-	Query order(Expression expression);
+	Query order(Field field);
 
-	Query distinct(String property, String alias);
+	Query distinct(String property, String label);
 
-	Query max(String property, String alias);
+	Query max(String property, String label);
 
-	Query min(String property, String alias);
+	Query min(String property, String label);
 
-	Query avg(String property, String alias);
+	Query avg(String property, String label);
 
-	Query sum(String property, String alias);
+	Query sum(String property, String label);
 
-	Query count(String property, String alias);
+	Query count(String property, String label);
 
-	Query countDistinct(String property, String alias);
+	Query countOne(String label);
+
+	Query countAll(String label);
+
+	Query countAll(String tableAlias, String label);
 
 	Query cache(String name);
 
-	Query all();
+	Query selectAll();
 
 	ResultSet limit(int limit);
 
 	ResultSet limit(int offset, int limit);
 
 	int rows();
-
-	Query setTimeout(int timeout);
 
 }

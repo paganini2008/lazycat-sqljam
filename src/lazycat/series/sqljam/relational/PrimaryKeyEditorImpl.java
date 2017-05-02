@@ -13,7 +13,7 @@ public class PrimaryKeyEditorImpl implements PrimaryKeyEditor {
 	private int position;
 
 	PrimaryKeyEditorImpl(TableEditor tableEditor, String propertyName) {
-		this.primaryKeyDefinition = new StandardPrimaryKeyDefinition(tableEditor.getTableDefinition().getColumn(propertyName));
+		this.primaryKeyDefinition = new StandardPrimaryKeyDefinition(tableEditor.getTableDefinition().getColumnDefinition(propertyName));
 	}
 
 	public PrimaryKeyEditor setConstraintName(String constraintName) {

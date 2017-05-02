@@ -3,7 +3,6 @@ package lazycat.series.sqljam.query;
 import java.util.Iterator;
 import java.util.List;
 
-import lazycat.series.cache.Cache;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
@@ -15,23 +14,21 @@ import lazycat.series.sqljam.update.CreateAs;
  * @author Fred Feng
  * @version 1.0
  */
-@SuppressWarnings("unchecked")
-public class Pageable implements ResultSet {
+public class Pageable implements ResultSet, CacheAdapter {
 
 	private final ResultSet delegate;
 	private final Session session;
 	private final int offset;
 	private final int limit;
 	private LockMode lockMode;
-	private String name;
-	private final ResultSet real;
+	private final Queryable queryable;
 
-	public Pageable(ResultSet delegate, Session session, Class<?> defaultMappedClass, int offset, int limit) {
+	public Pageable(ResultSet delegate, Session session, int offset, int limit) {
 		this.delegate = delegate;
 		this.session = session;
 		this.offset = offset;
 		this.limit = limit;
-		this.real = new LimitedResultSet(this, session, defaultMappedClass);
+		this.queryable = new QueryableImpl(this, session);
 	}
 
 	public String getText(Configuration configuration) {
@@ -43,7 +40,7 @@ public class Pageable implements ResultSet {
 		}
 		StringBuilder sql = new StringBuilder();
 		if (limit > 0) {
-			sql.append(configuration.getFeature().getPageableSqlString(delegate.getText(configuration), offset, limit));
+			sql.append(configuration.getJdbcAdmin().getFeature().getPageableSqlString(delegate.getText(configuration), offset, limit));
 		}
 		if (lockMode != null) {
 			sql.append(lockMode.getText(configuration));
@@ -55,46 +52,36 @@ public class Pageable implements ResultSet {
 		delegate.setParameters(parameterCollector, configuration);
 	}
 
-	public ResultSet setTimeout(int timeout) {
-		real.setTimeout(timeout);
-		return this;
+	public void setTimeout(long timeout) {
+		queryable.setTimeout(timeout);
 	}
 
-	public <T> T getResult(Class<T> requiredType, T defaultValue) {
-		Cache cache = session.getCache();
-		if (cache == null) {
-			return real.getResult(requiredType, defaultValue);
-		}
-		Object result = cache.getObject(name);
-		if (result == null) {
-			cache.putObject(name, real.getResult(requiredType, defaultValue));
-			result = cache.getObject(name);
-		}
-		return (T) result;
+	public <T> T one(Class<T> requiredType) {
+		return queryable.one(requiredType);
 	}
 
 	public <T> T first() {
-		return real.first();
+		return queryable.first();
 	}
 
 	public <T> T first(Class<T> beanClass) {
-		return real.first(beanClass);
+		return queryable.first(beanClass);
 	}
 
 	public <T> List<T> list() {
-		return real.list();
+		return queryable.list();
 	}
 
 	public <T> List<T> list(Class<T> beanClass) {
-		return real.list(beanClass);
+		return queryable.list(beanClass);
 	}
 
 	public <T> Iterator<T> iterator() {
-		return real.iterator();
+		return queryable.iterator();
 	}
 
 	public <T> Iterator<T> iterator(Class<T> beanClass) {
-		return real.iterator(beanClass);
+		return queryable.iterator(beanClass);
 	}
 
 	public int into(Class<?> mappedClass) {
@@ -105,18 +92,21 @@ public class Pageable implements ResultSet {
 		return new CreateAs(session, this, tableName).execute();
 	}
 
-	public ResultSet lock() {
+	public Queryable lock() {
 		return lock(-1);
 	}
 
-	public ResultSet lock(int timeout) {
+	public Queryable lock(int timeout) {
 		this.lockMode = LockMode.lock(timeout);
 		return this;
 	}
 
-	public ResultSet as(String name) {
-		this.name = name;
-		return this;
+	public Cacheable cacheAs(String name) {
+		return new CacheableImpl(this, session, name);
+	}
+
+	public Class<?> rootClass() {
+		return delegate.rootClass();
 	}
 
 }

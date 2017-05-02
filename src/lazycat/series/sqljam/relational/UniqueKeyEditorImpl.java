@@ -11,7 +11,7 @@ public class UniqueKeyEditorImpl implements UniqueKeyEditor {
 	private final StandardUniqueKeyDefinition uniqueKeyDefinition;
 
 	UniqueKeyEditorImpl(TableEditor tableEditor, String mappedProperty) {
-		this.uniqueKeyDefinition = new StandardUniqueKeyDefinition(tableEditor.getTableDefinition().getColumn(mappedProperty));
+		this.uniqueKeyDefinition = new StandardUniqueKeyDefinition(tableEditor.getTableDefinition().getColumnDefinition(mappedProperty));
 	}
 
 	public UniqueKeyEditor setConstraintName(String constraintName) {

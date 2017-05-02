@@ -13,30 +13,25 @@ import lazycat.series.sqljam.generator.Generator;
  */
 public class StandardSchemaDefinition implements SchemaDefinition {
 
-	private final String catalog;
 	private final String schema;
 	final Map<String, SequenceDefinition> sequences = new HashMap<String, SequenceDefinition>();
-	final Map<String, Generator> identifiers = new HashMap<String, Generator>();
+	final Map<String, Map<String, Generator>> generators = new HashMap<String, Map<String, Generator>>();
 
-	StandardSchemaDefinition(String catalog, String schema) {
-		this.catalog = catalog;
+	StandardSchemaDefinition(String schema) {
 		this.schema = schema;
-	}
-
-	public String getCatalog() {
-		return catalog;
 	}
 
 	public String getSchema() {
 		return schema;
 	}
 
-	public SequenceDefinition getSequence(String sequenceName) {
+	public SequenceDefinition getSequenceDefinition(String sequenceName) {
 		return sequences.get(sequenceName);
 	}
 
-	public Generator getIdentifierGenerator(String generatorName) {
-		return identifiers.get(generatorName);
+	public Generator getGenerator(String generator, String name) {
+		Map<String, Generator> data = generators.get(generator);
+		return data.get(name);
 	}
 
 }

@@ -2,6 +2,7 @@ package lazycat.series.sqljam.expression;
 
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
@@ -13,26 +14,26 @@ import lazycat.series.sqljam.Translator;
 public class TextExpression implements Expression {
 
 	public TextExpression(String property, String text) {
-		this(new Column(property), text);
+		this(new StandardColumn(property), text);
 	}
 
-	public TextExpression(Expression expression, String text) {
-		this.expression = expression;
+	public TextExpression(Field field, String text) {
+		this.field = field;
 		this.text = text;
 	}
 
-	private final Expression expression;
+	private final Field field;
 	private final String text;
 
-	public String getText(Translator translator, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(expression.getText(translator, configuration));
+		sql.append(field.getText(session, translator, configuration));
 		sql.append(text);
 		return sql.toString();
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		expression.setParameter(translator, parameterCollector, configuration);
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector,
+			Configuration configuration) {
 	}
 
 }

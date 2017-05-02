@@ -1,7 +1,7 @@
 package lazycat.series.sqljam.expression;
 
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
@@ -10,19 +10,17 @@ import lazycat.series.sqljam.Translator;
  * @author Fred Feng
  * @version 1.0
  */
-public class Text implements Expression {
+public class Text implements Data {
 
-	private Object object;
+	public static final Text NULL = new Text("NULL");
+	private final String text;
 
-	public Text(Object object) {
-		this.object = object;
+	public Text(Object text) {
+		this.text = text.toString();
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		return object != null ? object.toString() : "";
-	}
-
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		return text;
 	}
 
 }

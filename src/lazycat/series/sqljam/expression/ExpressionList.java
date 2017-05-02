@@ -5,6 +5,7 @@ import java.util.List;
 
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
@@ -16,7 +17,7 @@ import lazycat.series.sqljam.Translator;
 public class ExpressionList implements Expression {
 
 	private final List<Expression> list = new ArrayList<Expression>();
-	private String delimeter = ",";
+	private String delimeter = ", ";
 
 	public ExpressionList() {
 	}
@@ -30,10 +31,10 @@ public class ExpressionList implements Expression {
 		return this;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
 		StringBuilder sql = new StringBuilder();
 		for (int i = 0, l = list.size(); i < l; i++) {
-			sql.append(list.get(i).getText(translator, configuration));
+			sql.append(list.get(i).getText(session, translator, configuration));
 			if (i != l - 1) {
 				sql.append(delimeter);
 			}
@@ -41,14 +42,11 @@ public class ExpressionList implements Expression {
 		return sql.toString();
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector,
+			Configuration configuration) {
 		for (Expression expression : list) {
-			expression.setParameter(translator, parameterCollector, configuration);
+			expression.setParameter(session, translator, parameterCollector, configuration);
 		}
-	}
-
-	public static ExpressionList create(Expression expression) {
-		return new ExpressionList().addExpression(expression);
 	}
 
 	public static ExpressionList create(Expression... expressions) {

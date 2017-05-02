@@ -1,9 +1,5 @@
 package lazycat.series.sqljam.update;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import lazycat.series.concurrent.FutureCallback;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
@@ -18,9 +14,8 @@ import lazycat.series.sqljam.query.From;
  * @author Fred Feng
  * @version 1.0
  */
-public class UpdateImpl implements Update {
+public class UpdateImpl extends AbstractExecutor implements Update {
 
-	private final Session session;
 	private final UpdateBuilder builder;
 
 	public UpdateImpl(Session session, Class<?> mappedClass) {
@@ -32,7 +27,7 @@ public class UpdateImpl implements Update {
 	}
 
 	protected UpdateImpl(Session session, UpdateBuilder builder) {
-		this.session = session;
+		super(session);
 		this.builder = builder;
 	}
 
@@ -45,8 +40,8 @@ public class UpdateImpl implements Update {
 		return set(new Setter(object));
 	}
 
-	public Update set(String property, String anotherPropertyName) {
-		return set(Expressions.eq(property, anotherPropertyName));
+	public Update setProperty(String property, String anotherProperty) {
+		return set(Expressions.eqProperty(property, anotherProperty));
 	}
 
 	public Update set(String property, From query) {
@@ -65,24 +60,6 @@ public class UpdateImpl implements Update {
 			builder.set = (expression instanceof ExpressionList) ? expression : ExpressionList.create(expression);
 		}
 		return this;
-	}
-
-	public int execute() {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
-			public Integer call() throws Exception {
-				return session.execute(UpdateImpl.this);
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
-	}
-
-	public void execute(FutureCallback<Integer> callback) {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		session.getSessionFactory().getThreadPool().submit(new ExecutorCallable() {
-			public Integer call() throws Exception {
-				return session.execute(UpdateImpl.this);
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, callback);
 	}
 
 	public String getText(Configuration configuration) {

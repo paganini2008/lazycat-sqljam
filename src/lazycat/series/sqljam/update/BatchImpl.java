@@ -2,12 +2,9 @@ package lazycat.series.sqljam.update;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import lazycat.series.concurrent.FutureCallback;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
@@ -18,16 +15,15 @@ import lazycat.series.sqljam.Session;
  * @author Fred Feng
  * @version 1.0
  */
-public class BatchImpl implements Batch {
+public class BatchImpl extends AbstractExecutor implements Batch {
 
 	private final List<Object> bag = new CopyOnWriteArrayList<Object>();
 	private final Insert insert;
-	private final Session session;
 	private int flushSize = -1;
 
-	public BatchImpl(Insert insert, Session session) {
+	public BatchImpl(Session session, Insert insert) {
+		super(session);
 		this.insert = insert;
-		this.session = session;
 	}
 
 	private final AtomicInteger rows = new AtomicInteger(0);
@@ -48,7 +44,7 @@ public class BatchImpl implements Batch {
 	}
 
 	public void flush() {
-		session.getSessionFactory().getThreadPool().submit(new Runnable() {
+		session.getSessionAdmin().getSessionPool().execute(new Runnable() {
 			public void run() {
 				doFlush();
 			}
@@ -58,29 +54,14 @@ public class BatchImpl implements Batch {
 	private void doFlush() {
 		List<Object> objectList = new ArrayList<Object>(bag);
 		insert.values(objectList);
-		int effected = insert.batch(BatchImpl.this);
+		int effected = insert.batch(this);
 		rows.addAndGet(effected);
 		bag.removeAll(objectList);
 	}
 
-	public void execute(FutureCallback<Integer> callback) {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		session.getSessionFactory().getThreadPool().submit(new ExecutorCallable() {
-			public Integer call() throws Exception {
-				doFlush();
-				return rows.get();
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, callback);
-	}
-
 	public int execute() {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
-			public Integer call() throws Exception {
-				doFlush();
-				return rows.get();
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, rows.get());
+		doFlush();
+		return rows.get();
 	}
 
 	public String getText(Configuration configuration) {

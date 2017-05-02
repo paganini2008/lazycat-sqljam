@@ -10,8 +10,8 @@ public class SequenceEditorImpl implements SequenceEditor {
 
 	private final StandardSequenceDefinition sequenceDefinition;
 
-	SequenceEditorImpl(SchemaEditor schemaEditor, String name, boolean assigned) {
-		this.sequenceDefinition = new StandardSequenceDefinition(schemaEditor.getSchemaDefinition(), name, assigned);
+	SequenceEditorImpl(SchemaEditor schemaEditor, String name) {
+		this.sequenceDefinition = new StandardSequenceDefinition(schemaEditor.getSchemaDefinition(), name);
 	}
 
 	public SequenceEditor setStartWith(int startWith) {

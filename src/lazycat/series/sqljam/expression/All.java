@@ -2,7 +2,7 @@ package lazycat.series.sqljam.expression;
 
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
@@ -11,24 +11,22 @@ import lazycat.series.sqljam.Translator;
  * @author Fred Feng
  * @version 1.0
  */
-public class All implements Expression {
+public class All extends AbstractField {
 
-	private final String tableAlias;
+	public static final All THIS = new All();
+	private final Table table;
 
-	public All() {
-		this("");
+	All() {
+		this(null);
 	}
 
-	public All(String tableAlias) {
-		this.tableAlias = tableAlias;
+	public All(String expression) {
+		this.table = new Table(expression);
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		final String tableAlias = translator.getTableAlias(this.tableAlias);
-		return StringUtils.isNotBlank(tableAlias) ? tableAlias + ".*" : "*";
-	}
-
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		String tableName = table.getText(session, translator, configuration);
+		return StringUtils.isNotBlank(tableName) ? tableName + ".*" : "*";
 	}
 
 }

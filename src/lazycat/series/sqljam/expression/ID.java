@@ -2,9 +2,10 @@ package lazycat.series.sqljam.expression;
 
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.TranslatorException;
+import lazycat.series.sqljam.relational.TableDefinition;
 
 /**
  * ID,PrimaryKey
@@ -12,37 +13,27 @@ import lazycat.series.sqljam.TranslatorException;
  * @author Fred Feng
  * @version 1.0
  */
-public class ID implements Expression {
+public class ID extends Column {
 
-	private final String tableAlias;
-	private final boolean named;
+	public static final ID THIS = new ID();
+	private final Table table;
 
-	public ID() {
+	ID() {
 		this(null);
 	}
 
-	public ID(String tableAlias) {
-		this(tableAlias, false);
+	public ID(String expression) {
+		this.table = Table.get(expression);
 	}
 
-	public ID(String tableAlias, boolean named) {
-		this.tableAlias = tableAlias;
-		this.named = named;
-	}
-
-	public String getText(Translator translator, Configuration configuration) {
-		String tableAlias = translator.getTableAlias(this.tableAlias);
-		if (named) {
-			tableAlias = translator.getTableName(tableAlias, configuration.getMetaData());
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		String tableAlias = table.getText(session, translator, configuration);
+		TableDefinition tableDefinition = translator.getTableDefinition(tableAlias, configuration);
+		if (!tableDefinition.hasPrimaryKey()) {
+			throw new TranslatorException("No primary keys.");
 		}
-		String keyName = translator.getPrimaryKeyName(tableAlias, configuration.getMetaData());
-		if (StringUtils.isBlank(keyName)) {
-			throw new TranslatorException("No PrimaryKeys.");
-		}
-		String prefix = StringUtils.isNotBlank(tableAlias) ? tableAlias + "." : "";
-		return prefix + keyName;
+		String keyName = tableDefinition.getPrimaryKeyDefinition().getColumnDefinition().getColumnName();
+		return (StringUtils.isNotBlank(tableAlias) ? tableAlias + "." : "") + keyName;
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-	}
 }

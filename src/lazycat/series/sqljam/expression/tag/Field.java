@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
  * @version 1.0
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ ElementType.TYPE, ElementType.PARAMETER })
 public @interface Field {
 }

@@ -1,14 +1,21 @@
 package lazycat.series.sqljam.transcation;
 
-import java.sql.Connection;
-
 import lazycat.series.jdbc.TransactionIsolationLevel;
 import lazycat.series.sqljam.ConnectionProvider;
+import lazycat.series.sqljam.SessionAdmin;
 
+/**
+ * TransactionFactory
+ * 
+ * @author Fred Feng
+ * @version 1.0
+ */
 public interface TransactionFactory {
 
-	Transaction newTransaction(Connection connection);
+	void setAutoCommit(Boolean autoCommit);
 
-	Transaction newTransaction(ConnectionProvider connectionProvider, TransactionIsolationLevel level, boolean autoCommit);
+	void setTransactionIsolationLevel(TransactionIsolationLevel transactionIsolationLevel);
+
+	Transaction newTransaction(ConnectionProvider connectionProvider, SessionAdmin sessionAdmin);
 
 }

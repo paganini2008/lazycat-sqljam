@@ -5,7 +5,13 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-public class PooledConnectionProvider implements ConnectionProvider {
+/**
+ * PooledConnectionProvider
+ * 
+ * @author Fred Feng
+ * @version 1.0
+ */
+public class PooledConnectionProvider extends AbstractConnectionProvider {
 
 	private final DataSource dataSource;
 
@@ -19,29 +25,6 @@ public class PooledConnectionProvider implements ConnectionProvider {
 		} catch (SQLException e) {
 			throw new ConnectionException(e);
 		}
-	}
-
-	public void closeConnection(Connection connection) {
-		try {
-			if (connection != null && !connection.isClosed()) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			throw new ConnectionException(e);
-		}
-	}
-
-	public Connection openConnectionImplicitly() {
-		Connection connection = openConnection();
-		try {
-			connection.setAutoCommit(true);
-		} catch (SQLException e) {
-			throw new ConnectionException(e);
-		}
-		return connection;
-	}
-
-	public void destroy() {
 	}
 
 }

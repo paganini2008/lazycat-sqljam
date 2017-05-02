@@ -1,13 +1,13 @@
 package lazycat.series.sqljam.relational;
 
 /**
- * ColumnDefinition
+ * ColumnEditor
  * 
  * @author Fred Feng
  * @version 1.0
  */
 public interface ColumnEditor {
-	
+
 	ColumnEditor setLength(long length);
 
 	ColumnEditor setPrecision(int precision);
@@ -20,13 +20,9 @@ public interface ColumnEditor {
 
 	ColumnEditor setUnsigned(boolean unsigned);
 
-	ColumnEditor setDefaultValue(String defaultValue);
-
 	ColumnEditor setComment(String comment);
 
-	ColumnEditor setColumnScript(String columnScript);
-
-	ColumnEditor setInsertSql(String insertSql);
+	ColumnEditor setDefaultValue(String defaultValue);
 
 	PrimaryKeyEditor asPrimaryKey();
 
@@ -34,9 +30,11 @@ public interface ColumnEditor {
 
 	UniqueKeyEditor asUniqueKey();
 
-	ColumnEditor useIdentifierGenerator(String generatorName);
+	DefaultEditor addDefault();
 
-	ColumnEditor useSequence(String sequenceName);
+	ColumnEditor useGenerator(String generatorType, String name);
+
+	ColumnEditor useGenerator(String generatorType);
 
 	ColumnDefinition getColumnDefinition();
 

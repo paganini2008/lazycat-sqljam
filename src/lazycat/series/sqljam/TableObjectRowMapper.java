@@ -31,9 +31,9 @@ public class TableObjectRowMapper<T> extends BasicRowMapper<T> {
 		try {
 			columnDisplayName = getColumnDisplayName(rsmd, columnIndex);
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		}
-		ColumnDefinition cd = tableDefinition.getColumn(columnDisplayName);
+		ColumnDefinition cd = tableDefinition.getColumnDefinition(columnDisplayName);
 		return cd != null ? cd.getJavaType() : null;
 	}
 
@@ -42,9 +42,9 @@ public class TableObjectRowMapper<T> extends BasicRowMapper<T> {
 		try {
 			columnDisplayName = getColumnDisplayName(rsmd, columnIndex);
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		}
-		ColumnDefinition cd = tableDefinition.getColumn(columnDisplayName);
+		ColumnDefinition cd = tableDefinition.getColumnDefinition(columnDisplayName);
 		return cd != null ? cd.getJdbcType() : null;
 	}
 

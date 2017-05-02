@@ -3,7 +3,6 @@ package lazycat.series.sqljam.relational;
 import java.lang.reflect.Type;
 
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.sqljam.generator.Generator;
 
 /**
  * ColumnDefinition
@@ -29,19 +28,13 @@ public interface ColumnDefinition {
 
 	boolean isUnsigned();
 
-	String getDefaultValue();
-
 	String getComment();
 
-	String getColumnScript();
-
-	String getInsertSql();
+	String getDefaultValue();
 
 	String getMappedProperty();
 
 	Type getJavaType();
-
-	Generator getIdentifierGenerator();
 
 	TableDefinition getTableDefinition();
 

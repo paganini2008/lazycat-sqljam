@@ -23,7 +23,7 @@ import lazycat.series.jdbc.JdbcType;
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.DdlResolverException;
 import lazycat.series.sqljam.JdbcAdmin;
-import lazycat.series.sqljam.JdbcFault;
+import lazycat.series.sqljam.JdbcException;
 import lazycat.series.sqljam.JdbcTypeMapper;
 import lazycat.series.sqljam.JdbcUtils;
 import lazycat.series.sqljam.SQL92Criterion;
@@ -44,20 +44,13 @@ import lazycat.series.sqljam.relational.UniqueKeyDefinition;
 public abstract class Feature extends SQL92Criterion {
 
 	private final JdbcTypeMapper jdbcTypeMapper = new JdbcTypeMapper();
-	private final Map<Type, JdbcType> javaTypeMapper = new HashMap<Type, JdbcType>();
-	private final Map<String, String> functionMapper = new HashMap<String, String>();
+	private final Map<Type, JdbcType> javaTypeJdbcTypes = new HashMap<Type, JdbcType>();
 
 	protected Feature() {
 		registerGlobal();
 	}
 
 	protected void registerGlobal() {
-
-		registerFunction("max", "max(?)");
-		registerFunction("min", "min(?)");
-		registerFunction("sum", "sum(?)");
-		registerFunction("avg", "avg(?)");
-		registerFunction("count", "count(?)");
 
 		registerJavaType(Byte.TYPE, JdbcType.TINYINT);
 		registerJavaType(Short.TYPE, JdbcType.SMALLINT);
@@ -84,7 +77,6 @@ public abstract class Feature extends SQL92Criterion {
 		registerJavaType(Timestamp.class, JdbcType.TIMESTAMP);
 		registerJavaType(Time.class, JdbcType.TIME);
 		registerJavaType(java.sql.Date.class, JdbcType.DATE);
-
 		registerJavaType(byte[].class, JdbcType.BLOB);
 		registerJavaType(char[].class, JdbcType.CLOB);
 	}
@@ -97,12 +89,8 @@ public abstract class Feature extends SQL92Criterion {
 		jdbcTypeMapper.put(jdbcType, name);
 	}
 
-	protected final void registerFunction(String functionName, String functionTemplate) {
-		functionMapper.put(functionName, functionTemplate);
-	}
-
 	protected final void registerJavaType(Type javaType, JdbcType jdbcType) {
-		javaTypeMapper.put(javaType, jdbcType);
+		javaTypeJdbcTypes.put(javaType, jdbcType);
 	}
 
 	public String getColumnType(JdbcType jdbcType, int precision, int scale) {
@@ -117,12 +105,8 @@ public abstract class Feature extends SQL92Criterion {
 		return jdbcTypeMapper.get(jdbcType);
 	}
 
-	public String getFunctionTemplate(String functionName) {
-		return functionMapper.get(functionName);
-	}
-
 	public JdbcType getJdbcType(Type javaType) {
-		return javaTypeMapper.get(javaType);
+		return javaTypeJdbcTypes.get(javaType);
 	}
 
 	protected boolean isAssigned(JdbcType fromType, JdbcType toType) {
@@ -177,7 +161,7 @@ public abstract class Feature extends SQL92Criterion {
 
 	protected abstract String definePrimaryKey(TableDefinition tableDefinition);
 
-	protected abstract String defineAddPrimaryKey(TableDefinition tableDefinition);
+	protected abstract List<String> defineAddPrimaryKey(TableDefinition tableDefinition);
 
 	protected abstract String defineDropPrimaryKey(TableDefinition tableDefinition, String constaintName,
 			List<PrimaryKeyDefinition> pkDefinitions, JdbcAdmin jdbcAdmin);
@@ -224,7 +208,7 @@ public abstract class Feature extends SQL92Criterion {
 		final List<String> ddls = new ArrayList<String>();
 		for (ColumnDefinition columnDefinition : columnDefinitions) {
 			try {
-				if (JdbcUtils.columnExists(dbmd, tableDefinition.getCatalog(), tableDefinition.getSchema(), tableDefinition.getTableName(),
+				if (JdbcUtils.columnExists(dbmd, null, tableDefinition.getSchemaDefinition().getSchema(), tableDefinition.getTableName(),
 						columnDefinition.getColumnName())) {
 					int[] effects = getColumnModified(columnDefinition, dbmd);
 					if (effects != null) {
@@ -234,7 +218,7 @@ public abstract class Feature extends SQL92Criterion {
 					ddls.addAll(Arrays.asList(defineAddColumn(columnDefinition)));
 				}
 			} catch (SQLException e) {
-				throw new JdbcFault(e);
+				throw new JdbcException(e);
 			}
 
 		}
@@ -245,7 +229,7 @@ public abstract class Feature extends SQL92Criterion {
 				if (isPrimaryKeyModified(pkDefinition, dbmd)) {
 					ddls.add(defineDropPrimaryKey(tableDefinition, pkDefinition.getConstraintName(), ListUtils.create(definitions),
 							jdbcAdmin));
-					ddls.add(defineAddPrimaryKey(tableDefinition));
+					ddls.addAll(defineAddPrimaryKey(tableDefinition));
 					break;
 				}
 			}
@@ -285,7 +269,7 @@ public abstract class Feature extends SQL92Criterion {
 		ColumnDefinition[] columnDefinitions = tableDefinition.getColumnDefinitions();
 		for (ColumnDefinition columnDefinition : columnDefinitions) {
 			try {
-				if (JdbcUtils.columnExists(dbmd, tableDefinition.getCatalog(), tableDefinition.getSchema(), tableDefinition.getTableName(),
+				if (JdbcUtils.columnExists(dbmd, null, tableDefinition.getSchemaDefinition().getSchema(), tableDefinition.getTableName(),
 						columnDefinition.getColumnName())) {
 					if (getColumnModified(columnDefinition, dbmd) != null) {
 						throw new DdlResolverException("Column '" + columnDefinition.getColumnName() + "' is modified.");
@@ -294,7 +278,7 @@ public abstract class Feature extends SQL92Criterion {
 					throw new DdlResolverException("Column '" + columnDefinition.getColumnName() + "' is not existed.");
 				}
 			} catch (SQLException e) {
-				throw new JdbcFault(e);
+				throw new JdbcException(e);
 			}
 
 		}
@@ -336,7 +320,7 @@ public abstract class Feature extends SQL92Criterion {
 				parts.add(part);
 			}
 		}
-		if (tableDefinition.isDdlContainsConstraint()) {
+		if (tableDefinition.isDefineConstraintOnCreate()) {
 			part = definePrimaryKey(tableDefinition);
 			if (StringUtils.isNotBlank(part)) {
 				parts.add(part);
@@ -366,9 +350,9 @@ public abstract class Feature extends SQL92Criterion {
 			ddls.add(formatString(getAddTableCommentSqlString(), tableDefinition.getTableName(), tableDefinition.getComment()));
 		}
 
-		if (!tableDefinition.isDdlContainsConstraint()) {
-			part = defineAddPrimaryKey(tableDefinition);
-			ddls.add(part);
+		if (!tableDefinition.isDefineConstraintOnCreate()) {
+			ddls.addAll(defineAddPrimaryKey(tableDefinition));
+			
 			Iterator<String> iter = defineAddForeignKeys(tableDefinition, jdbcAdmin);
 			if (iter != null) {
 				for (; iter.hasNext();) {

@@ -13,7 +13,7 @@ public class ForeignKeyEditorImpl implements ForeignKeyEditor {
 	private final StandardForeignKeyDefinition foreignKeyDefinition;
 
 	ForeignKeyEditorImpl(TableEditor tableEditor, String propertyName, Class<?> refMappedClass, String refMappedProperty) {
-		this.foreignKeyDefinition = new StandardForeignKeyDefinition(tableEditor.getTableDefinition().getColumn(propertyName),
+		this.foreignKeyDefinition = new StandardForeignKeyDefinition(tableEditor.getTableDefinition().getColumnDefinition(propertyName),
 				refMappedClass, refMappedProperty);
 	}
 

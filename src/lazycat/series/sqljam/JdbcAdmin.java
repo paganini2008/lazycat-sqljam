@@ -1,6 +1,5 @@
 package lazycat.series.sqljam;
 
-import lazycat.series.jdbc.TransactionIsolationLevel;
 import lazycat.series.sqljam.feature.Feature;
 
 /**
@@ -11,48 +10,36 @@ import lazycat.series.sqljam.feature.Feature;
  */
 public interface JdbcAdmin {
 
-	void registerDdlResolver(AutoDdl autoDdl, DdlResolver ddlResolver);
+	Configuration getConfiguration();
+
+	void setFeatureFactory(FeatureFactory featureFactory);
+
+	void setFeature(Feature feature);
+
+	Feature getFeature();
 
 	boolean tableExists(Class<?> mappedClass);
 
-	void updateTable(Class<?> mappedClass);
+	void truncateTable(Class<?> mappedClass);
+
+	void exportTable(Class<?> mappedClass, String path);
+
+	void alterTable(Class<?> mappedClass);
 
 	void createTable(Class<?> mappedClass);
 
 	void dropTable(Class<?> mappedClass);
 
 	void validateTable(Class<?> mappedClass);
-
+	
 	void resolve(Class<?> mappedClass);
 
 	void resolve();
 
 	ConnectionProvider getConnectionProvider();
 
-	Configuration getConfiguration();
+	SessionFactory buildSessionEngine();
 
-	TransactionIsolationLevel getDefaultTransactionIsolationLevel();
-
-	String getDatabaseProductName();
-
-	String getDatabaseProductVersion();
-
-	int getDatabaseMinorVersion();
-
-	int getDatabaseMajorVersion();
-
-	public String getDriverName();
-
-	public String getDriverVersion();
-
-	public int getDriverMinorVersion();
-
-	public int getDriverMajorVersion();
-
-	Feature getDefaultFeature();
-
-	SessionFactory buildSessionEngine(TransactionIsolationLevel transactionIsolationLevel, boolean autoCommit);
-
-	void closeConnections();
+	void releaseConnections();
 
 }

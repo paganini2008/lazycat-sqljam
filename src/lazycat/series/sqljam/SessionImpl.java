@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import lazycat.series.beans.PropertyUtils;
-import lazycat.series.cache.Cache;
-import lazycat.series.cache.LruCache;
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.sqljam.expression.Fields;
+import lazycat.series.sqljam.expression.Expressions;
+import lazycat.series.sqljam.expression.ID;
 import lazycat.series.sqljam.expression.Identifier;
-import lazycat.series.sqljam.expression.SqlParameterExpression;
 import lazycat.series.sqljam.query.Query;
+import lazycat.series.sqljam.query.QueryImpl;
 import lazycat.series.sqljam.transcation.Transaction;
 import lazycat.series.sqljam.update.CascadeDelete;
 import lazycat.series.sqljam.update.Delete;
@@ -30,20 +29,13 @@ import lazycat.series.sqljam.update.UpdateImpl;
  */
 public class SessionImpl implements Session {
 
-	public SessionImpl(Transaction transaction, SessionFactory sessionFactory) {
+	public SessionImpl(Transaction transaction, SessionAdmin sessionAdmin) {
 		this.transaction = transaction;
-		this.sessionFactory = sessionFactory;
-		Configuration configuration = sessionFactory.getConfiguration();
-		this.queryCache = new LruCache(configuration.getQueryCacheSize());
-		if (configuration.isUseSessionQueryResultCache()) {
-			this.queryResultCache = new LruCache(configuration.getSessionQueryResultCacheSize());
-		}
+		this.sessionAdmin = sessionAdmin;
 	}
 
 	private final Transaction transaction;
-	private final SessionFactory sessionFactory;
-	private final Cache queryCache;
-	private Cache queryResultCache;
+	private final SessionAdmin sessionAdmin;
 
 	public void commit() {
 		transaction.commit();
@@ -58,8 +50,7 @@ public class SessionImpl implements Session {
 		int effected = insert(object.getClass()).values(object).execute(keyStore);
 		if (effected > 0) {
 			for (String keyProperty : keyStore.getKeyNames()) {
-				PropertyUtils.setProperty(object, keyProperty, keyStore.getKey(keyProperty),
-						getSessionExecutor().getTypeConverter());
+				PropertyUtils.setProperty(object, keyProperty, keyStore.getKey(keyProperty), null);
 			}
 		}
 		return effected;
@@ -70,7 +61,7 @@ public class SessionImpl implements Session {
 	}
 
 	public <T> T get(Serializable id, Class<T> mappedClass) {
-		return query(mappedClass).filter(new SqlParameterExpression(Fields.ID, id)).first();
+		return query(mappedClass).filter(Expressions.eq(ID.THIS, id)).first();
 	}
 
 	public int delete(Object object) {
@@ -78,47 +69,47 @@ public class SessionImpl implements Session {
 	}
 
 	public int delete(Object object, boolean cascade) {
-		return delete(object.getClass(), "this", cascade).filter(Identifier.create(object)).execute();
+		return delete(object.getClass(), ROOT_ALIAS, cascade).filter(Identifier.create(object)).execute();
 	}
 
 	public <T> T getResult(Executable query, Class<T> requiredType) {
-		return getSessionExecutor().getResult(transaction, query, requiredType);
+		return sessionAdmin.getSessionExecutor().getResult(transaction, query, requiredType);
 	}
 
 	public <T> T getResult(String sql, Object[] parameters, JdbcType[] jdbcTypes, Class<T> requiredType) {
-		return getSessionExecutor().getResult(transaction, sql, parameters, jdbcTypes, requiredType);
+		return sessionAdmin.getSessionExecutor().getResult(transaction, sql, parameters, jdbcTypes, requiredType);
 	}
 
 	public <T> T first(Executable query, Class<T> objectClass) {
-		return getSessionExecutor().first(transaction, query, objectClass);
+		return sessionAdmin.getSessionExecutor().first(transaction, query, objectClass);
 	}
 
 	public <T> Iterator<T> iterator(Executable query, Class<T> beanClass) {
-		return getSessionExecutor().iterator(transaction, query, beanClass);
+		return sessionAdmin.getSessionExecutor().iterator(transaction, query, beanClass);
 	}
 
 	public <T> Iterator<Map<String, Object>> iterator(Executable query) {
-		return getSessionExecutor().iterator(transaction, query);
+		return sessionAdmin.getSessionExecutor().iterator(transaction, query);
 	}
 
 	public <T> List<T> list(Executable query, Class<T> objectClass) {
-		return getSessionExecutor().list(transaction, query, objectClass);
+		return sessionAdmin.getSessionExecutor().list(transaction, query, objectClass);
 	}
 
 	public <T> List<Map<String, Object>> list(Executable query) {
-		return getSessionExecutor().list(transaction, query);
+		return sessionAdmin.getSessionExecutor().list(transaction, query);
 	}
 
 	public int batch(Executable executable) {
-		return getSessionExecutor().batch(transaction, executable);
+		return sessionAdmin.getSessionExecutor().batch(transaction, executable);
 	}
 
 	public int execute(Executable executable) {
-		return getSessionExecutor().update(transaction, executable);
+		return sessionAdmin.getSessionExecutor().update(transaction, executable);
 	}
 
 	public int execute(Executable executable, KeyStore keyStore) {
-		return getSessionExecutor().update(transaction, executable, keyStore);
+		return sessionAdmin.getSessionExecutor().update(transaction, executable, keyStore);
 	}
 
 	public Insert insert(Class<?> mappedClass) {
@@ -134,7 +125,7 @@ public class SessionImpl implements Session {
 	}
 
 	public Delete delete(Class<?> mappedClass) {
-		return delete(mappedClass, "this");
+		return delete(mappedClass, ROOT_ALIAS);
 	}
 
 	public Delete delete(Class<?> mappedClass, String tableAlias) {
@@ -146,60 +137,39 @@ public class SessionImpl implements Session {
 	}
 
 	public Query query(Class<?> mappedClass, String tableAlias) {
-		return getSessionFactory().getConfiguration().getFeature().createQueryExecutor(this, mappedClass, tableAlias);
+		return new QueryImpl(this, mappedClass, tableAlias);
 	}
 
 	public Query query(Class<?> mappedClass) {
-		return query(mappedClass, "this");
+		return query(mappedClass, ROOT_ALIAS);
 	}
 
 	public Query query(Query source, String tableAlias) {
-		return getSessionFactory().getConfiguration().getFeature().createQueryExecutor(this, source, tableAlias);
+		return new QueryImpl(this, source, tableAlias);
 	}
 
-	public Query namedQuery(String name) {
-		return (Query) queryCache.getObject(name);
+	public Query query(String name) {
+		return (Query) sessionAdmin.getQueryCache().getObject(name);
 	}
 
-	public Object getQueryResult(String name) {
-		return queryResultCache.getObject(name);
+	public KeyStore keyStore(Class<?> mappedClass) {
+		return sessionAdmin.getSessionExecutor().keyStore(mappedClass);
+	}
+
+	public int executeSql(String sql, Object[] arguments) {
+		return sessionAdmin.getSessionExecutor().update(transaction, sql, arguments);
+	}
+
+	public void cache(String name, Query query) {
+		sessionAdmin.getQueryCache().putObject(name, query);
 	}
 
 	public void close() {
 		transaction.close();
-		((SessionEngine) sessionFactory).dispose();
 	}
 
-	public KeyStore keyStore(Class<?> mappedClass) {
-		return getSessionExecutor().keyStore(mappedClass);
-	}
-
-	public int executeSql(String sql, Object[] arguments) {
-		return getSessionExecutor().update(transaction, sql, arguments);
-	}
-
-	public void addCache(String name, Query query) {
-		queryCache.putObject(name, query);
-	}
-
-	private SessionExecutor getSessionExecutor() {
-		return getSessionFactory().getSessionExecutor();
-	}
-
-	public SessionFactory getSessionFactory() {
-		return sessionFactory;
-	}
-
-	@Override
-	public Cache getCache() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Cache getQueryCache() {
-		// TODO Auto-generated method stub
-		return null;
+	public SessionAdmin getSessionAdmin() {
+		return sessionAdmin;
 	}
 
 }

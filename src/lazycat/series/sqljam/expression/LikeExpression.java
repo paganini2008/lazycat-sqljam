@@ -3,17 +3,18 @@ package lazycat.series.sqljam.expression;
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
- * Like expression
+ * LikeExpression
  * 
  * @author Fred Feng
  * @version 1.0
  */
 public class LikeExpression implements Expression {
 
-	private final Expression expression;
+	private final Field field;
 	private final String like;
 	private MatchMode matchMode = MatchMode.ANY_WHERE;
 	private Character escapeChar;
@@ -49,11 +50,11 @@ public class LikeExpression implements Expression {
 	}
 
 	public LikeExpression(String propertyName, String like, MatchMode matchMode) {
-		this(new Column(propertyName), like, matchMode);
+		this(new StandardColumn(propertyName), like, matchMode);
 	}
 
-	public LikeExpression(Expression expression, String like, MatchMode matchMode) {
-		this.expression = expression;
+	public LikeExpression(Field field, String like, MatchMode matchMode) {
+		this.field = field;
 		this.like = like;
 		this.matchMode = matchMode;
 	}
@@ -68,11 +69,11 @@ public class LikeExpression implements Expression {
 		return this;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		return configuration.getFeature().like(expression.getText(translator, configuration), like, escapeChar);
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		return configuration.getJdbcAdmin().getFeature().like(field.getText(session,translator, configuration), like, escapeChar);
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public void setParameter(Session session,Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
 		parameterCollector.setParameter(matchMode.toMatchString(like), JdbcType.VARCHAR);
 	}
 

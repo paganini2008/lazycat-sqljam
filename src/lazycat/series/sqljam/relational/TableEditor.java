@@ -13,9 +13,11 @@ import lazycat.series.sqljam.AutoDdl;
  */
 public interface TableEditor {
 
-	TableEditor setAutoDdl(AutoDdl autoDdl);
+	TableEditor setName(String name);
 
-	TableEditor setDdlContainsConstraint(boolean ddlContainsConstraint);
+	TableEditor setName(String schema, String name);
+
+	TableEditor setDefineConstraintOnCreate(boolean defineConstraintOnCreate);
 
 	ColumnEditor addColumn(String propertyName, Type javaType, String columnName, JdbcType jdbcType);
 
@@ -27,10 +29,16 @@ public interface TableEditor {
 
 	UniqueKeyEditor addUniqueKey(String propertyName);
 
-	TableEditor useIdentifierGenerator(String propertyName, String generatorName);
+	DefaultEditor addDefault(String propertyName);
+
+	TableEditor useGenerator(String propertyName, String generatorType, String name);
+
+	TableEditor useGenerator(String propertyName, String generatorType);
 
 	TableEditor useSequence(String propertyName, String sequenceName);
 
 	TableDefinition getTableDefinition();
+
+	TableEditor setAutoDdl(AutoDdl autoDdl);
 
 }

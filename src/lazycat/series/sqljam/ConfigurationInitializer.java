@@ -8,6 +8,6 @@ package lazycat.series.sqljam;
  */
 public interface ConfigurationInitializer {
 
-	void configure(Configuration configuration);
+	void configure(Configuration configuration, SessionOptions sessionOptions);
 
 }

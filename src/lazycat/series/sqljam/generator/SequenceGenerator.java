@@ -1,7 +1,7 @@
 package lazycat.series.sqljam.generator;
 
+import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.Session;
-import lazycat.series.sqljam.feature.Feature;
 
 /**
  * SequenceGenerator
@@ -11,22 +11,20 @@ import lazycat.series.sqljam.feature.Feature;
  */
 public class SequenceGenerator implements Generator {
 
+	public static final String NAME = "sequence";
+
 	private final String generator;
 
 	public SequenceGenerator(String generator) {
 		this.generator = generator;
 	}
 
-	public Object getValue(Feature feature, Session session) {
-		return null;
+	public Object postValue(Session session, Configuration configuration) {
+		return session.getResult(configuration.getJdbcAdmin().getFeature().selectNextval(generator), null, null, Integer.class);
 	}
 
-	public boolean hasValue(Feature feature, Session session) {
-		return false;
+	public boolean hasValue(Session session, Configuration configuration) {
+		Object result = session.getResult(configuration.getJdbcAdmin().getFeature().selectCurrval(generator), null, null, Integer.class);
+		return result != null;
 	}
-
-	public String getText(Feature feature, Session session) {
-		return feature.nextval(generator);
-	}
-
 }

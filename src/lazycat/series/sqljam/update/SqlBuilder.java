@@ -10,4 +10,9 @@ import lazycat.series.sqljam.Executable;
  * @version 1.0
  */
 public interface SqlBuilder extends Executable, Context{
+	
+	SqlBuilder copy();
+	
 }
+
+

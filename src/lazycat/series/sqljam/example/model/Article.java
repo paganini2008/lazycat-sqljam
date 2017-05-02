@@ -6,10 +6,11 @@ import java.util.Date;
 import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.sqljam.AutoDdl;
 import lazycat.series.sqljam.annotation.Column;
+import lazycat.series.sqljam.annotation.Generator;
 import lazycat.series.sqljam.annotation.PrimaryKey;
 import lazycat.series.sqljam.annotation.Table;
 
-@Table(name = "tb_article", autoDdl = AutoDdl.UPDATE, comment = "This is a article table.", ddlContainsConstraint = true)
+@Table(name = "tb_article", autoDdl = AutoDdl.UPDATE, comment = "This is a article table.", defineConstraintOnCreate = true)
 public class Article {
 
 	@PrimaryKey
@@ -28,7 +29,9 @@ public class Article {
 	private String url;
 	@Column
 	private float score;
-	@Column(comment = "最后更新时间", defaultValue = "current_timestamp")
+	
+	@Generator(generator = "now")
+	@Column(comment = "最后更新时间")
 	private Date lastModified;
 
 	@Column

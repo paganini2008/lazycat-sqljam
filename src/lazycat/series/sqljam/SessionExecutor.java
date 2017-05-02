@@ -4,9 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import lazycat.series.converter.TypeConverter;
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.jdbc.TypeHandlerRegistry;
 import lazycat.series.sqljam.transcation.Transaction;
 
 /**
@@ -27,8 +25,7 @@ public interface SessionExecutor {
 
 	<T> Iterator<T> iterator(Transaction transaction, Executable query, Class<T> objectClass);
 
-	<T> Iterator<T> iterator(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes,
-			Class<T> objectClass);
+	<T> Iterator<T> iterator(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, Class<T> objectClass);
 
 	Iterator<Map<String, Object>> iterator(Transaction transaction, Executable query);
 
@@ -56,8 +53,5 @@ public interface SessionExecutor {
 
 	int update(Transaction transaction, String sql, Object[] parameters);
 
-	TypeConverter getTypeConverter();
-
-	TypeHandlerRegistry getTypeHandlerRegistry();
-
+	Configuration getConfiguration();
 }

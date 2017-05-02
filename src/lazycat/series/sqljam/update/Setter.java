@@ -16,6 +16,7 @@ import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.PropertySelector;
 import lazycat.series.sqljam.PropertySelectors;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
 import lazycat.series.sqljam.relational.ColumnDefinition;
@@ -29,7 +30,7 @@ import lazycat.series.sqljam.relational.ColumnDefinition;
 public class Setter implements Expression {
 
 	private final Object object;
-	private final Map<String, Property<?>> cache = new HashMap<String, Property<?>>();
+	private final Map<String, Property> cache = new HashMap<String, Property>();
 
 	public Setter(Object object) {
 		Assert.isNull(object, "Null example");
@@ -51,10 +52,10 @@ public class Setter implements Expression {
 		return this;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		String tableAlias = translator.getTableAlias(null);
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		String tableAlias = translator.getTableAlias();
 		String prefix = StringUtils.isNotBlank(tableAlias) ? tableAlias + "." : "";
-		ColumnDefinition[] definitions = translator.getColumns(null, configuration.getMetaData());
+		ColumnDefinition[] definitions = translator.getColumns(null, configuration);
 		List<String> list = new ArrayList<String>();
 		for (ColumnDefinition cd : definitions) {
 			if (exludeProperties.contains(cd.getMappedProperty())) {
@@ -65,11 +66,11 @@ public class Setter implements Expression {
 				list.add(prefix.concat(cd.getColumnName()).concat("=?"));
 			}
 		}
-		return configuration.getFeature().set(CollectionUtils.join(list, ","));
+		return configuration.getJdbcAdmin().getFeature().set(CollectionUtils.join(list, ", "));
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		ColumnDefinition[] definitions = translator.getColumns(null, configuration.getMetaData());
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+		ColumnDefinition[] definitions = translator.getColumns(null, configuration);
 		for (ColumnDefinition cd : definitions) {
 			if (exludeProperties.contains(cd.getMappedProperty())) {
 				continue;
@@ -82,7 +83,7 @@ public class Setter implements Expression {
 	}
 
 	protected Object getPropertyValue(Object object, ColumnDefinition cd) {
-		Property<?> property = cache.get(cd.getMappedProperty());
+		Property property = cache.get(cd.getMappedProperty());
 		if (property == null) {
 			cache.put(cd.getMappedProperty(), Property.getProperty(cd.getMappedProperty(), (Class<?>) cd.getJavaType()));
 			property = cache.get(cd.getMappedProperty());

@@ -8,13 +8,13 @@ import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ConfigurationInitializer;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.SessionEngine;
+import lazycat.series.sqljam.SessionOptions;
 import lazycat.series.sqljam.example.model.Article;
 import lazycat.series.sqljam.example.model.ArticleCopy;
 import lazycat.series.sqljam.example.model.Order;
 import lazycat.series.sqljam.example.model.User;
-import lazycat.series.sqljam.expression.Column;
 import lazycat.series.sqljam.expression.Expressions;
-import lazycat.series.sqljam.expression.Fields;
+import lazycat.series.sqljam.expression.Functions;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.update.Batch;
 import lazycat.series.sqljam.update.Delete;
@@ -29,17 +29,10 @@ public class TestMySql {
 	public static void main1(String[] args) {
 		String driverClassName = "com.mysql.jdbc.Driver";
 		String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
-		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "root", "12345678", null, true,
-				new ConfigurationInitializer() {
-					public void configure(Configuration configuration) {
-						configuration.scanPackage("lazycat.series.sqljam.example.model");
-						// configuration.mapClass(Article.class);
-					}
-				});
-		Session session = sessionEngine.openSession();
+		Session session = openSession();
 		System.out.println(session);
 	}
-	
+
 	public static void test12() {
 		Session session = openSession();
 		Article article = new Article();
@@ -72,14 +65,7 @@ public class TestMySql {
 
 		String driverClassName = "com.mysql.jdbc.Driver";
 		String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
-		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "root", "12345678", null, true,
-				new ConfigurationInitializer() {
-					public void configure(Configuration configuration) {
-						configuration.scanPackage("lazycat.series.sqljam.example.model");
-						// configuration.mapClass(Article.class);
-					}
-				});
-		Session session = sessionEngine.openSession();
+		Session session = openSession();
 		System.out.println(session);
 
 		Batch batch = session.insert(Article.class).batch();
@@ -129,7 +115,7 @@ public class TestMySql {
 	public static void main3(String[] args) {
 		Session session = openSession();
 		Query query = session.query(Article.class);
-		//query.filter(Expressions.gte("score", 100));
+		// query.filter(Expressions.gte("score", 100));
 		query.desc("author");
 		System.out.println(query.rows());
 		List<Article> list = query.limit(5).lock().list();
@@ -154,14 +140,7 @@ public class TestMySql {
 
 		String driverClassName = "com.mysql.jdbc.Driver";
 		String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
-		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "root", "12345678", null, true,
-				new ConfigurationInitializer() {
-					public void configure(Configuration configuration) {
-						configuration.scanPackage("lazycat.series.sqljam.example.model");
-						// configuration.mapClass(Article.class);
-					}
-				});
-		Session session = sessionEngine.openSession();
+		Session session = openSession();
 		System.out.println(session);
 
 		Query query = session.query(Article.class);
@@ -183,14 +162,7 @@ public class TestMySql {
 
 		String driverClassName = "com.mysql.jdbc.Driver";
 		String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
-		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "root", "12345678", null, true,
-				new ConfigurationInitializer() {
-					public void configure(Configuration configuration) {
-						configuration.scanPackage("lazycat.series.sqljam.example.model");
-						// configuration.mapClass(Article.class);
-					}
-				});
-		Session session = sessionEngine.openSession();
+		Session session = openSession();
 		System.out.println(session);
 
 		Query query = session.query(Article.class);
@@ -221,13 +193,13 @@ public class TestMySql {
 		// System.out.println(a);
 		// }
 		List<Article> list = session.query(Article.class).group("title").max("score", "score")
-				.column(Fields.function("left", new Column("title"), 2), "title").list();
+				.column(Functions.func("left", "'title'", 2).as("title")).list();
 		for (Article a : list) {
 			System.out.println(a);
 		}
 		System.out.println("Over");
 	}
-  
+
 	public static void main7(String[] args) {
 		Session session = openSession();
 		Delete delete = session.delete(Article.class);
@@ -290,30 +262,27 @@ public class TestMySql {
 		order.setPrice(new BigDecimal("201.678"));
 		order.setUid(6);
 		session.save(order);
-		
-		 
+
 		session.commit();
 	}
 
 	private static Session openSession() {
 		String driverClassName = "com.mysql.jdbc.Driver";
 		String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
-		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "root", "12345678", null, false,
-				new ConfigurationInitializer() {
-					public void configure(Configuration configuration) {
-						configuration.scanPackage("lazycat.series.sqljam.example.model");
-						// configuration.mapClass(Article.class);
-					}
-				});
+		SessionEngine sessionEngine = new SessionEngine(driverClassName, jdbcUrl, "root", "root", new ConfigurationInitializer() {
+			public void configure(Configuration configuration, SessionOptions sessionOptions) {
+				configuration.scanPackages("lazycat.series.sqljam.example.model");
+			}
+		});
 		Session session = sessionEngine.openSession();
 		System.out.println(session);
 		return session;
 	}
 
 	public static void main(String[] args) throws IOException {
-		main3(args);
+		openSession();
 		System.in.read();
-		System.out.println("TestMySql.main()"); 
+		System.out.println("TestMySql.main()");
 	}
 
 }

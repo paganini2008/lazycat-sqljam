@@ -17,8 +17,6 @@ import lazycat.series.sqljam.AutoDdl;
 @Target(ElementType.TYPE)
 public @interface Table {
 
-	String catalog() default "";
-
 	String schema() default "";
 
 	String name() default "";
@@ -27,6 +25,6 @@ public @interface Table {
 
 	String comment() default "";
 
-	boolean ddlContainsConstraint() default true;
+	boolean defineConstraintOnCreate() default true;
 
 }

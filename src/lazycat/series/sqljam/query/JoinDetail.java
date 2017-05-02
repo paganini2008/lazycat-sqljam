@@ -2,8 +2,8 @@ package lazycat.series.sqljam.query;
 
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.JoinType;
-import lazycat.series.sqljam.MetaData;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
 import lazycat.series.sqljam.feature.Feature;
@@ -28,22 +28,22 @@ public class JoinDetail implements Join {
 		this.last = last;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		final Feature feature = configuration.getFeature();
-		String str = " "
-				+ joinType.sqlText(feature, feature.on(source.getText(configuration), expression.getText(translator, configuration)));
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		final Feature feature = configuration.getJdbcAdmin().getFeature();
+		String str = " " + joinType.getText(feature,
+				feature.on(source.getText(configuration), expression.getText(session, translator, configuration)));
 		if (last != null) {
-			return last.getText(translator, configuration) + str;
+			return last.getText(session, translator, configuration) + str;
 		}
 		return str;
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
 		if (last != null) {
-			last.setParameter(translator, parameterCollector, configuration);
+			last.setParameter(session, translator, parameterCollector, configuration);
 		}
 		source.setParameters(parameterCollector, configuration);
-		expression.setParameter(translator, parameterCollector, configuration);
+		expression.setParameter(session, translator, parameterCollector, configuration);
 	}
 
 	public Join join(From source, JoinType joinType, Expression on) {
@@ -57,7 +57,7 @@ public class JoinDetail implements Join {
 		return 1;
 	}
 
-	public Class<?> findMappedClass(String tableAlias, MetaData metaData) {
+	public Class<?> findMappedClass(String tableAlias, Configuration metaData) {
 		Class<?> result = source.findMappedClass(tableAlias, metaData);
 		if (result != null) {
 			return result;

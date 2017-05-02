@@ -10,17 +10,17 @@ import lazycat.series.sqljam.Configuration;
  */
 public class LockMode {
 
-	private static final LockMode WAIT = new LockMode(-1);
-	private static final LockMode NO_WAIT = new LockMode(0);
+	public static final LockMode WAIT = new LockMode(-1);
+	public static final LockMode NO_WAIT = new LockMode(0);
 
 	private final int timeout;
 
-	public LockMode(int timeout) {
+	LockMode(int timeout) {
 		this.timeout = timeout;
 	}
 
 	public String getText(Configuration configuration) {
-		return configuration.getFeature().forUpdate(timeout);
+		return configuration.getJdbcAdmin().getFeature().forUpdate(timeout);
 	}
 
 	public static LockMode lock(int timeout) {

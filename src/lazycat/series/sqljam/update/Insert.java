@@ -27,9 +27,9 @@ public interface Insert extends Executor {
 	Insert values(Expression expression);
 
 	Batch batch();
-	
+
 	int batch(Batch batch);
-	
+
 	int execute(KeyStore keyStore);
 
 }

@@ -1,8 +1,5 @@
 package lazycat.series.sqljam;
 
-import lazycat.series.concurrent.ThreadPool;
-import lazycat.series.sqljam.transcation.TransactionFactory;
-
 /**
  * SessionFactory
  * 
@@ -11,18 +8,10 @@ import lazycat.series.sqljam.transcation.TransactionFactory;
  */
 public interface SessionFactory {
 
-	void setTransactionFactory(TransactionFactory transactionFactory);
-
-	SessionExecutor getSessionExecutor();
-	
-	ThreadPool getThreadPool();
+	JdbcAdmin getJdbcAdmin();
 
 	Session openSession();
-	
-	Configuration getConfiguration();
-	
+
 	void destroy();
-	
-	
 
 }

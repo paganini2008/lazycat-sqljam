@@ -11,14 +11,16 @@ import java.util.Set;
 import lazycat.series.beans.Property;
 import lazycat.series.collection.CollectionUtils;
 import lazycat.series.lang.Assert;
-import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.NullValueException;
 import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.expression.Data;
 import lazycat.series.sqljam.expression.Expression;
 import lazycat.series.sqljam.generator.Generator;
 import lazycat.series.sqljam.relational.ColumnDefinition;
+import lazycat.series.sqljam.relational.DefaultDefinition;
 
 /**
  * Values
@@ -31,22 +33,16 @@ public class Values implements Expression {
 	private final Object object;
 
 	public Values(Object object) {
-		Assert.isNull(object, "Null example");
+		Assert.isNull(object, "Null example.");
 		this.object = object;
 	}
 
 	private final Set<String> excludeProperties = new HashSet<String>();
-	private final Map<String, Property<?>> cache = new HashMap<String, Property<?>>();
+	private final Map<String, Property> cache = new HashMap<String, Property>();
 	private boolean ignoreAutocrement = true;
-	private boolean ignoreDefaultValue = true;
 
 	public Values ignoreAutocrement(boolean ignoreAutocrement) {
 		this.ignoreAutocrement = ignoreAutocrement;
-		return this;
-	}
-
-	public Values ignoreDefaultValue(boolean ignoreDefaultValue) {
-		this.ignoreDefaultValue = ignoreDefaultValue;
 		return this;
 	}
 
@@ -57,37 +53,27 @@ public class Values implements Expression {
 		return this;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
 		final List<String> columns = new ArrayList<String>();
 		final List<String> args = new ArrayList<String>();
-		ColumnDefinition[] definitions = translator.getColumns(null, configuration.getMetaData());
-		for (ColumnDefinition cd : definitions) {
-			if (excludeProperties.contains(cd.getMappedProperty())) {
+		ColumnDefinition[] columnDefinitions = translator.getColumns(null, configuration);
+		for (ColumnDefinition columnDefinition : columnDefinitions) {
+			if (excludeProperties.contains(columnDefinition.getMappedProperty())) {
 				continue;
 			}
-			if (ignoreAutocrement && cd.isAutoIncrement()) {
+			if (ignoreAutocrement && columnDefinition.isAutoIncrement()) {
 				continue;
 			}
-			if (ignoreDefaultValue && StringUtils.isNotBlank(cd.getDefaultValue())) {
-				continue;
-			}
-			if (cd.getIdentifierGenerator() != null) {
-				String text = cd.getIdentifierGenerator().getText(configuration.getFeature(), translator.getCurrentSession());
-				if (StringUtils.isNotBlank(text)) {
-					args.add(text);
-					columns.add(cd.getColumnName());
-				}
+			DefaultDefinition defaultDefinition = columnDefinition.getTableDefinition()
+					.getDefaultDefinition(columnDefinition.getMappedProperty());
+			if (defaultDefinition != null) {
+				String result = defaultDefinition.getValue();
+				Data data = defaultDefinition.getDataType().createData(result);
+				args.add(data.getText(session, translator, configuration));
 			} else {
-				Object value = getPropertyValue(object, cd);
-				if (value != null || cd.isNullable()) {
-					args.add("?");
-				} else {
-					if (StringUtils.isNotBlank(cd.getInsertSql())) {
-						args.add(cd.getInsertSql());
-					}
-				}
-				columns.add(cd.getColumnName());
+				args.add("?");
 			}
+			columns.add(columnDefinition.getColumnName());
 		}
 		StringBuilder text = new StringBuilder();
 		text.append(" (");
@@ -98,43 +84,39 @@ public class Values implements Expression {
 		return text.toString();
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		ColumnDefinition[] definitions = translator.getColumns(null, configuration.getMetaData());
-		for (ColumnDefinition cd : definitions) {
-			if (excludeProperties.contains(cd.getMappedProperty())) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+		ColumnDefinition[] columnDefinitions = translator.getColumns(null, configuration);
+		for (ColumnDefinition columnDefinition : columnDefinitions) {
+			if (excludeProperties.contains(columnDefinition.getMappedProperty())) {
 				continue;
 			}
-			if (ignoreAutocrement && cd.isAutoIncrement()) {
+			if (ignoreAutocrement && columnDefinition.isAutoIncrement()) {
 				continue;
 			}
-			if (ignoreDefaultValue && StringUtils.isNotBlank(cd.getDefaultValue())) {
-				continue;
-			}
-			Object value = null;
-			Generator identifier = cd.getIdentifierGenerator();
-			if (identifier != null && identifier.hasValue(configuration.getFeature(), translator.getCurrentSession())) {
-				value = identifier.getValue(configuration.getFeature(), translator.getCurrentSession());
-			} else {
-				value = getPropertyValue(object, cd);
-			}
-			if (value != null || cd.isNullable()) {
-				parameterCollector.setParameter(value, cd.getJdbcType());
-			} else {
-				if (identifier != null && identifier.hasValue(configuration.getFeature(), translator.getCurrentSession()) == false) {
-					continue;
+			Object value = getPropertyValue(object, columnDefinition);
+			if (value == null) {
+				Generator generator = columnDefinition.getTableDefinition().getGenerator(columnDefinition.getMappedProperty());
+				if (generator != null) {
+					value = generator.postValue(session, configuration);
 				}
-				if (translator.isPrimaryKey(null, cd.getMappedProperty(), configuration.getMetaData())) {
-					throw new NullValueException("PrimaryKey '" + cd.getMappedProperty() + "' must not be null.");
-				}
-				if (StringUtils.isBlank(cd.getDefaultValue())) {
-					throw new NullValueException("Property '" + cd.getMappedProperty() + "' must not be null.");
+			}
+			if (value != null || columnDefinition.isNullable()) {
+				parameterCollector.setParameter(value, columnDefinition.getJdbcType());
+			} else {
+				DefaultDefinition defaultDefinition = columnDefinition.getTableDefinition()
+						.getDefaultDefinition(columnDefinition.getMappedProperty());
+				if (defaultDefinition == null) {
+					if (columnDefinition.getTableDefinition().isPrimaryKey(columnDefinition.getMappedProperty())) {
+						throw new NullValueException("PrimaryKey '" + columnDefinition.getMappedProperty() + "' must not be null.");
+					}
+					throw new NullValueException("Property '" + columnDefinition.getMappedProperty() + "' must not be null.");
 				}
 			}
 		}
 	}
 
 	protected Object getPropertyValue(Object object, ColumnDefinition cd) {
-		Property<?> property = cache.get(cd.getMappedProperty());
+		Property property = cache.get(cd.getMappedProperty());
 		if (property == null) {
 			cache.put(cd.getMappedProperty(), Property.getProperty(cd.getMappedProperty(), (Class<?>) cd.getJavaType()));
 			property = cache.get(cd.getMappedProperty());

@@ -2,11 +2,11 @@ package lazycat.series.sqljam.update;
 
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ContextTranslator;
-import lazycat.series.sqljam.MetaData;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
+import lazycat.series.sqljam.expression.Field;
 import lazycat.series.sqljam.feature.Feature;
 import lazycat.series.sqljam.query.From;
 import lazycat.series.sqljam.query.Join;
@@ -21,53 +21,56 @@ import lazycat.series.sqljam.query.SimpleFrom;
 public class DeleteBuilder implements SqlBuilder {
 
 	DeleteBuilder(Session session, Class<?> mappedClass, String tableAlias) {
-		this.translator = new ContextTranslator(session, this);
+		this.translator = new ContextTranslator(this);
 		this.source = new SimpleFrom(mappedClass, tableAlias);
+		this.session = session;
 	}
 
 	private final Translator translator;
+	private final Session session;
 
-	Expression alias;
+	Field self;
 	From source;
 	Join join;
 	Expression where;
 
 	public String getText(Configuration configuration) {
-		final Feature feature = configuration.getFeature();
+		final Feature feature = configuration.getJdbcAdmin().getFeature();
 		StringBuilder text = new StringBuilder();
 		text.append(feature.delete());
-		if (alias != null) {
-			text.append(alias.getText(translator, configuration));
+		if (self != null) {
+			text.append(self.getText(session, translator, configuration));
 		}
 		text.append(feature.from(source.getText(configuration)));
 		if (join != null) {
-			text.append(join.getText(translator, configuration));
+			text.append(join.getText(session, translator, configuration));
 		}
 		if (where != null) {
-			text.append(feature.where(where.getText(translator, configuration)));
+			text.append(feature.where(where.getText(session, translator, configuration)));
 		}
 		return text.toString();
 	}
 
 	public void setParameters(ParameterCollector parameterCollector, Configuration configuration) {
-		if (alias != null) {
-			alias.setParameter(translator, parameterCollector, configuration);
-		}
 		source.setParameters(parameterCollector, configuration);
 		if (join != null) {
-			join.setParameter(translator, parameterCollector, configuration);
+			join.setParameter(session, translator, parameterCollector, configuration);
 		}
 		if (where != null) {
-			where.setParameter(translator, parameterCollector, configuration);
+			where.setParameter(session, translator, parameterCollector, configuration);
 		}
 	}
 
-	public Class<?> findMappedClass(String tableAlias, MetaData metaData) {
-		return source.findMappedClass(tableAlias, metaData);
+	public Class<?> findMappedClass(String tableAlias, Configuration configuration) {
+		return source.findMappedClass(tableAlias, configuration);
 	}
 
 	public String getTableAlias() {
 		return source.getTableAlias();
+	}
+
+	public SqlBuilder copy() {
+		return null;
 	}
 
 }

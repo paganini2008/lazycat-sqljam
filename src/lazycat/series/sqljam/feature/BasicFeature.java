@@ -16,7 +16,7 @@ import lazycat.series.lang.StringUtils;
 import lazycat.series.reflect.ConstructorUtils;
 import lazycat.series.reflect.ReflectiveInvocationException;
 import lazycat.series.sqljam.JdbcAdmin;
-import lazycat.series.sqljam.JdbcFault;
+import lazycat.series.sqljam.JdbcException;
 import lazycat.series.sqljam.JdbcUtils;
 import lazycat.series.sqljam.SessionException;
 import lazycat.series.sqljam.query.Query;
@@ -116,15 +116,14 @@ public abstract class BasicFeature extends Feature {
 	protected boolean isForeignKeyModified(ForeignKeyDefinition fkDefinition, JdbcAdmin jdbcAdmin, DatabaseMetaData dbmd) {
 		ColumnDefinition columnDefinition = fkDefinition.getColumnDefinition();
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
-		TableDefinition refTableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(fkDefinition.getRefMappedClass());
-		ColumnDefinition refColumnDefinition = jdbcAdmin.getConfiguration().getMetaData().getColumn(fkDefinition.getRefMappedClass(),
+		TableDefinition refTableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(fkDefinition.getRefMappedClass());
+		ColumnDefinition refColumnDefinition = jdbcAdmin.getConfiguration().getColumnDefinition(fkDefinition.getRefMappedClass(),
 				fkDefinition.getRefMappedProperty());
 		Iterator<Map<String, Object>> iter;
 		try {
-			iter = JdbcUtils.foreignKeyMetadataIterator(dbmd, refTableDefinition.getCatalog(), refTableDefinition.getSchema(),
-					refTableDefinition.getTableName());
+			iter = JdbcUtils.foreignKeyMetadataIterator(dbmd, null, refTableDefinition.getSchema(), refTableDefinition.getTableName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		}
 		Map<String, Object> metadata;
 		for (; iter.hasNext();) {
@@ -146,10 +145,9 @@ public abstract class BasicFeature extends Feature {
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		Iterator<Map<String, Object>> iter;
 		try {
-			iter = JdbcUtils.primaryKeyMetadataIterator(dbmd, tableDefinition.getCatalog(), tableDefinition.getSchema(),
-					tableDefinition.getTableName());
+			iter = JdbcUtils.primaryKeyMetadataIterator(dbmd, null, tableDefinition.getSchema(), tableDefinition.getTableName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		}
 		Map<String, Object> metadata;
 		for (; iter.hasNext();) {
@@ -169,10 +167,9 @@ public abstract class BasicFeature extends Feature {
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		Iterator<Map<String, Object>> iter;
 		try {
-			iter = JdbcUtils.uniqueKeyMetadataIterator(dbmd, tableDefinition.getCatalog(), tableDefinition.getSchema(),
-					tableDefinition.getTableName());
+			iter = JdbcUtils.uniqueKeyMetadataIterator(dbmd, null, tableDefinition.getSchema(), tableDefinition.getTableName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		}
 		Map<String, Object> metadata;
 		for (; iter.hasNext();) {
@@ -297,15 +294,15 @@ public abstract class BasicFeature extends Feature {
 	private String matchForeignKeyName(TableDefinition tableDefinition, String constaintName, List<ForeignKeyDefinition> fkDefinitions,
 			JdbcAdmin jdbcAdmin) {
 		ForeignKeyDefinition firstDefinition = ListUtils.getFirst(fkDefinitions);
-		TableDefinition refTableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(firstDefinition.getRefMappedClass());
+		TableDefinition refTableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(firstDefinition.getRefMappedClass());
 		if (StringUtils.isNotBlank(constaintName)) {
 			Connection connection = jdbcAdmin.getConnectionProvider().openConnectionImplicitly();
 			boolean constaintExists;
 			try {
-				constaintExists = JdbcUtils.foreignKeyExists(connection.getMetaData(), refTableDefinition.getCatalog(),
-						refTableDefinition.getSchema(), refTableDefinition.getTableName(), constaintName);
+				constaintExists = JdbcUtils.foreignKeyExists(connection.getMetaData(), null, refTableDefinition.getSchema(),
+						refTableDefinition.getTableName(), constaintName);
 			} catch (SQLException e) {
-				throw new JdbcFault(e);
+				throw new JdbcException(e);
 			} finally {
 				jdbcAdmin.getConnectionProvider().closeConnection(connection);
 			}
@@ -317,10 +314,10 @@ public abstract class BasicFeature extends Feature {
 		Connection connection = jdbcAdmin.getConnectionProvider().openConnectionImplicitly();
 		Iterator<Map<String, Object>> iterator;
 		try {
-			iterator = JdbcUtils.foreignKeyMetadataIterator(connection.getMetaData(), refTableDefinition.getCatalog(),
-					refTableDefinition.getSchema(), refTableDefinition.getTableName());
+			iterator = JdbcUtils.foreignKeyMetadataIterator(connection.getMetaData(), null, refTableDefinition.getSchema(),
+					refTableDefinition.getTableName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		} finally {
 			jdbcAdmin.getConnectionProvider().closeConnection(connection);
 		}
@@ -331,8 +328,8 @@ public abstract class BasicFeature extends Feature {
 				if (tableDefinition.getTableName().equals(metadata.get("FKTABLE_NAME"))
 						&& fkDefinition.getColumnDefinition().getColumnName().equals(metadata.get("FKCOLUMN_NAME"))
 						&& refTableDefinition.getTableName().equals(metadata.get("PKTABLE_NAME"))
-						&& jdbcAdmin.getConfiguration().getMetaData()
-								.getColumn(fkDefinition.getRefMappedClass(), fkDefinition.getRefMappedProperty()).getColumnName()
+						&& jdbcAdmin.getConfiguration()
+								.getColumnDefinition(fkDefinition.getRefMappedClass(), fkDefinition.getRefMappedProperty()).getColumnName()
 								.equals(metadata.get("PKCOLUMN_NAME"))) {
 					metadataList.add(metadata);
 				}
@@ -350,10 +347,10 @@ public abstract class BasicFeature extends Feature {
 			Connection connection = jdbcAdmin.getConnectionProvider().openConnectionImplicitly();
 			boolean constaintExists;
 			try {
-				constaintExists = JdbcUtils.primaryKeyExists(connection.getMetaData(), tableDefinition.getCatalog(),
-						tableDefinition.getSchema(), tableDefinition.getTableName(), constaintName);
+				constaintExists = JdbcUtils.primaryKeyExists(connection.getMetaData(), null, tableDefinition.getSchema(),
+						tableDefinition.getTableName(), constaintName);
 			} catch (SQLException e) {
-				throw new JdbcFault(e);
+				throw new JdbcException(e);
 			} finally {
 				jdbcAdmin.getConnectionProvider().closeConnection(connection);
 			}
@@ -365,10 +362,10 @@ public abstract class BasicFeature extends Feature {
 		Connection connection = jdbcAdmin.getConnectionProvider().openConnectionImplicitly();
 		Iterator<Map<String, Object>> iterator;
 		try {
-			iterator = JdbcUtils.primaryKeyMetadataIterator(connection.getMetaData(), tableDefinition.getCatalog(),
-					tableDefinition.getSchema(), tableDefinition.getTableName());
+			iterator = JdbcUtils.primaryKeyMetadataIterator(connection.getMetaData(), null, tableDefinition.getSchema(),
+					tableDefinition.getTableName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		} finally {
 			jdbcAdmin.getConnectionProvider().closeConnection(connection);
 		}
@@ -395,10 +392,10 @@ public abstract class BasicFeature extends Feature {
 			Connection connection = jdbcAdmin.getConnectionProvider().openConnectionImplicitly();
 			boolean constaintExists;
 			try {
-				constaintExists = JdbcUtils.foreignKeyExists(connection.getMetaData(), tableDefinition.getCatalog(),
-						tableDefinition.getSchema(), tableDefinition.getTableName(), constaintName);
+				constaintExists = JdbcUtils.foreignKeyExists(connection.getMetaData(), null, tableDefinition.getSchema(),
+						tableDefinition.getTableName(), constaintName);
 			} catch (SQLException e) {
-				throw new JdbcFault(e);
+				throw new JdbcException(e);
 			} finally {
 				jdbcAdmin.getConnectionProvider().closeConnection(connection);
 			}
@@ -410,10 +407,10 @@ public abstract class BasicFeature extends Feature {
 		Connection connection = jdbcAdmin.getConnectionProvider().openConnectionImplicitly();
 		Iterator<Map<String, Object>> iterator;
 		try {
-			iterator = JdbcUtils.uniqueKeyMetadataIterator(connection.getMetaData(), tableDefinition.getCatalog(),
-					tableDefinition.getSchema(), tableDefinition.getTableName());
+			iterator = JdbcUtils.uniqueKeyMetadataIterator(connection.getMetaData(), null, tableDefinition.getSchema(),
+					tableDefinition.getTableName());
 		} catch (SQLException e) {
-			throw new JdbcFault(e);
+			throw new JdbcException(e);
 		} finally {
 			jdbcAdmin.getConnectionProvider().closeConnection(connection);
 		}
@@ -434,7 +431,8 @@ public abstract class BasicFeature extends Feature {
 		return "";
 	}
 
-	protected String defineAddPrimaryKey(TableDefinition tableDefinition) {
+	protected List<String> defineAddPrimaryKey(TableDefinition tableDefinition) {
+		List<String> sqls = new ArrayList<String>();
 		PrimaryKeyDefinition[] pkDefinitions = tableDefinition.getPrimaryKeyDefinitions();
 		if (pkDefinitions != null) {
 			List<String> columnNames = new ArrayList<String>();
@@ -449,9 +447,9 @@ public abstract class BasicFeature extends Feature {
 				constaintName = getDefaultPrimaryKeyName(tableDefinition.getTableName(), columnNames.toArray(new String[0]));
 			}
 			String[] args = { tableDefinition.getTableName(), constaintName, ArrayUtils.join(columnNames.toArray(), ",") };
-			return formatString(getAddPrimaryKeySqlString(), args);
+			sqls.add(formatString(getAddPrimaryKeySqlString(), args));
 		}
-		return "";
+		return sqls;
 	}
 
 	protected String definePrimaryKey(TableDefinition tableDefinition) {
@@ -531,11 +529,11 @@ public abstract class BasicFeature extends Feature {
 		List<String> refColumnNames = new ArrayList<String>();
 		for (ForeignKeyDefinition fkDefinition : fkDefinitions) {
 			columnNames.add(fkDefinition.getColumnDefinition().getColumnName());
-			refColumnNames.add(jdbcAdmin.getConfiguration().getMetaData()
-					.getColumn(fkDefinition.getRefMappedClass(), fkDefinition.getRefMappedProperty()).getColumnName());
+			refColumnNames.add(jdbcAdmin.getConfiguration()
+					.getColumnDefinition(fkDefinition.getRefMappedClass(), fkDefinition.getRefMappedProperty()).getColumnName());
 		}
 		ForeignKeyDefinition fkDefinition = ListUtils.getFirst(fkDefinitions);
-		TableDefinition reftTableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(fkDefinition.getRefMappedClass());
+		TableDefinition reftTableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(fkDefinition.getRefMappedClass());
 		if (StringUtils.isBlank(constaintName)) {
 			constaintName = getDefaultForeignKeyName(tableDefinition.getTableName(), columnNames.toArray(new String[0]),
 					reftTableDefinition.getTableName(), refColumnNames.toArray(new String[0]));
@@ -552,11 +550,11 @@ public abstract class BasicFeature extends Feature {
 		List<String> refColumnNames = new ArrayList<String>();
 		for (ForeignKeyDefinition fkDefinition : fkDefinitions) {
 			columnNames.add(fkDefinition.getColumnDefinition().getColumnName());
-			refColumnNames.add(jdbcAdmin.getConfiguration().getMetaData()
-					.getColumn(fkDefinition.getRefMappedClass(), fkDefinition.getRefMappedProperty()).getColumnName());
+			refColumnNames.add(jdbcAdmin.getConfiguration()
+					.getColumnDefinition(fkDefinition.getRefMappedClass(), fkDefinition.getRefMappedProperty()).getColumnName());
 		}
 		ForeignKeyDefinition fkDefinition = ListUtils.getFirst(fkDefinitions);
-		TableDefinition reftTableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(fkDefinition.getRefMappedClass());
+		TableDefinition reftTableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(fkDefinition.getRefMappedClass());
 		if (StringUtils.isBlank(constaintName)) {
 			constaintName = getDefaultForeignKeyName(tableDefinition.getTableName(), columnNames.toArray(new String[0]),
 					reftTableDefinition.getTableName(), refColumnNames.toArray(new String[0]));

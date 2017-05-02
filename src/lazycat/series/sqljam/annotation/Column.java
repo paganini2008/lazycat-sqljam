@@ -25,8 +25,6 @@ public @interface Column {
 
 	boolean store() default true;
 
-	String insertSql() default "";
-
 	String name() default "";
 
 	long length() default -1;
@@ -37,10 +35,8 @@ public @interface Column {
 
 	JdbcType jdbcType() default JdbcType.OTHER;
 
-	String defaultValue() default "";
-
 	String comment() default "";
 
-	String value() default "";
+	String defaultValue() default "";
 
 }

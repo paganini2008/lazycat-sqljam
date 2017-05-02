@@ -9,6 +9,8 @@ import java.sql.Connection;
  * @version 1.0
  */
 public interface ConnectionProvider {
+	
+	ProductMetadata getMetadata();
 
 	Connection openConnection();
 

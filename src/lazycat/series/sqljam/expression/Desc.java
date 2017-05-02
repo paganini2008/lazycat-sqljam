@@ -1,9 +1,8 @@
 package lazycat.series.sqljam.expression;
 
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.ParameterCollector;
+import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
-import lazycat.series.sqljam.expression.tag.Order;
 
 /**
  * Desc
@@ -11,25 +10,20 @@ import lazycat.series.sqljam.expression.tag.Order;
  * @author Fred Feng
  * @version 1.0
  */
-@Order
-public class Desc implements Expression {
+public class Desc extends AbstractField {
 
-	private final Expression expression;
+	private final Field field;
 
 	public Desc(String property) {
-		this.expression = new Column(property);
+		this.field = new StandardColumn(property);
 	}
 
-	public Desc(Expression expression) {
-		this.expression = expression;
+	public Desc(Field field) {
+		this.field = field;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
-		return configuration.getFeature().desc(expression.getText(translator, configuration));
-	}
-
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		expression.setParameter(translator, parameterCollector, configuration);
+	public String getText(Session session, Translator translator, Configuration configuration) {
+		return configuration.getJdbcAdmin().getFeature().desc(field.getText(session, translator, configuration));
 	}
 
 }

@@ -12,8 +12,8 @@ public class ValidateDdlResolver implements DdlResolver {
 
 	public void resolve(JdbcAdmin jdbcAdmin, Class<?> mappedClass) {
 		if (!jdbcAdmin.tableExists(mappedClass)) {
-			TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getMetaData().getTable(mappedClass);
-			throw new DdlResolverException(tableDefinition.getFullTableName() + " is not existed.");
+			TableDefinition tableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(mappedClass);
+			throw new DdlResolverException(tableDefinition.getTableName() + " is not existed.");
 		}
 		jdbcAdmin.validateTable(mappedClass);
 	}

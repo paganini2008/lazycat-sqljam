@@ -1,7 +1,7 @@
 package lazycat.series.sqljam;
 
 /**
- * ORMFault
+ * ORMException
  * 
  * @author Fred Feng
  * @version 1.0

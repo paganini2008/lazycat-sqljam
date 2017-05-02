@@ -11,10 +11,11 @@ import lazycat.series.beans.Property;
 import lazycat.series.collection.CollectionUtils;
 import lazycat.series.lang.Assert;
 import lazycat.series.lang.StringUtils;
-import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.PropertySelector;
 import lazycat.series.sqljam.PropertySelectors;
+import lazycat.series.sqljam.Session;
+import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 
@@ -30,7 +31,7 @@ public class Example implements Expression {
 	private final String tableAlias;
 	private final Set<String> excludedProperties = new HashSet<String>();
 	private PropertySelector propertySelector = PropertySelectors.NON_NULL;
-	private final Map<String, Property<?>> cache = new HashMap<String, Property<?>>();
+	private final Map<String, Property> cache = new HashMap<String, Property>();
 
 	public Example(Object object, String tableAlias) {
 		Assert.isNull(object, "Null example");
@@ -52,11 +53,11 @@ public class Example implements Expression {
 		return this;
 	}
 
-	public String getText(Translator translator, Configuration configuration) {
+	public String getText(Session session, Translator translator, Configuration configuration) {
 		final String prefix = StringUtils.isNotBlank(tableAlias) ? tableAlias + "." : "";
 		List<String> list = new ArrayList<String>();
-		if (translator.hasPrimaryKey(tableAlias, configuration.getMetaData())) {
-			ColumnDefinition[] definitions = translator.getPrimaryKeys(tableAlias, configuration.getMetaData());
+		if (translator.hasPrimaryKey(tableAlias, configuration)) {
+			ColumnDefinition[] definitions = translator.getPrimaryKeys(tableAlias, configuration);
 			for (ColumnDefinition definition : definitions) {
 				Object parameter = getPropertyValue(object, definition);
 				if (propertySelector.include(parameter, definition.getColumnName(), definition.getJdbcType())) {
@@ -67,7 +68,7 @@ public class Example implements Expression {
 				return CollectionUtils.join(list, " and ");
 			}
 		}
-		ColumnDefinition[] definitions = translator.getColumns(prefix, configuration.getMetaData());
+		ColumnDefinition[] definitions = translator.getColumns(prefix, configuration);
 		for (ColumnDefinition definition : definitions) {
 			if (excludedProperties.contains(definition.getMappedProperty())) {
 				continue;
@@ -80,9 +81,10 @@ public class Example implements Expression {
 		return CollectionUtils.join(list, " and ");
 	}
 
-	public void setParameter(Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		if (translator.hasPrimaryKey(tableAlias, configuration.getMetaData())) {
-			ColumnDefinition[] definitions = translator.getPrimaryKeys(tableAlias, configuration.getMetaData());
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector,
+			Configuration configuration) {
+		if (translator.hasPrimaryKey(tableAlias, configuration)) {
+			ColumnDefinition[] definitions = translator.getPrimaryKeys(tableAlias, configuration);
 			boolean sure = true;
 			for (ColumnDefinition definition : definitions) {
 				Object parameter = getPropertyValue(object, definition);
@@ -96,7 +98,7 @@ public class Example implements Expression {
 				return;
 			}
 		}
-		ColumnDefinition[] definitions = translator.getPrimaryKeys(tableAlias, configuration.getMetaData());
+		ColumnDefinition[] definitions = translator.getPrimaryKeys(tableAlias, configuration);
 		for (ColumnDefinition definition : definitions) {
 			if (excludedProperties.contains(definition.getMappedProperty())) {
 				continue;
@@ -110,9 +112,10 @@ public class Example implements Expression {
 	}
 
 	protected Object getPropertyValue(Object object, ColumnDefinition cd) {
-		Property<?> property = cache.get(cd.getMappedProperty());
+		Property property = cache.get(cd.getMappedProperty());
 		if (property == null) {
-			cache.put(cd.getMappedProperty(), Property.getProperty(cd.getMappedProperty(), (Class<?>) cd.getJavaType()));
+			cache.put(cd.getMappedProperty(),
+					Property.getProperty(cd.getMappedProperty(), (Class<?>) cd.getJavaType()));
 			property = cache.get(cd.getMappedProperty());
 		}
 		return property.extract(object);

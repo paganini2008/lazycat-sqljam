@@ -4,7 +4,9 @@ import java.lang.reflect.Type;
 
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.AutoDdl;
+import lazycat.series.sqljam.JdbcAdmin;
 import lazycat.series.sqljam.generator.Generator;
+import lazycat.series.sqljam.generator.SequenceGenerator;
 
 /**
  * TableEditorImpl
@@ -14,19 +16,22 @@ import lazycat.series.sqljam.generator.Generator;
  */
 public class TableEditorImpl implements TableEditor {
 
+	protected final JdbcAdmin jdbcAdmin;
 	private final StardardTableDefinition tableDefinition;
 
-	public TableEditorImpl(SchemaEditor schemaEditor, Class<?> mappedClass, String tableName) {
-		this.tableDefinition = new StardardTableDefinition(schemaEditor.getSchemaDefinition(), mappedClass, tableName);
+	public TableEditorImpl(Class<?> mappedClass, JdbcAdmin jdbcAdmin) {
+		this.tableDefinition = new StardardTableDefinition(mappedClass);
+		this.jdbcAdmin = jdbcAdmin;
 	}
 
-	public TableEditor setDdlContainsConstraint(boolean ddlContainsConstraint) {
-		tableDefinition.setDdlContainsConstraint(ddlContainsConstraint);
-		return this;
+	public TableEditor setName(String name) {
+		return setName(null, name);
 	}
 
-	public TableEditor setComment(String comment) {
-		tableDefinition.setComment(comment);
+	public TableEditor setName(String schema, String name) {
+		SchemaEditor schemaEditor = jdbcAdmin.getConfiguration().getSchemaEditor(schema);
+		tableDefinition.setSchemaDefinition(schemaEditor.getSchemaDefinition());
+		tableDefinition.setTableName(name);
 		return this;
 	}
 
@@ -35,17 +40,30 @@ public class TableEditorImpl implements TableEditor {
 		return this;
 	}
 
-	public TableEditor useIdentifierGenerator(String propertyName, String generatorName) {
-		((StandardColumnDefinition) tableDefinition.columns.get(propertyName))
-				.setIdentifierGenerator(tableDefinition.getSchemaDefinition().getIdentifierGenerator(generatorName));
+	public TableEditor setDefineConstraintOnCreate(boolean defineConstraintOnCreate) {
+		tableDefinition.setDefineConstraintOnCreate(defineConstraintOnCreate);
+		return this;
+	}
+
+	public TableEditor setComment(String comment) {
+		tableDefinition.setComment(comment);
+		return this;
+	}
+
+	public TableEditor useGenerator(String propertyName, String generatorType) {
+		return useGenerator(propertyName, generatorType, "global");
+	}
+
+	public TableEditor useGenerator(String propertyName, String generatorType, String name) {
+		Generator generator = tableDefinition.getSchemaDefinition().getGenerator(generatorType, name);
+		tableDefinition.generators.put(propertyName, generator);
 		return this;
 	}
 
 	public TableEditor useSequence(String propertyName, String sequenceName) {
-		Generator identifierGenerator = tableDefinition.getSchemaDefinition().getSequence(sequenceName)
-				.getIdentifierGenerator();
-		((StandardColumnDefinition) tableDefinition.columns.get(propertyName)).setIdentifierGenerator(identifierGenerator);
-		return this;
+		SchemaEditor schemaEditor = jdbcAdmin.getConfiguration().getSchemaEditor(tableDefinition.getSchema());
+		schemaEditor.registerGenerator(SequenceGenerator.NAME, sequenceName, new SequenceGenerator(sequenceName));
+		return useGenerator(propertyName, SequenceGenerator.NAME, sequenceName);
 	}
 
 	public ColumnEditor addColumn(String propertyName, Type javaType, String columnName, JdbcType jdbcType) {
@@ -63,6 +81,8 @@ public class TableEditorImpl implements TableEditor {
 	public ForeignKeyEditor addForeignKey(String propertyName, Class<?> refMappedClass, String refMappedProperty) {
 		ForeignKeyEditor foreignKeyEditor = new ForeignKeyEditorImpl(this, propertyName, refMappedClass, refMappedProperty);
 		tableDefinition.foreignKeys.put(propertyName, foreignKeyEditor.getForeignKeyDefinition());
+		TableDefinition refTableDefinition = jdbcAdmin.getConfiguration().getTableDefinition(refMappedClass);
+		((StardardTableDefinition) refTableDefinition).references.add(tableDefinition);
 		return foreignKeyEditor;
 	}
 
@@ -70,6 +90,12 @@ public class TableEditorImpl implements TableEditor {
 		UniqueKeyEditor uniqueKeyEditor = new UniqueKeyEditorImpl(this, propertyName);
 		tableDefinition.uniqueKeys.put(propertyName, uniqueKeyEditor.getUniqueKeyDefinition());
 		return uniqueKeyEditor;
+	}
+
+	public DefaultEditor addDefault(String propertyName) {
+		DefaultEditor defaultEditor = new DefaultEditorImpl(this, propertyName);
+		tableDefinition.defaults.put(propertyName, defaultEditor.getDefaultDefinition());
+		return defaultEditor;
 	}
 
 	public TableDefinition getTableDefinition() {

@@ -6,18 +6,20 @@ import java.util.List;
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.JoinType;
-import lazycat.series.sqljam.MetaData;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
-import lazycat.series.sqljam.expression.Alias;
-import lazycat.series.sqljam.expression.All;
+import lazycat.series.sqljam.expression.AbstractField;
 import lazycat.series.sqljam.expression.Asc;
-import lazycat.series.sqljam.expression.Column;
+import lazycat.series.sqljam.expression.Columns;
 import lazycat.series.sqljam.expression.Desc;
 import lazycat.series.sqljam.expression.Expression;
-import lazycat.series.sqljam.expression.ExpressionList;
-import lazycat.series.sqljam.expression.Fields;
-import lazycat.series.sqljam.expression.RowCount;
+import lazycat.series.sqljam.expression.Expressions;
+import lazycat.series.sqljam.expression.Field;
+import lazycat.series.sqljam.expression.FieldList;
+import lazycat.series.sqljam.expression.Functions;
+import lazycat.series.sqljam.expression.RelationShip;
+import lazycat.series.sqljam.expression.Select;
+import lazycat.series.sqljam.expression.StandardColumn;
 import lazycat.series.sqljam.update.CreateAs;
 import lazycat.series.sqljam.update.InsertImpl;
 
@@ -35,22 +37,22 @@ public class QueryImpl extends AbstractQuery implements Query {
 
 	public QueryImpl(Session session, Query source, String tableAlias) {
 		this.builder = new QueryBuilder(session, source, tableAlias);
-		this.mappedClass = source.defaultMappedClass();
-		this.resultSet = new LimitedResultSet(this, session, mappedClass);
+		this.mappedClass = source.rootClass();
+		this.queryable = new QueryableImpl(this, session);
 		this.session = session;
 	}
 
 	public QueryImpl(Session session, Class<?> mappedClass, String tableAlias) {
 		this.builder = new QueryBuilder(session, mappedClass, tableAlias);
 		this.mappedClass = mappedClass;
-		this.resultSet = new LimitedResultSet(this, session, mappedClass);
+		this.queryable = new QueryableImpl(this, session);
 		this.session = session;
 	}
 
-	private final ResultSet resultSet;
+	private final Queryable queryable;
 	private LockMode lockMode;
 
-	public Class<?> defaultMappedClass() {
+	public Class<?> rootClass() {
 		return mappedClass;
 	}
 
@@ -65,18 +67,21 @@ public class QueryImpl extends AbstractQuery implements Query {
 	}
 
 	public Query filter(Expression expression) {
-		builder.where = expression;
+		Expression where = builder.where;
+		if (where != null) {
+			builder.where = Expressions.and(where, expression);
+		} else {
+			builder.where = expression;
+		}
 		return this;
 	}
 
-	public Query relation(Expression expression) {
-		builder.relation = expression;
-		return this;
+	public Query relate(Class<?> mappedClass, String tableAlias) {
+		return filter(new RelationShip(mappedClass, tableAlias));
 	}
 
-	public Query setTimeout(int timeout) {
-		resultSet.setTimeout(timeout);
-		return this;
+	public void setTimeout(long timeout) {
+		queryable.setTimeout(timeout);
 	}
 
 	public Query crossJoin(Class<?> mappedClass, String tableAlias, Expression on) {
@@ -137,16 +142,16 @@ public class QueryImpl extends AbstractQuery implements Query {
 		return this;
 	}
 
-	public Query group(String propertyName) {
-		return group(new Column(propertyName));
+	public Query group(String property) {
+		return group(new StandardColumn(property));
 	}
 
-	public Query group(Expression expression) {
-		final Expression groupBy = builder.group;
-		if (groupBy instanceof ExpressionList) {
-			((ExpressionList) groupBy).addExpression(expression);
+	public Query group(Field field) {
+		Field group = builder.group;
+		if (group != null && field instanceof AbstractField) {
+			group = ((AbstractField) group).sibling(field);
 		} else {
-			builder.group = (expression instanceof ExpressionList) ? expression : ExpressionList.create(expression);
+			builder.group = field;
 		}
 		return this;
 	}
@@ -156,73 +161,104 @@ public class QueryImpl extends AbstractQuery implements Query {
 		return this;
 	}
 
-	public Query asc(String propertyName) {
-		return order(new Asc(propertyName));
+	public Query asc(String property) {
+		return order(new Asc(property));
 	}
 
-	public Query desc(String propertyName) {
-		return order(new Desc(propertyName));
+	public Query desc(String property) {
+		return order(new Desc(property));
 	}
 
-	public Query order(Expression expression) {
-		final Expression order = builder.order;
-		if (order instanceof ExpressionList) {
-			((ExpressionList) order).addExpression(expression);
+	public Query order(Field field) {
+		Field order = builder.order;
+		if (order != null && field instanceof AbstractField) {
+			order = ((AbstractField) order).sibling(field);
 		} else {
-			builder.order = (expression instanceof ExpressionList) ? expression : ExpressionList.create(expression);
+			order = field;
 		}
 		return this;
 	}
 
-	public Query column(String propertyName) {
-		return column(new Column(propertyName));
+	public Query column(String property) {
+		return column(property, property);
 	}
 
-	public Query column(String propertyName, String alias) {
-		return column(new Column(propertyName), alias);
+	public Query column(String property, String alias) {
+		return column(Columns.forName(property).as(alias));
 	}
 
-	public Query column(Expression expression) {
-		final Expression field = builder.field;
-		if (field instanceof ExpressionList) {
-			((ExpressionList) field).addExpression(expression);
+	public Query column(Field field) {
+		Field columns = builder.columns;
+		if (columns != null && columns instanceof AbstractField) {
+			((AbstractField) columns).sibling(field);
 		} else {
-			builder.field = (expression instanceof ExpressionList) ? expression : ExpressionList.create(expression);
+			builder.columns = field;
 		}
 		return this;
 	}
 
-	public Query column(Expression expression, String alias) {
-		expression = new Alias(expression, alias);
-		return column(expression);
+	public Query columns(String... propertyNames) {
+		return column(FieldList.columnList(propertyNames));
 	}
 
-	public Query max(String propertyName, String alias) {
-		return column(Fields.max(propertyName), alias);
+	public Query max(String property) {
+		return max(property, property);
 	}
 
-	public Query min(String propertyName, String alias) {
-		return column(Fields.min(propertyName), alias);
+	public Query max(String property, String label) {
+		return column(Functions.max(property).as(label));
 	}
 
-	public Query avg(String propertyName, String alias) {
-		return column(Fields.avg(propertyName), alias);
+	public Query min(String property) {
+		return min(property, property);
 	}
 
-	public Query sum(String propertyName, String alias) {
-		return column(Fields.sum(propertyName), alias);
+	public Query min(String property, String label) {
+		return column(Functions.min(property).as(label));
 	}
 
-	public Query distinct(String propertyName, String alias) {
-		return column(Fields.distinct(propertyName), alias);
+	public Query avg(String property) {
+		return avg(property, property);
 	}
 
-	public Query count(String propertyName, String alias) {
-		return column(Fields.count(propertyName), alias);
+	public Query avg(String property, String label) {
+		return column(Functions.avg(property).as(label));
 	}
 
-	public Query countDistinct(String propertyName, String alias) {
-		return column(Fields.countDistinct(propertyName), alias);
+	public Query sum(String property) {
+		return sum(property, property);
+	}
+
+	public Query sum(String property, String label) {
+		return column(Functions.sum(property).as(label));
+	}
+
+	public Query distinct(String property) {
+		return distinct(property, property);
+	}
+
+	public Query distinct(String property, String label) {
+		return column(Columns.distinct(property).as(label));
+	}
+
+	public Query count(String property) {
+		return count(property, property);
+	}
+
+	public Query count(String property, String label) {
+		return column(Functions.count(property).as(label));
+	}
+
+	public Query countOne(String label) {
+		return column(Functions.countOne().as(label));
+	}
+
+	public Query countAll(String label) {
+		return countAll(builder.getTableAlias());
+	}
+
+	public Query countAll(String tableAlias, String label) {
+		return column(Functions.countAll(tableAlias).as(label));
 	}
 
 	public ResultSet lock() {
@@ -239,35 +275,35 @@ public class QueryImpl extends AbstractQuery implements Query {
 	}
 
 	public ResultSet limit(int offset, int limit) {
-		return new Pageable(this, session, defaultMappedClass(), offset, limit);
+		return new Pageable(this, session, offset, limit);
 	}
 
 	public <T> T first() {
-		return resultSet.first();
+		return queryable.first();
 	}
 
 	public <T> T first(Class<T> beanClass) {
-		return resultSet.first(beanClass);
+		return queryable.first(beanClass);
 	}
 
 	public <T> List<T> list() {
-		return resultSet.list();
+		return queryable.list();
 	}
 
 	public <T> List<T> list(Class<T> beanClass) {
-		return resultSet.list(beanClass);
+		return queryable.list(beanClass);
 	}
 
 	public <T> Iterator<T> iterator() {
-		return resultSet.iterator();
+		return queryable.iterator();
 	}
 
 	public <T> Iterator<T> iterator(Class<T> beanClass) {
-		return resultSet.iterator(beanClass);
+		return queryable.iterator(beanClass);
 	}
 
-	public <T> T getResult(Class<T> requiredType, T defaultValue) {
-		return resultSet.getResult(requiredType, defaultValue);
+	public <T> T one(Class<T> requiredType) {
+		return queryable.one(requiredType);
 	}
 
 	public int into(Class<?> mappedClass) {
@@ -279,17 +315,17 @@ public class QueryImpl extends AbstractQuery implements Query {
 	}
 
 	public int rows() {
-		Query query = new QueryImpl(session, this, defaultTableAlias()).column(RowCount.ONE);
+		Query query = session.query(this, defaultTableAlias()).countOne(null);
 		return session.getResult(query, Integer.class);
 	}
 
 	public Query cache(String name) {
-		//session.addCache(name, this);
+		session.cache(name, this);
 		return this;
 	}
 
-	public Query all() {
-		return column(new All());
+	public Query selectAll() {
+		return column(Select.ALL);
 	}
 
 	public int size() {
@@ -320,12 +356,12 @@ public class QueryImpl extends AbstractQuery implements Query {
 		builder.setParameters(parameterCollector, configuration);
 	}
 
-	public Class<?> findMappedClass(String tableAlias, MetaData metaData) {
+	public Class<?> findMappedClass(String tableAlias, Configuration metaData) {
 		return builder.findMappedClass(tableAlias, metaData);
 	}
 
-	public ResultSet as(String name) {
-		return null;
+	public Cacheable cacheAs(String name) {
+		return new CacheableImpl(this, session, name);
 	}
 
 }

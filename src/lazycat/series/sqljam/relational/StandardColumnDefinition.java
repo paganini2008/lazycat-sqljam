@@ -5,7 +5,6 @@ import java.lang.reflect.Type;
 import lazycat.series.beans.PropertyFilters;
 import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.jdbc.JdbcType;
-import lazycat.series.sqljam.generator.Generator;
 
 /**
  * A description of table column
@@ -27,14 +26,10 @@ public class StandardColumnDefinition implements ColumnDefinition {
 	private int scale;
 	private boolean nullable;
 	private boolean autoIncrement;
-	private String defaultValue;
 	private String comment;
-	private String columnScript;
-	private String insertSql;
-	private Generator identifierGenerator;
+	private String defaultValue;
 
-	StandardColumnDefinition(TableDefinition tableDefinition, String mappedProperty, Type javaType, String columnName,
-			JdbcType jdbcType) {
+	StandardColumnDefinition(TableDefinition tableDefinition, String mappedProperty, Type javaType, String columnName, JdbcType jdbcType) {
 		this.mappedProperty = mappedProperty;
 		this.javaType = javaType;
 		this.columnName = columnName;
@@ -90,14 +85,6 @@ public class StandardColumnDefinition implements ColumnDefinition {
 		this.nullable = nullable;
 	}
 
-	public String getDefaultValue() {
-		return defaultValue;
-	}
-
-	public void setDefaultValue(String defaultValue) {
-		this.defaultValue = defaultValue;
-	}
-
 	public String getComment() {
 		return comment;
 	}
@@ -106,20 +93,12 @@ public class StandardColumnDefinition implements ColumnDefinition {
 		this.comment = comment;
 	}
 
-	public String getColumnScript() {
-		return columnScript;
+	public String getDefaultValue() {
+		return defaultValue;
 	}
 
-	public void setColumnScript(String columnScript) {
-		this.columnScript = columnScript;
-	}
-
-	public String getInsertSql() {
-		return insertSql;
-	}
-
-	public void setInsertSql(String insertSql) {
-		this.insertSql = insertSql;
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
 	}
 
 	public TableDefinition getTableDefinition() {
@@ -142,17 +121,8 @@ public class StandardColumnDefinition implements ColumnDefinition {
 		this.autoIncrement = autoIncrement;
 	}
 
-	public Generator getIdentifierGenerator() {
-		return identifierGenerator;
-	}
-
-	public void setIdentifierGenerator(Generator identifierGenerator) {
-		this.identifierGenerator = identifierGenerator;
-	}
-
 	public String toString() {
-		return ToStringBuilder.reflectInvokeToString(this,
-				PropertyFilters.newExcludedPropertyFilter(new String[] { "tableDefinition" }));
+		return ToStringBuilder.reflectInvokeToString(this, PropertyFilters.newExcludedPropertyFilter(new String[] { "tableDefinition" }));
 	}
 
 }

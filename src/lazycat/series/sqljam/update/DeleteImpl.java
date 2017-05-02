@@ -1,15 +1,12 @@
 package lazycat.series.sqljam.update;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import lazycat.series.concurrent.FutureCallback;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.JoinType;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.expression.Expression;
-import lazycat.series.sqljam.expression.TableAlias;
+import lazycat.series.sqljam.expression.Table;
+import lazycat.series.sqljam.expression.TableName;
 import lazycat.series.sqljam.query.JoinDetail;
 import lazycat.series.sqljam.query.SimpleFrom;
 
@@ -19,10 +16,9 @@ import lazycat.series.sqljam.query.SimpleFrom;
  * @author Fred Feng
  * @version 1.0
  */
-public class DeleteImpl implements Delete {
+public class DeleteImpl extends AbstractExecutor implements Delete {
 
 	private final DeleteBuilder builder;
-	private final Session session;
 
 	public DeleteImpl(Session session, Class<?> mappedClass) {
 		this(session, mappedClass, "this");
@@ -32,13 +28,13 @@ public class DeleteImpl implements Delete {
 		this(session, new DeleteBuilder(session, mappedClass, tableAlias));
 	}
 
-	protected DeleteImpl(Session session, DeleteBuilder builder) {
+	DeleteImpl(Session session, DeleteBuilder builder) {
+		super(session);
 		this.builder = builder;
-		this.session = session;
 	}
 
-	public Delete self() {
-		builder.alias = new TableAlias();
+	public Delete self(boolean show) {
+		builder.self = show ? TableName.THIS : Table.THIS;
 		return this;
 	}
 
@@ -82,24 +78,6 @@ public class DeleteImpl implements Delete {
 
 	public void setParameters(ParameterCollector parameterCollector, Configuration configuration) {
 		builder.setParameters(parameterCollector, configuration);
-	}
-
-	public int execute() {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		return session.getSessionFactory().getThreadPool().submit(new Callable<Integer>() {
-			public Integer call() throws Exception {
-				return session.execute(DeleteImpl.this);
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, 0);
-	}
-
-	public void execute(FutureCallback<Integer> callback) {
-		Configuration configuration = session.getSessionFactory().getConfiguration();
-		session.getSessionFactory().getThreadPool().submit(new ExecutorCallable() {
-			public Integer call() throws Exception {
-				return session.execute(DeleteImpl.this);
-			}
-		}, configuration.getDefaultSessionTimeout(), TimeUnit.SECONDS, callback);
 	}
 
 }
