@@ -10,17 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 import lazycat.series.collection.ListUtils;
+import lazycat.series.collection.RandomStringUtils;
 import lazycat.series.lang.ArrayUtils;
-import lazycat.series.lang.RandomUtils;
 import lazycat.series.lang.StringUtils;
-import lazycat.series.reflect.ConstructorUtils;
-import lazycat.series.reflect.ReflectiveInvocationException;
 import lazycat.series.sqljam.JdbcAdmin;
 import lazycat.series.sqljam.JdbcException;
 import lazycat.series.sqljam.JdbcUtils;
-import lazycat.series.sqljam.SessionException;
-import lazycat.series.sqljam.query.Query;
-import lazycat.series.sqljam.query.QueryImpl;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 import lazycat.series.sqljam.relational.ForeignKeyDefinition;
 import lazycat.series.sqljam.relational.PrimaryKeyDefinition;
@@ -102,11 +97,11 @@ public abstract class BasicFeature extends Feature {
 	}
 
 	protected String getDefaultForeignKeyName(String tableName, String[] columnNames, String refTableName, String[] refColumnNames) {
-		return "fk_" + refTableName + "_" + RandomUtils.randomString(4);
+		return "fk_" + refTableName + "_" + RandomStringUtils.randomString(4, true, true, false);
 	}
 
 	protected String getDefaultUniqueKeyName(String tableName, String[] columnNames) {
-		return "uk_" + RandomUtils.randomString(4);
+		return "uk_" + RandomStringUtils.randomString(4, true, true, false);
 	}
 
 	protected String getDefaultSequenceName(String tableName, String columnName) {
@@ -189,100 +184,54 @@ public abstract class BasicFeature extends Feature {
 		return result != null ? result.toString() : "";
 	}
 
-	protected Iterator<String> defineAddUniqueKeys(final TableDefinition tableDefinition, final JdbcAdmin jdbcAdmin) {
+	protected List<String> defineAddUniqueKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin) {
+		List<String> sqls = new ArrayList<String>();
 		UniqueKeyDefinition[] ukDefinitions = tableDefinition.getUniqueKeyDefinitions();
 		if (ukDefinitions != null) {
-			final Iterator<Map.Entry<String, List<UniqueKeyDefinition>>> iterator = transferUniqueKeys(ukDefinitions).entrySet().iterator();
-			return new Iterator<String>() {
-
-				public boolean hasNext() {
-					return iterator.hasNext();
-				}
-
-				public String next() {
-					Map.Entry<String, List<UniqueKeyDefinition>> entry = iterator.next();
-					return defineAddUniqueKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
-				}
-
-				public void remove() {
-					throw new UnsupportedOperationException();
-				}
-
-			};
+			for (Map.Entry<String, List<UniqueKeyDefinition>> entry : transferUniqueKeys(ukDefinitions).entrySet()) {
+				String sql = defineAddUniqueKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
+				sqls.add(sql);
+			}
 		}
-		return null;
+		return sqls;
 	}
 
-	protected Iterator<String> defineUniqueKeys(final TableDefinition tableDefinition, final JdbcAdmin jdbcAdmin) {
+	protected List<String> defineUniqueKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin) {
+		List<String> sqls = new ArrayList<String>();
 		UniqueKeyDefinition[] ukDefinitions = tableDefinition.getUniqueKeyDefinitions();
 		if (ukDefinitions != null) {
-			final Iterator<Map.Entry<String, List<UniqueKeyDefinition>>> iterator = transferUniqueKeys(ukDefinitions).entrySet().iterator();
-			return new Iterator<String>() {
-
-				public boolean hasNext() {
-					return iterator.hasNext();
+			if (ukDefinitions != null) {
+				for (Map.Entry<String, List<UniqueKeyDefinition>> entry : transferUniqueKeys(ukDefinitions).entrySet()) {
+					String sql = defineUniqueKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
+					sqls.add(sql);
 				}
-
-				public String next() {
-					Map.Entry<String, List<UniqueKeyDefinition>> entry = iterator.next();
-					return defineUniqueKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
-				}
-
-				public void remove() {
-					throw new UnsupportedOperationException();
-				}
-
-			};
+			}
 		}
-		return null;
+		return sqls;
 	}
 
-	protected Iterator<String> defineAddForeignKeys(final TableDefinition tableDefinition, final JdbcAdmin jdbcAdmin) {
+	protected List<String> defineAddForeignKeys(final TableDefinition tableDefinition, final JdbcAdmin jdbcAdmin) {
+		List<String> sqls = new ArrayList<String>();
 		ForeignKeyDefinition[] fkDefinitions = tableDefinition.getForeignKeyDefinitions();
 		if (fkDefinitions != null) {
-			final Iterator<Map.Entry<String, List<ForeignKeyDefinition>>> iterator = transferForeignKeys(fkDefinitions).entrySet()
-					.iterator();
-			return new Iterator<String>() {
-
-				public boolean hasNext() {
-					return iterator.hasNext();
-				}
-
-				public String next() {
-					Map.Entry<String, List<ForeignKeyDefinition>> entry = iterator.next();
-					return defineAddForeignKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
-				}
-
-				public void remove() {
-					throw new UnsupportedOperationException();
-				}
-			};
+			for (Map.Entry<String, List<ForeignKeyDefinition>> entry : transferForeignKeys(fkDefinitions).entrySet()) {
+				String sql = defineAddForeignKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
+				sqls.add(sql);
+			}
 		}
-		return null;
+		return sqls;
 	}
 
-	protected Iterator<String> defineForeignKeys(final TableDefinition tableDefinition, final JdbcAdmin jdbcAdmin) {
+	protected List<String> defineForeignKeys(final TableDefinition tableDefinition, final JdbcAdmin jdbcAdmin) {
+		List<String> sqls = new ArrayList<String>();
 		ForeignKeyDefinition[] fkDefinitions = tableDefinition.getForeignKeyDefinitions();
 		if (fkDefinitions != null) {
-			final Iterator<Map.Entry<String, List<ForeignKeyDefinition>>> iterator = transferForeignKeys(fkDefinitions).entrySet()
-					.iterator();
-			return new Iterator<String>() {
-
-				public boolean hasNext() {
-					return iterator.hasNext();
-				}
-
-				public String next() {
-					Map.Entry<String, List<ForeignKeyDefinition>> entry = iterator.next();
-					return defineForeignKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
-				}
-
-				public void remove() {
-					throw new UnsupportedOperationException();
-				}
-			};
+			for (Map.Entry<String, List<ForeignKeyDefinition>> entry : transferForeignKeys(fkDefinitions).entrySet()) {
+				String sql = defineForeignKey(tableDefinition, entry.getKey(), entry.getValue(), jdbcAdmin);
+				sqls.add(sql);
+			}
 		}
-		return null;
+		return sqls;
 	}
 
 	protected String defineDropForeignKey(TableDefinition tableDefinition, String constaintName, List<ForeignKeyDefinition> fkDefinitions,
@@ -472,22 +421,28 @@ public abstract class BasicFeature extends Feature {
 		return "";
 	}
 
-	protected String[] defineAddColumn(ColumnDefinition columnDefinition) {
+	protected List<String> defineAddColumn(ColumnDefinition columnDefinition) {
+		List<String> sqls = new ArrayList<String>();
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		String[] args = { tableDefinition.getTableName(), defineColumn(columnDefinition) };
-		return new String[] { formatString(getAddColumnSqlString(), args) };
+		sqls.add(formatString(getAddColumnSqlString(), args));
+		return sqls;
 	}
 
-	protected String[] defineModifyColumn(ColumnDefinition columnDefinition, int[] effects) {
+	protected List<String> defineModifyColumn(ColumnDefinition columnDefinition, int[] effects) {
+		List<String> sqls = new ArrayList<String>();
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		String[] args = { tableDefinition.getTableName(), defineColumn(columnDefinition) };
-		return new String[] { formatString(getModifyColumnSqlString(), args) };
+		sqls.add(formatString(getModifyColumnSqlString(), args));
+		return sqls;
 	}
 
-	protected String[] defineDropColumn(ColumnDefinition columnDefinition) {
+	protected List<String> defineDropColumn(ColumnDefinition columnDefinition) {
+		List<String> sqls = new ArrayList<String>();
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		String[] args = { tableDefinition.getTableName(), columnDefinition.getColumnName() };
-		return new String[] { formatString(getDropColumnSqlString(), args) };
+		sqls.add(formatString(getDropColumnSqlString(), args));
+		return sqls;
 	}
 
 	protected String defineAddUniqueKey(TableDefinition tableDefinition, String constaintName, List<UniqueKeyDefinition> uqDefinitions,
@@ -578,16 +533,6 @@ public abstract class BasicFeature extends Feature {
 		text.append(" limit ").append(limit);
 		text.append(" offset ").append(offset);
 		return text.toString();
-	}
-
-	public Query createQueryExecutor(Object... arguments) {
-		try {
-			return ConstructorUtils.invokeConstructor(QueryImpl.class, arguments);
-		} catch (NoSuchMethodException e) {
-			throw new SessionException(e.getMessage(), e);
-		} catch (ReflectiveInvocationException e) {
-			throw new SessionException(e.getMessage(), e);
-		}
 	}
 
 }

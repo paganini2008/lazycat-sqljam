@@ -10,7 +10,6 @@ import lazycat.series.sqljam.annotation.Default;
 import lazycat.series.sqljam.annotation.ForeignKey;
 import lazycat.series.sqljam.annotation.Generator;
 import lazycat.series.sqljam.annotation.PrimaryKey;
-import lazycat.series.sqljam.annotation.Sequence;
 import lazycat.series.sqljam.annotation.Table;
 import lazycat.series.sqljam.annotation.UniqueKey;
 import lazycat.series.sqljam.relational.ColumnEditor;
@@ -89,11 +88,7 @@ public class AnnotatedTableEditor extends TableEditorImpl {
 		}
 		if (field.isAnnotationPresent(Generator.class)) {
 			Generator generator = field.getAnnotation(Generator.class);
-			useGenerator(field.getName(), generator.generator(), generator.name());
-		}
-		if (field.isAnnotationPresent(Sequence.class)) {
-			Sequence sequence = field.getAnnotation(Sequence.class);
-			useSequence(field.getName(), sequence.value());
+			columnEditor.useGenerator(generator.value(), generator.name());
 		}
 	}
 

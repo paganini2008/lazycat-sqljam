@@ -4,6 +4,8 @@ import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.field.Field;
+import lazycat.series.sqljam.field.StandardColumn;
 
 /**
  * TextExpression

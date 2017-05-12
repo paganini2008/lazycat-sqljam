@@ -5,8 +5,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import lazycat.series.jdbc.DataSourceFactory;
-import lazycat.series.logger.LoggerFactory;
-import lazycat.series.logger.MyLogger;
+import lazycat.series.sqljam.transcation.TransactionFactory;
 
 /**
  * SessionEngine
@@ -15,8 +14,6 @@ import lazycat.series.logger.MyLogger;
  * @version 1.0
  */
 public class SessionEngine implements SessionFactory {
-
-	private static final MyLogger logger = LoggerFactory.getLogger(SessionEngine.class);
 
 	private final SessionAdmin sessionAdmin;
 	private final JdbcAdmin jdbcAdmin;
@@ -44,8 +41,8 @@ public class SessionEngine implements SessionFactory {
 		this.jdbcAdmin = jdbcAdmin;
 	}
 
-	public JdbcAdmin getJdbcAdmin() {
-		return jdbcAdmin;
+	public void setTransactionFactory(TransactionFactory transactionFactory) {
+		this.sessionAdmin.setTransactionFactory(transactionFactory);
 	}
 
 	public Session openSession() {

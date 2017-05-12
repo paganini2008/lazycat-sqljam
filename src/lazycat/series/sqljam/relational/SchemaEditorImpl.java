@@ -7,6 +7,7 @@ import lazycat.series.sqljam.generator.CurrentTimestampGenerator;
 import lazycat.series.sqljam.generator.Generator;
 import lazycat.series.sqljam.generator.GuidGenerator;
 import lazycat.series.sqljam.generator.NowGenerator;
+import lazycat.series.sqljam.generator.SequenceGenerator;
 
 /**
  * SchemaEditorImpl
@@ -30,9 +31,11 @@ public class SchemaEditorImpl implements SchemaEditor {
 		return schemaDefinition;
 	}
 
-	public SequenceEditor addSequence(String sequenceName) {
+	public SequenceEditor registerSequence(String sequenceName) {
+		Map<String, SequenceDefinition> sequences = schemaDefinition.sequences;
 		SequenceEditor sequenceEditor = new SequenceEditorImpl(this, sequenceName);
-		schemaDefinition.sequences.put(sequenceName, sequenceEditor.getSequenceDefinition());
+		sequences.put(sequenceName, sequenceEditor.getSequenceDefinition());
+		registerGenerator(SequenceGenerator.NAME, sequenceName, new SequenceGenerator(sequenceName));
 		return sequenceEditor;
 	}
 
@@ -41,12 +44,15 @@ public class SchemaEditorImpl implements SchemaEditor {
 	}
 
 	public SchemaEditor registerGenerator(String generatorType, String name, Generator generator) {
-		Map<String, Generator> data = schemaDefinition.generators.get(generatorType);
+		Map<String, Map<String, Generator>> generators = schemaDefinition.generators;
+		Map<String, Generator> data = generators.get(generatorType);
 		if (data == null) {
 			schemaDefinition.generators.put(generatorType, new HashMap<String, Generator>());
 			data = schemaDefinition.generators.get(generatorType);
 		}
-		data.put(name, generator);
+		if (!data.containsKey(name)) {
+			data.put(name, generator);
+		}
 		return this;
 	}
 

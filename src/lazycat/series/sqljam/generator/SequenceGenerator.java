@@ -13,18 +13,18 @@ public class SequenceGenerator implements Generator {
 
 	public static final String NAME = "sequence";
 
-	private final String generator;
+	private final String sequenceName;
 
-	public SequenceGenerator(String generator) {
-		this.generator = generator;
+	public SequenceGenerator(String sequenceName) {
+		this.sequenceName = sequenceName;
 	}
 
 	public Object postValue(Session session, Configuration configuration) {
-		return session.getResult(configuration.getJdbcAdmin().getFeature().selectNextval(generator), null, null, Integer.class);
+		return session.getResult(configuration.getJdbcAdmin().getFeature().selectNextval(sequenceName), null, null, Integer.class);
 	}
 
 	public boolean hasValue(Session session, Configuration configuration) {
-		Object result = session.getResult(configuration.getJdbcAdmin().getFeature().selectCurrval(generator), null, null, Integer.class);
+		Object result = session.getResult(configuration.getJdbcAdmin().getFeature().selectCurrval(sequenceName), null, null, Integer.class);
 		return result != null;
 	}
 }

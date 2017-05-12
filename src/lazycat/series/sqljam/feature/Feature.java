@@ -8,11 +8,9 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,8 +25,7 @@ import lazycat.series.sqljam.JdbcException;
 import lazycat.series.sqljam.JdbcTypeMapper;
 import lazycat.series.sqljam.JdbcUtils;
 import lazycat.series.sqljam.SQL92Criterion;
-import lazycat.series.sqljam.SynaxFault;
-import lazycat.series.sqljam.query.Query;
+import lazycat.series.sqljam.SynaxException;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 import lazycat.series.sqljam.relational.ForeignKeyDefinition;
 import lazycat.series.sqljam.relational.PrimaryKeyDefinition;
@@ -125,21 +122,21 @@ public abstract class Feature extends SQL92Criterion {
 
 	protected abstract int[] getColumnModified(ColumnDefinition columnDefinition, DatabaseMetaData dbmd);
 
-	protected abstract Iterator<String> defineUniqueKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
+	protected abstract List<String> defineUniqueKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
 
-	protected abstract Iterator<String> defineForeignKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
+	protected abstract List<String> defineForeignKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
 
-	protected abstract Iterator<String> defineAddForeignKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
+	protected abstract List<String> defineAddForeignKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
 
-	protected abstract Iterator<String> defineAddUniqueKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
+	protected abstract List<String> defineAddUniqueKeys(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin);
 
 	protected abstract String defineColumn(ColumnDefinition columnDefinition);
 
-	protected abstract String[] defineAddColumn(ColumnDefinition columnDefinition);
+	protected abstract List<String> defineAddColumn(ColumnDefinition columnDefinition);
 
-	protected abstract String[] defineModifyColumn(ColumnDefinition columnDefinition, int[] effects);
+	protected abstract List<String> defineModifyColumn(ColumnDefinition columnDefinition, int[] effects);
 
-	protected abstract String[] defineDropColumn(ColumnDefinition columnDefinition);
+	protected abstract List<String> defineDropColumn(ColumnDefinition columnDefinition);
 
 	protected abstract String defineAddUniqueKey(TableDefinition tableDefinition, String constaintName,
 			List<UniqueKeyDefinition> uqDefinitions, JdbcAdmin jdbcAdmin);
@@ -184,7 +181,7 @@ public abstract class Feature extends SQL92Criterion {
 				refMappedClasses.add(fkDefinition.getRefMappedClass());
 			}
 			if (refMappedClasses.size() != 1) {
-				throw new SynaxFault("Constaint name reference different tables.");
+				throw new SynaxException("Constaint name reference different tables.");
 			}
 		}
 		return mapper;
@@ -203,7 +200,7 @@ public abstract class Feature extends SQL92Criterion {
 		return mapper;
 	}
 
-	public Iterator<String> iteratorForUpdateDDL(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin, DatabaseMetaData dbmd) {
+	public List<String> listForUpdateDDL(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin, DatabaseMetaData dbmd) {
 		ColumnDefinition[] columnDefinitions = tableDefinition.getColumnDefinitions();
 		final List<String> ddls = new ArrayList<String>();
 		for (ColumnDefinition columnDefinition : columnDefinitions) {
@@ -212,10 +209,10 @@ public abstract class Feature extends SQL92Criterion {
 						columnDefinition.getColumnName())) {
 					int[] effects = getColumnModified(columnDefinition, dbmd);
 					if (effects != null) {
-						ddls.addAll(Arrays.asList(defineModifyColumn(columnDefinition, effects)));
+						ddls.addAll(defineModifyColumn(columnDefinition, effects));
 					}
 				} else {
-					ddls.addAll(Arrays.asList(defineAddColumn(columnDefinition)));
+					ddls.addAll(defineAddColumn(columnDefinition));
 				}
 			} catch (SQLException e) {
 				throw new JdbcException(e);
@@ -260,8 +257,7 @@ public abstract class Feature extends SQL92Criterion {
 				}
 			}
 		}
-
-		return ddls.iterator();
+		return ddls;
 
 	}
 
@@ -309,7 +305,7 @@ public abstract class Feature extends SQL92Criterion {
 		}
 	}
 
-	public Iterator<String> iteratorForCreateDDL(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin, DatabaseMetaData dbmd) {
+	public List<String> listForCreateDDL(TableDefinition tableDefinition, JdbcAdmin jdbcAdmin, DatabaseMetaData dbmd) {
 		ColumnDefinition[] definitions = tableDefinition.getColumnDefinitions();
 		final List<String> parts = new ArrayList<String>();
 		final List<String> ddls = new ArrayList<String>();
@@ -325,24 +321,20 @@ public abstract class Feature extends SQL92Criterion {
 			if (StringUtils.isNotBlank(part)) {
 				parts.add(part);
 			}
-			Iterator<String> iter = defineForeignKeys(tableDefinition, jdbcAdmin);
-			if (iter != null) {
-				for (; iter.hasNext();) {
-					parts.add(iter.next());
-				}
+			List<String> list = defineForeignKeys(tableDefinition, jdbcAdmin);
+			if (list != null) {
+				parts.addAll(list);
 			}
-			iter = defineUniqueKeys(tableDefinition, jdbcAdmin);
-			if (iter != null) {
-				for (; iter.hasNext();) {
-					parts.add(iter.next());
-				}
+			list = defineUniqueKeys(tableDefinition, jdbcAdmin);
+			if (list != null) {
+				parts.addAll(list);
 			}
 		}
 		beforeCreateTable(tableDefinition, parts, ddls);
 		StringBuilder createSql = new StringBuilder();
 		createSql.append(tableDefinition.getTableName());
 		createSql.append(" (");
-		createSql.append(CollectionUtils.join(parts, ","));
+		createSql.append(CollectionUtils.join(parts, ", "));
 		createSql.append(")");
 		ddls.add(createTable(createSql.toString()));
 
@@ -351,34 +343,32 @@ public abstract class Feature extends SQL92Criterion {
 		}
 
 		if (!tableDefinition.isDefineConstraintOnCreate()) {
-			ddls.addAll(defineAddPrimaryKey(tableDefinition));
-			
-			Iterator<String> iter = defineAddForeignKeys(tableDefinition, jdbcAdmin);
-			if (iter != null) {
-				for (; iter.hasNext();) {
-					ddls.add(iter.next());
-				}
+			List<String> list = defineAddPrimaryKey(tableDefinition);
+			if (list != null) {
+				ddls.addAll(list);
 			}
-			iter = defineAddUniqueKeys(tableDefinition, jdbcAdmin);
-			if (iter != null) {
-				for (; iter.hasNext();) {
-					ddls.add(iter.next());
-				}
+			list = defineAddForeignKeys(tableDefinition, jdbcAdmin);
+			if (list != null) {
+				ddls.addAll(list);
+			}
+			list = defineAddUniqueKeys(tableDefinition, jdbcAdmin);
+			if (list != null) {
+				ddls.addAll(list);
 			}
 		}
 		afterCreateTable(tableDefinition, ddls);
-		return ddls.iterator();
+		return ddls;
 	}
 
-	public Iterator<String> iteratorForDropDDL(TableDefinition tableDefinition, DatabaseMetaData dbmd) {
+	public List<String> listForDropDDL(TableDefinition tableDefinition, DatabaseMetaData dbmd) {
 		List<String> ddls = new ArrayList<String>();
 		beforeDropTable(tableDefinition, ddls);
 		ddls.add(dropTable(tableDefinition.getTableName()));
 		afterDropTable(tableDefinition, ddls);
-		return ddls.iterator();
+		return ddls;
 	}
 
-	static String formatString(String pattern, String... args) {
+	protected final String formatString(String pattern, String... args) {
 		return StringUtils.parseText(pattern, "?", args);
 	}
 
@@ -411,7 +401,5 @@ public abstract class Feature extends SQL92Criterion {
 	}
 
 	public abstract String getPageableSqlString(String sql, int offset, int limit);
-
-	public abstract Query createQueryExecutor(Object... arguments);
 
 }

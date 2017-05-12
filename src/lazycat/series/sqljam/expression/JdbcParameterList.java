@@ -10,7 +10,7 @@ import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
- * Sql ParameterList
+ * JdbcParameterList
  * 
  * @author Fred Feng
  * @version 1.0

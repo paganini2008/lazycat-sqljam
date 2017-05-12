@@ -16,6 +16,10 @@ public class AndExpression extends LogicalExpression {
 	private final Expression left;
 	private final Expression right;
 
+	public AndExpression(Expression one) {
+		this(TRUE, one);
+	}
+
 	public AndExpression(Expression left, Expression right) {
 		this.left = left;
 		this.right = right;
@@ -27,10 +31,21 @@ public class AndExpression extends LogicalExpression {
 		return configuration.getJdbcAdmin().getFeature().and(leftContent, rightContent);
 	}
 
-	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector,
-			Configuration configuration) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
 		left.setParameter(session, translator, parameterCollector, configuration);
 		right.setParameter(session, translator, parameterCollector, configuration);
+	}
+
+	public static LogicalExpression create(Expression... expressions) {
+		LogicalExpression and = null;
+		for (Expression expression : expressions) {
+			if (and == null) {
+				and = new AndExpression(expression);
+			} else {
+				and = and.and(expression);
+			}
+		}
+		return and;
 	}
 
 }

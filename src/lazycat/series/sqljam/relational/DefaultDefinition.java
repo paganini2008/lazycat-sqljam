@@ -1,6 +1,6 @@
 package lazycat.series.sqljam.relational;
 
-import lazycat.series.sqljam.expression.DataType;
+import lazycat.series.sqljam.field.DataType;
 
 /**
  * DefaultDefinition

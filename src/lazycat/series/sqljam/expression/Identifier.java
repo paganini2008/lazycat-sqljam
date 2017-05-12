@@ -8,6 +8,7 @@ import lazycat.series.sqljam.IdentifierNullFault;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.field.Table;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 import lazycat.series.sqljam.relational.TableDefinition;
 

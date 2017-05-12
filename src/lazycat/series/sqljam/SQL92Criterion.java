@@ -13,7 +13,7 @@ public abstract class SQL92Criterion {
 	}
 
 	public String createTable(String str) {
-		return "create table " + str;
+		return "create table if not exists " + str;
 	}
 
 	public String createTableAs(String table, String select) {
@@ -55,7 +55,7 @@ public abstract class SQL92Criterion {
 	public String select(boolean distinct) {
 		return distinct ? "select distinct " : "select ";
 	}
-	
+
 	public String tableAs(String left, String right) {
 		return left + " as " + right;
 	}

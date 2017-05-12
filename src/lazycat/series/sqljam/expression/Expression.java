@@ -13,6 +13,10 @@ import lazycat.series.sqljam.Translator;
  */
 public interface Expression {
 
+	static final Expression TRUE = new TrueExpression();
+
+	static final Expression FALSE = new FalseExpression();
+
 	String getText(Session session, Translator translator, Configuration configuration);
 
 	void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration);

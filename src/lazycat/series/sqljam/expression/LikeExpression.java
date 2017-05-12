@@ -5,6 +5,8 @@ import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.field.Field;
+import lazycat.series.sqljam.field.StandardColumn;
 
 /**
  * LikeExpression
@@ -12,7 +14,7 @@ import lazycat.series.sqljam.Translator;
  * @author Fred Feng
  * @version 1.0
  */
-public class LikeExpression implements Expression {
+public class LikeExpression extends LogicalExpression {
 
 	private final Field field;
 	private final String like;
@@ -70,10 +72,10 @@ public class LikeExpression implements Expression {
 	}
 
 	public String getText(Session session, Translator translator, Configuration configuration) {
-		return configuration.getJdbcAdmin().getFeature().like(field.getText(session,translator, configuration), like, escapeChar);
+		return configuration.getJdbcAdmin().getFeature().like(field.getText(session, translator, configuration), like, escapeChar);
 	}
 
-	public void setParameter(Session session,Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
 		parameterCollector.setParameter(matchMode.toMatchString(like), JdbcType.VARCHAR);
 	}
 

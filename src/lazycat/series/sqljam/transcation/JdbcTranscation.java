@@ -20,17 +20,17 @@ public class JdbcTranscation implements Transaction {
 	private static final AtomicPositiveLong transactionIdGenerator = new AtomicPositiveLong(0);
 
 	public JdbcTranscation(ConnectionProvider connectionProvider, TransactionIsolationLevel level, Boolean autoCommit,
-			SessionAdmin sessionBuilder) {
+			SessionAdmin sessionAdmin) {
 		this.transactionId = transactionIdGenerator.incrementAndGet();
 		this.connectionProvider = connectionProvider;
 		this.level = level;
 		this.autoCommit = autoCommit;
 		this.expired = false;
 		this.begin = System.currentTimeMillis();
-		this.sessionBuilder = sessionBuilder;
+		this.sessionAdmin = sessionAdmin;
 	}
 
-	private final SessionAdmin sessionBuilder;
+	private final SessionAdmin sessionAdmin;
 	private final long transactionId;
 	private final long begin;
 	private long elapsed;
@@ -89,7 +89,7 @@ public class JdbcTranscation implements Transaction {
 		this.elapsed = System.currentTimeMillis() - begin;
 		this.expired = true;
 
-		sessionBuilder.closeSession();
+		sessionAdmin.closeSession();
 	}
 
 	private void checkExpired() {

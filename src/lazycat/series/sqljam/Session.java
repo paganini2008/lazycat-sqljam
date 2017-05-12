@@ -71,8 +71,6 @@ public interface Session {
 
 	int execute(Executable executable, KeyStore keyStore);
 
-	int executeSql(String sql, Object[] arguments);
-
 	void rollback();
 
 	void commit();

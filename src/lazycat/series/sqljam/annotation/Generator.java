@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD })
 public @interface Generator {
 
-	String generator();
+	String value();
 
 	String name() default "global";
 

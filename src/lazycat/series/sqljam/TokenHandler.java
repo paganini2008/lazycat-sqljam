@@ -1,6 +1,6 @@
 package lazycat.series.sqljam;
 
-import lazycat.series.sqljam.TableMetadata;
+import lazycat.series.sqljam.TableConfiguation;
 import lazycat.series.sqljam.Translator;
 
 /**
@@ -13,6 +13,6 @@ public interface TokenHandler {
 
 	static final String DEFAULT_TOKEN = "?";
 
-	String getText(Object argument, Translator translator, TableMetadata configuration);
+	String getText(Object argument, Translator translator, TableConfiguation configuration);
 
 }

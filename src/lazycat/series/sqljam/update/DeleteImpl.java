@@ -5,8 +5,8 @@ import lazycat.series.sqljam.JoinType;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.expression.Expression;
-import lazycat.series.sqljam.expression.Table;
-import lazycat.series.sqljam.expression.TableName;
+import lazycat.series.sqljam.field.Table;
+import lazycat.series.sqljam.field.TableName;
 import lazycat.series.sqljam.query.JoinDetail;
 import lazycat.series.sqljam.query.SimpleFrom;
 

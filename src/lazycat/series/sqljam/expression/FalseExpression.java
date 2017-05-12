@@ -17,8 +17,10 @@ public class FalseExpression implements Expression {
 		return "1!=1";
 	}
 
-	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector,
-			Configuration configuration) {
+	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
+	}
+
+	FalseExpression() {
 	}
 
 }

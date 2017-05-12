@@ -31,12 +31,6 @@ public interface TableEditor {
 
 	DefaultEditor addDefault(String propertyName);
 
-	TableEditor useGenerator(String propertyName, String generatorType, String name);
-
-	TableEditor useGenerator(String propertyName, String generatorType);
-
-	TableEditor useSequence(String propertyName, String sequenceName);
-
 	TableDefinition getTableDefinition();
 
 	TableEditor setAutoDdl(AutoDdl autoDdl);

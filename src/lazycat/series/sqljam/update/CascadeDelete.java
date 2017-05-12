@@ -8,7 +8,7 @@ import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.expression.Expression;
 import lazycat.series.sqljam.expression.Expressions;
-import lazycat.series.sqljam.expression.NumberData;
+import lazycat.series.sqljam.field.NumberData;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.relational.TableDefinition;
 

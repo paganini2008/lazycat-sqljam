@@ -4,6 +4,8 @@ import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
+import lazycat.series.sqljam.field.Field;
+import lazycat.series.sqljam.field.StandardColumn;
 
 /**
  * NullableExpression
@@ -11,7 +13,7 @@ import lazycat.series.sqljam.Translator;
  * @author Fred Feng
  * @version 1.0
  */
-public class NullableExpression implements Expression {
+public class NullableExpression extends LogicalExpression {
 
 	private final Field field;
 	private final boolean yes;

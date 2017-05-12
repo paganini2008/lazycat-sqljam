@@ -1,5 +1,7 @@
 package lazycat.series.sqljam;
 
+import lazycat.series.sqljam.transcation.TransactionFactory;
+
 /**
  * SessionFactory
  * 
@@ -8,7 +10,7 @@ package lazycat.series.sqljam;
  */
 public interface SessionFactory {
 
-	JdbcAdmin getJdbcAdmin();
+	void setTransactionFactory(TransactionFactory transactionFactory);
 
 	Session openSession();
 

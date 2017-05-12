@@ -11,16 +11,16 @@ import lazycat.series.beans.ToStringBuilder;
 public class StandardSequenceDefinition implements SequenceDefinition {
 
 	private final SchemaDefinition schemaDefinition;
-	private final String name;
+	private final String sequenceName;
 	private int startWith;
 	private int incrementBy;
 	private int maxValue;
 	private int minValue;
 	private int cache;
 
-	StandardSequenceDefinition(SchemaDefinition schemaDefinition, String name) {
+	StandardSequenceDefinition(SchemaDefinition schemaDefinition, String sequenceName) {
 		this.schemaDefinition = schemaDefinition;
-		this.name = name;
+		this.sequenceName = sequenceName;
 		this.startWith = 1;
 		this.incrementBy = 1;
 		this.maxValue = -1;
@@ -29,7 +29,7 @@ public class StandardSequenceDefinition implements SequenceDefinition {
 	}
 
 	public String getName() {
-		return name;
+		return sequenceName;
 	}
 
 	public int getStartWith() {

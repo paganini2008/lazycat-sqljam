@@ -5,8 +5,6 @@ import java.lang.reflect.Type;
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.AutoDdl;
 import lazycat.series.sqljam.JdbcAdmin;
-import lazycat.series.sqljam.generator.Generator;
-import lazycat.series.sqljam.generator.SequenceGenerator;
 
 /**
  * TableEditorImpl
@@ -48,22 +46,6 @@ public class TableEditorImpl implements TableEditor {
 	public TableEditor setComment(String comment) {
 		tableDefinition.setComment(comment);
 		return this;
-	}
-
-	public TableEditor useGenerator(String propertyName, String generatorType) {
-		return useGenerator(propertyName, generatorType, "global");
-	}
-
-	public TableEditor useGenerator(String propertyName, String generatorType, String name) {
-		Generator generator = tableDefinition.getSchemaDefinition().getGenerator(generatorType, name);
-		tableDefinition.generators.put(propertyName, generator);
-		return this;
-	}
-
-	public TableEditor useSequence(String propertyName, String sequenceName) {
-		SchemaEditor schemaEditor = jdbcAdmin.getConfiguration().getSchemaEditor(tableDefinition.getSchema());
-		schemaEditor.registerGenerator(SequenceGenerator.NAME, sequenceName, new SequenceGenerator(sequenceName));
-		return useGenerator(propertyName, SequenceGenerator.NAME, sequenceName);
 	}
 
 	public ColumnEditor addColumn(String propertyName, Type javaType, String columnName, JdbcType jdbcType) {

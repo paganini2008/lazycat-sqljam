@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import lazycat.series.sqljam.expression.DataType;
+import lazycat.series.sqljam.field.DataType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })

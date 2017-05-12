@@ -31,4 +31,16 @@ public class OrExpression extends LogicalExpression {
 		right.setParameter(session, translator, parameterCollector, configuration);
 	}
 
+	public static LogicalExpression create(Expression... expressions) {
+		LogicalExpression or = null;
+		for (Expression expression : expressions) {
+			if (or == null) {
+				or = new AndExpression(expression);
+			} else {
+				or = or.or(expression);
+			}
+		}
+		return or;
+	}
+
 }

@@ -4,7 +4,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import lazycat.series.converter.TypeConverter;
 import lazycat.series.jdbc.JdbcType;
+import lazycat.series.jdbc.TypeHandlerRegistry;
 import lazycat.series.sqljam.transcation.Transaction;
 
 /**
@@ -39,8 +41,6 @@ public interface SessionExecutor {
 
 	<T> T getResult(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes, final Class<T> requiredType);
 
-	int update(Transaction transaction, Executable executable, KeyStore keyStore);
-
 	KeyStore keyStore(Class<?> mappedClass);
 
 	int batch(Transaction transaction, Executable executable);
@@ -50,8 +50,12 @@ public interface SessionExecutor {
 	int update(Transaction transaction, Executable executable);
 
 	int update(Transaction transaction, String sql, Object[] parameters, JdbcType[] jdbcTypes);
+	
+	int update(Transaction transaction, Executable executable, KeyStore keyStore);
 
-	int update(Transaction transaction, String sql, Object[] parameters);
+	void setTypeConverter(TypeConverter typeConverter);
+
+	void setTypeHandlerRegistry(TypeHandlerRegistry typeHandlerRegistry);
 
 	Configuration getConfiguration();
 }

@@ -1,6 +1,7 @@
 package lazycat.series.sqljam.expression;
 
 import lazycat.series.sqljam.expression.LikeExpression.MatchMode;
+import lazycat.series.sqljam.field.Field;
 import lazycat.series.sqljam.query.From;
 
 /**
@@ -10,10 +11,6 @@ import lazycat.series.sqljam.query.From;
  * @version 1.0
  */
 public class Expressions {
-
-	public static final TrueExpression TRUE = new TrueExpression();
-
-	public static final FalseExpression FALSE = new FalseExpression();
 
 	public static LogicalExpression and(Expression expression, Expression otherExpression) {
 		return new AndExpression(expression, otherExpression);
@@ -28,123 +25,123 @@ public class Expressions {
 	}
 
 	public static LogicalExpression wrap(Expression expression) {
-		return new Wrap(expression);
+		return new WrapExpression(expression);
 	}
 
 	public static Expression eq(String property, Object parameter) {
-		return new JdbcParameterExpression(property, parameter, ComparisonOperator.EQ);
+		return new JdbcParameterExpression(property, parameter, BooleanOperator.EQ);
 	}
 
 	public static Expression eq(Field field, Object parameter) {
-		return new JdbcParameterExpression(field, parameter, ComparisonOperator.EQ);
+		return new JdbcParameterExpression(field, parameter, BooleanOperator.EQ);
 	}
 
 	public static Expression eq(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.EQ);
+		return new JdbcParameterExpression(property, query, BooleanOperator.EQ);
 	}
 
 	public static Expression ne(String property, Object parameter) {
-		return new JdbcParameterExpression(property, parameter, ComparisonOperator.NE);
+		return new JdbcParameterExpression(property, parameter, BooleanOperator.NE);
 	}
 
 	public static Expression ne(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.NE);
+		return new JdbcParameterExpression(property, query, BooleanOperator.NE);
 	}
 
 	public static Expression neAny(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.NE_ANY);
+		return new JdbcParameterExpression(property, query, BooleanOperator.NE_ANY);
 	}
 
 	public static Expression neAll(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.NE_ALL);
+		return new JdbcParameterExpression(property, query, BooleanOperator.NE_ALL);
 	}
 
 	public static Expression lt(String property, Object parameter) {
-		return new JdbcParameterExpression(property, parameter, ComparisonOperator.LT);
+		return new JdbcParameterExpression(property, parameter, BooleanOperator.LT);
 	}
 
 	public static Expression lt(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.LT);
+		return new JdbcParameterExpression(property, query, BooleanOperator.LT);
 	}
 
 	public static Expression ltAny(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.LT_ANY);
+		return new JdbcParameterExpression(property, query, BooleanOperator.LT_ANY);
 	}
 
 	public static Expression ltAll(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.LT_ALL);
+		return new JdbcParameterExpression(property, query, BooleanOperator.LT_ALL);
 	}
 
 	public static Expression gt(String property, Object parameter) {
-		return new JdbcParameterExpression(property, parameter, ComparisonOperator.GT);
+		return new JdbcParameterExpression(property, parameter, BooleanOperator.GT);
 	}
 
 	public static Expression gt(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.GT);
+		return new JdbcParameterExpression(property, query, BooleanOperator.GT);
 	}
 
 	public static Expression gtAny(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.GT_ANY);
+		return new JdbcParameterExpression(property, query, BooleanOperator.GT_ANY);
 	}
 
 	public static Expression gtAll(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.GT_ALL);
+		return new JdbcParameterExpression(property, query, BooleanOperator.GT_ALL);
 	}
 
 	public static Expression lte(String property, Object parameter) {
-		return new JdbcParameterExpression(property, parameter, ComparisonOperator.LTE);
+		return new JdbcParameterExpression(property, parameter, BooleanOperator.LTE);
 	}
 
 	public static Expression lte(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.LTE);
+		return new JdbcParameterExpression(property, query, BooleanOperator.LTE);
 	}
 
 	public static Expression lteAny(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.LTE_ANY);
+		return new JdbcParameterExpression(property, query, BooleanOperator.LTE_ANY);
 	}
 
 	public static Expression lteAll(String property, From query) {
-		return new JdbcParameterExpression(property, query, ComparisonOperator.LTE_ALL);
+		return new JdbcParameterExpression(property, query, BooleanOperator.LTE_ALL);
 	}
 
 	public static Expression gte(String property, Object parameter) {
-		return new JdbcParameterExpression(property, parameter, ComparisonOperator.GTE);
+		return new JdbcParameterExpression(property, parameter, BooleanOperator.GTE);
 	}
 
 	public static Expression gte(String property, From query) {
-		return new JdbcParameterExpression(property, query(query), ComparisonOperator.GTE);
+		return new JdbcParameterExpression(property, query(query), BooleanOperator.GTE);
 	}
 
 	public static Expression gteAny(String property, From query) {
-		return new JdbcParameterExpression(property, query(query), ComparisonOperator.GTE_ANY);
+		return new JdbcParameterExpression(property, query(query), BooleanOperator.GTE_ANY);
 	}
 
 	public static Expression gteAll(String property, From query) {
-		return new JdbcParameterExpression(property, query(query), ComparisonOperator.GTE_ALL);
+		return new JdbcParameterExpression(property, query(query), BooleanOperator.GTE_ALL);
 	}
 
 	public static Expression eqProperty(String property, String anotherProperty) {
-		return new FieldExpression(property, anotherProperty, ComparisonOperator.EQ);
+		return new FieldExpression(property, anotherProperty, BooleanOperator.EQ);
 	}
 
 	public static Expression neProperty(String property, String anotherProperty) {
-		return new FieldExpression(property, anotherProperty, ComparisonOperator.NE);
+		return new FieldExpression(property, anotherProperty, BooleanOperator.NE);
 	}
 
 	public static Expression ltProperty(String property, String anotherProperty) {
-		return new FieldExpression(property, anotherProperty, ComparisonOperator.LT);
+		return new FieldExpression(property, anotherProperty, BooleanOperator.LT);
 	}
 
 	public static Expression gtProperty(String property, String anotherProperty) {
-		return new FieldExpression(property, anotherProperty, ComparisonOperator.GT);
+		return new FieldExpression(property, anotherProperty, BooleanOperator.GT);
 	}
 
 	public static Expression lteProperty(String property, String anotherProperty) {
-		return new FieldExpression(property, anotherProperty, ComparisonOperator.LTE);
+		return new FieldExpression(property, anotherProperty, BooleanOperator.LTE);
 	}
 
 	public static Expression gteProperty(String property, String anotherProperty) {
-		return new FieldExpression(property, anotherProperty, ComparisonOperator.GTE);
+		return new FieldExpression(property, anotherProperty, BooleanOperator.GTE);
 	}
 
 	public static Expression isNull(String property) {

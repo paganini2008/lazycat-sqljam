@@ -2,7 +2,6 @@ package lazycat.series.sqljam.relational;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,7 +12,6 @@ import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.beans.ToStringBuilder.PrintStyle;
 import lazycat.series.sqljam.AutoDdl;
 import lazycat.series.sqljam.MappingException;
-import lazycat.series.sqljam.generator.Generator;
 
 /**
  * Table Description
@@ -36,7 +34,6 @@ public class StardardTableDefinition implements TableDefinition {
 	final Map<String, ForeignKeyDefinition> foreignKeys = new LinkedHashMap<String, ForeignKeyDefinition>();
 	final Map<String, UniqueKeyDefinition> uniqueKeys = new LinkedHashMap<String, UniqueKeyDefinition>();
 	final Map<String, DefaultDefinition> defaults = new LinkedHashMap<String, DefaultDefinition>();
-	final Map<String, Generator> generators = new HashMap<String, Generator>();
 	final Set<TableDefinition> references = new HashSet<TableDefinition>();
 
 	StardardTableDefinition(Class<?> mappedClass) {
@@ -89,10 +86,6 @@ public class StardardTableDefinition implements TableDefinition {
 
 	public void setSchemaDefinition(SchemaDefinition schemaDefinition) {
 		this.schemaDefinition = schemaDefinition;
-	}
-
-	public Generator getGenerator(String propertyName) {
-		return generators.get(propertyName);
 	}
 
 	public DefaultDefinition getDefaultDefinition(String propertyName) {

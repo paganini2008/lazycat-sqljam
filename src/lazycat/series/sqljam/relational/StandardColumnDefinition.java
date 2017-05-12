@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import lazycat.series.beans.PropertyFilters;
 import lazycat.series.beans.ToStringBuilder;
 import lazycat.series.jdbc.JdbcType;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * A description of table column
@@ -28,6 +29,7 @@ public class StandardColumnDefinition implements ColumnDefinition {
 	private boolean autoIncrement;
 	private String comment;
 	private String defaultValue;
+	private Generator generator;
 
 	StandardColumnDefinition(TableDefinition tableDefinition, String mappedProperty, Type javaType, String columnName, JdbcType jdbcType) {
 		this.mappedProperty = mappedProperty;
@@ -119,6 +121,14 @@ public class StandardColumnDefinition implements ColumnDefinition {
 
 	public void setAutoIncrement(boolean autoIncrement) {
 		this.autoIncrement = autoIncrement;
+	}
+
+	public Generator getGenerator() {
+		return generator;
+	}
+
+	public void setGenerator(Generator generator) {
+		this.generator = generator;
 	}
 
 	public String toString() {

@@ -5,10 +5,10 @@ import lazycat.series.sqljam.ContextTranslator;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
-import lazycat.series.sqljam.expression.All;
 import lazycat.series.sqljam.expression.Expression;
-import lazycat.series.sqljam.expression.Field;
 import lazycat.series.sqljam.feature.Feature;
+import lazycat.series.sqljam.field.All;
+import lazycat.series.sqljam.field.Field;
 import lazycat.series.sqljam.update.SqlBuilder;
 
 /**

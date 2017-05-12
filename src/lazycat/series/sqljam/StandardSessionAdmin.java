@@ -1,8 +1,5 @@
 package lazycat.series.sqljam;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import lazycat.series.cache.Cache;
 import lazycat.series.cache.LruCache;
 import lazycat.series.cache.UncheckedExpiredCache;
@@ -28,7 +25,6 @@ public class StandardSessionAdmin implements SessionAdmin {
 
 	public StandardSessionAdmin(SessionOptions sessionOptions, Configuration configuration, ConnectionProvider connectionProvider) {
 		this.sessionExecutor = new SessionExecutorImpl(configuration);
-		
 		this.sessionPool = new SessionPool(sessionOptions.getSessionThreads(), sessionOptions.getMaxSessionPermits(),
 				sessionOptions.getDefaultSessionTimeout());
 		this.queryCache = new LruCache(sessionOptions.getQueryCacheSize());

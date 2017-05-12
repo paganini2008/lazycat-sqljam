@@ -29,9 +29,9 @@ public class StandardSchemaDefinition implements SchemaDefinition {
 		return sequences.get(sequenceName);
 	}
 
-	public Generator getGenerator(String generator, String name) {
-		Map<String, Generator> data = generators.get(generator);
-		return data.get(name);
+	public Generator getGenerator(String generatorType, String name) {
+		Map<String, Generator> data = generators.get(generatorType);
+		return data != null ? data.get(name) : null;
 	}
 
 }

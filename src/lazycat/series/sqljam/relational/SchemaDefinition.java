@@ -14,6 +14,6 @@ public interface SchemaDefinition {
 
 	SequenceDefinition getSequenceDefinition(String sequenceName);
 
-	Generator getGenerator(String generator, String name);
+	Generator getGenerator(String generatorType, String name);
 
 }

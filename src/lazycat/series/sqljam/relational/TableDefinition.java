@@ -1,7 +1,6 @@
 package lazycat.series.sqljam.relational;
 
 import lazycat.series.sqljam.AutoDdl;
-import lazycat.series.sqljam.generator.Generator;
 
 /**
  * TableDefinition
@@ -52,8 +51,6 @@ public interface TableDefinition {
 	String getSchema();
 
 	SchemaDefinition getSchemaDefinition();
-
-	Generator getGenerator(String propertyName);
 
 	TableDefinition[] getReferences();
 

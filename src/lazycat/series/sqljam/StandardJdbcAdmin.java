@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +11,8 @@ import javax.sql.DataSource;
 
 import lazycat.series.jdbc.DBUtils;
 import lazycat.series.jdbc.DataSourceFactory;
-import lazycat.series.logger.LoggerFactory;
-import lazycat.series.logger.MyLogger;
+import lazycat.series.logger.Log;
+import lazycat.series.logger.LogFactory;
 import lazycat.series.sqljam.feature.Feature;
 import lazycat.series.sqljam.relational.TableDefinition;
 
@@ -25,7 +24,7 @@ import lazycat.series.sqljam.relational.TableDefinition;
  */
 public class StandardJdbcAdmin implements JdbcAdmin {
 
-	private static final MyLogger logger = LoggerFactory.getLogger(StandardJdbcAdmin.class);
+	private static final Log logger = LogFactory.getLog(StandardJdbcAdmin.class);
 	private final ConnectionProvider connectionProvider;
 	private final Configuration configuration;
 	private final Map<AutoDdl, DdlResolver> ddlResolvers = new EnumMap<AutoDdl, DdlResolver>(AutoDdl.class);
@@ -47,7 +46,7 @@ public class StandardJdbcAdmin implements JdbcAdmin {
 	protected StandardJdbcAdmin(ConnectionProvider connectionProvider) {
 		this.feature = featureFactory.buildFeature(connectionProvider.getMetadata());
 		this.connectionProvider = connectionProvider;
-		this.configuration = new TableMetadata(this);
+		this.configuration = new TableConfiguation(this);
 
 		registerDdlResolver(AutoDdl.DEFAULT, new DefaultDdlResolver());
 		registerDdlResolver(AutoDdl.CREATE, new CreateDdlResolver());
@@ -77,8 +76,7 @@ public class StandardJdbcAdmin implements JdbcAdmin {
 		Connection connection = null;
 		try {
 			connection = connectionProvider.openConnectionImplicitly();
-			return JdbcUtils.tableExists(connection.getMetaData(), null, tableDefinition.getSchema(),
-					tableDefinition.getTableName());
+			return JdbcUtils.tableExists(connection.getMetaData(), null, tableDefinition.getSchema(), tableDefinition.getTableName());
 		} catch (SQLException e) {
 			throw new JdbcException(e);
 		} finally {
@@ -91,10 +89,7 @@ public class StandardJdbcAdmin implements JdbcAdmin {
 		Connection connection = null;
 		try {
 			connection = connectionProvider.openConnectionImplicitly();
-			String sql;
-			for (Iterator<String> iter = feature.iteratorForUpdateDDL(tableDefinition, this, connection.getMetaData()); iter
-					.hasNext();) {
-				sql = iter.next();
+			for (String sql : feature.listForUpdateDDL(tableDefinition, this, connection.getMetaData())) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Execute sql: {}", sql);
 				}
@@ -112,10 +107,7 @@ public class StandardJdbcAdmin implements JdbcAdmin {
 		Connection connection = null;
 		try {
 			connection = connectionProvider.openConnectionImplicitly();
-			String sql;
-			for (Iterator<String> iter = feature.iteratorForCreateDDL(tableDefinition, this, connection.getMetaData()); iter
-					.hasNext();) {
-				sql = iter.next();
+			for (String sql : feature.listForCreateDDL(tableDefinition, this, connection.getMetaData())) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Execute sql: {}", sql);
 				}
@@ -133,9 +125,7 @@ public class StandardJdbcAdmin implements JdbcAdmin {
 		Connection connection = null;
 		try {
 			connection = connectionProvider.openConnectionImplicitly();
-			String sql;
-			for (Iterator<String> iter = feature.iteratorForDropDDL(tableDefinition, connection.getMetaData()); iter.hasNext();) {
-				sql = iter.next();
+			for (String sql : feature.listForDropDDL(tableDefinition, connection.getMetaData())) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Execute sql: {}", sql);
 				}

@@ -43,7 +43,7 @@ public abstract class LogicalExpression implements Expression {
 	 * @return
 	 */
 	public LogicalExpression wrap() {
-		return new Wrap(this);
+		return new WrapExpression(this);
 	}
 
 }

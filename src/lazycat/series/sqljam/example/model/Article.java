@@ -30,7 +30,7 @@ public class Article {
 	@Column
 	private float score;
 	
-	@Generator(generator = "now")
+	@Generator("now")
 	@Column(comment = "最后更新时间")
 	private Date lastModified;
 

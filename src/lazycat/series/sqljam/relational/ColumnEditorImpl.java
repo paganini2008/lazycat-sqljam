@@ -3,6 +3,7 @@ package lazycat.series.sqljam.relational;
 import java.lang.reflect.Type;
 
 import lazycat.series.jdbc.JdbcType;
+import lazycat.series.sqljam.generator.Generator;
 
 /**
  * ColumnEditorImpl
@@ -16,8 +17,8 @@ public class ColumnEditorImpl implements ColumnEditor {
 	private final StandardColumnDefinition columnDefinition;
 
 	ColumnEditorImpl(TableEditor tableEditor, String mappedProperty, Type javaType, String columnName, JdbcType jdbcType) {
-		this.columnDefinition = new StandardColumnDefinition(tableEditor.getTableDefinition(), mappedProperty, javaType,
-				columnName, jdbcType);
+		this.columnDefinition = new StandardColumnDefinition(tableEditor.getTableDefinition(), mappedProperty, javaType, columnName,
+				jdbcType);
 		this.tableEditor = tableEditor;
 	}
 
@@ -81,13 +82,13 @@ public class ColumnEditorImpl implements ColumnEditor {
 		return tableEditor.addDefault(columnDefinition.getMappedProperty());
 	}
 
-	public ColumnEditor useGenerator(String generatorType, String name) {
-		tableEditor.useGenerator(columnDefinition.getMappedProperty(), generatorType, name);
-		return this;
+	public ColumnEditor useGenerator(String generatorType) {
+		return useGenerator(generatorType, "global");
 	}
 
-	public ColumnEditor useGenerator(String generatorType) {
-		tableEditor.useGenerator(columnDefinition.getMappedProperty(), generatorType);
+	public ColumnEditor useGenerator(String generatorType, String name) {
+		Generator generator = tableEditor.getTableDefinition().getSchemaDefinition().getGenerator(generatorType, name);
+		columnDefinition.setGenerator(generator);
 		return this;
 	}
 

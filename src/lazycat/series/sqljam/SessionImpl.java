@@ -8,8 +8,8 @@ import java.util.Map;
 import lazycat.series.beans.PropertyUtils;
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.sqljam.expression.Expressions;
-import lazycat.series.sqljam.expression.ID;
 import lazycat.series.sqljam.expression.Identifier;
+import lazycat.series.sqljam.field.ID;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.query.QueryImpl;
 import lazycat.series.sqljam.transcation.Transaction;
@@ -50,7 +50,8 @@ public class SessionImpl implements Session {
 		int effected = insert(object.getClass()).values(object).execute(keyStore);
 		if (effected > 0) {
 			for (String keyProperty : keyStore.getKeyNames()) {
-				PropertyUtils.setProperty(object, keyProperty, keyStore.getKey(keyProperty), null);
+				PropertyUtils.setProperty(object, keyProperty, keyStore.getKey(keyProperty),
+						sessionAdmin.getSessionOptions().getTypeConverter());
 			}
 		}
 		return effected;
@@ -154,10 +155,6 @@ public class SessionImpl implements Session {
 
 	public KeyStore keyStore(Class<?> mappedClass) {
 		return sessionAdmin.getSessionExecutor().keyStore(mappedClass);
-	}
-
-	public int executeSql(String sql, Object[] arguments) {
-		return sessionAdmin.getSessionExecutor().update(transaction, sql, arguments);
 	}
 
 	public void cache(String name, Query query) {

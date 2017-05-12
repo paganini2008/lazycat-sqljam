@@ -1,7 +1,7 @@
 package lazycat.series.sqljam.query;
 
 import lazycat.series.sqljam.expression.Expression;
-import lazycat.series.sqljam.expression.Field;
+import lazycat.series.sqljam.field.Field;
 
 /**
  * Select Clause

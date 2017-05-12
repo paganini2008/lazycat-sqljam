@@ -5,13 +5,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import lazycat.series.converter.TypeConverter;
 import lazycat.series.jdbc.JdbcType;
 import lazycat.series.jdbc.SqlRunner;
+import lazycat.series.jdbc.TypeHandlerRegistry;
 import lazycat.series.jdbc.mapper.ColumnIndexRowMapper;
 import lazycat.series.jdbc.mapper.ObjectRowMapper;
 import lazycat.series.jdbc.mapper.RowMapper;
-import lazycat.series.logger.LoggerFactory;
-import lazycat.series.logger.MyLogger;
+import lazycat.series.logger.Log;
+import lazycat.series.logger.LogFactory;
 import lazycat.series.sqljam.transcation.Transaction;
 
 /**
@@ -22,7 +24,7 @@ import lazycat.series.sqljam.transcation.Transaction;
  */
 public class SessionExecutorImpl implements SessionExecutor {
 
-	private static final MyLogger logger = LoggerFactory.getLogger(SessionExecutorImpl.class);
+	private static final Log logger = LogFactory.getLog(SessionExecutorImpl.class);
 	private final SqlRunner sqlRunner = new SqlRunner();
 	private final Configuration configuration;
 
@@ -30,9 +32,12 @@ public class SessionExecutorImpl implements SessionExecutor {
 		this.configuration = configuration;
 	}
 
-	public void configure(SessionOptions sessionOptions) {
-		sqlRunner.setTypeConverter(sessionOptions.getTypeConverter());
-		sqlRunner.setTypeHandlerRegistry(sessionOptions.getTypeHandlerRegistry());
+	public void setTypeConverter(TypeConverter typeConverter) {
+		sqlRunner.setTypeConverter(typeConverter);
+	}
+
+	public void setTypeHandlerRegistry(TypeHandlerRegistry typeHandlerRegistry) {
+		sqlRunner.setTypeHandlerRegistry(typeHandlerRegistry);
 	}
 
 	public <T> List<T> list(Transaction transaction, Executable query, Class<T> objectClass) {

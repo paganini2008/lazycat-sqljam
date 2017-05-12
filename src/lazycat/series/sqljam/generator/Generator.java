@@ -11,8 +11,6 @@ import lazycat.series.sqljam.Session;
  */
 public interface Generator {
 
-	static final String INSTANCE = "global";
-
 	boolean hasValue(Session session, Configuration configuration);
 
 	Object postValue(Session session, Configuration configuration);

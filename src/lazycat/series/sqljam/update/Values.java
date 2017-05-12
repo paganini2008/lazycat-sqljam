@@ -16,8 +16,8 @@ import lazycat.series.sqljam.NullValueException;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
-import lazycat.series.sqljam.expression.Data;
 import lazycat.series.sqljam.expression.Expression;
+import lazycat.series.sqljam.field.Data;
 import lazycat.series.sqljam.generator.Generator;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 import lazycat.series.sqljam.relational.DefaultDefinition;
@@ -95,7 +95,7 @@ public class Values implements Expression {
 			}
 			Object value = getPropertyValue(object, columnDefinition);
 			if (value == null) {
-				Generator generator = columnDefinition.getTableDefinition().getGenerator(columnDefinition.getMappedProperty());
+				Generator generator = columnDefinition.getGenerator();
 				if (generator != null) {
 					value = generator.postValue(session, configuration);
 				}

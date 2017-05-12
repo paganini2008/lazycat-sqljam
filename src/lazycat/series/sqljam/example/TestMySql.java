@@ -2,8 +2,11 @@ package lazycat.series.sqljam.example;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
+import lazycat.series.collection.RandomStringUtils;
+import lazycat.series.lang.RandomUtils;
 import lazycat.series.sqljam.Configuration;
 import lazycat.series.sqljam.ConfigurationInitializer;
 import lazycat.series.sqljam.Session;
@@ -14,7 +17,7 @@ import lazycat.series.sqljam.example.model.ArticleCopy;
 import lazycat.series.sqljam.example.model.Order;
 import lazycat.series.sqljam.example.model.User;
 import lazycat.series.sqljam.expression.Expressions;
-import lazycat.series.sqljam.expression.Functions;
+import lazycat.series.sqljam.field.Functions;
 import lazycat.series.sqljam.query.Query;
 import lazycat.series.sqljam.update.Batch;
 import lazycat.series.sqljam.update.Delete;
@@ -279,8 +282,27 @@ public class TestMySql {
 		return session;
 	}
 
+	private static void batchInsert() {
+		Session session = openSession();
+		int N = 1000;
+		for (int i = 0; i < N; i++) {
+			Article article = new Article();
+			article.setAuthor(RandomStringUtils.randomString(6, true, true, true));
+			article.setContent("<div>Content_" + i + "</div>");
+			article.setTitle("Title_" + i);
+			article.setText("Text_" + i);
+			article.setUrl("http://www." + RandomStringUtils.randomString(5, true, true, true) + ".com/a/b/c.html");
+			article.setScore(RandomUtils.randomFloat(1, 100));
+			article.setFollowCount(BigInteger.valueOf(RandomUtils.randomLong(10, 10000)));
+			session.save(article);
+		}
+		session.commit();
+		session.close();
+		System.out.println("TestMySql.batchInsert()");
+	}
+
 	public static void main(String[] args) throws IOException {
-		openSession();
+		batchInsert();
 		System.in.read();
 		System.out.println("TestMySql.main()");
 	}

@@ -120,8 +120,12 @@ public class PostgreSqlFeature extends BasicFeature {
 		return "alter table ? alter column ? set default ?";
 	}
 
+	protected String getDropSequenceSqlString() {
+		return "drop sequence if exists ?";
+	}
+
 	protected String getCreateSequenceSqlString() {
-		return "create sequence if not exists ? increment by 1 minvalue 1 no maxvalue start with 1 owned by ?";
+		return "create sequence ? increment by 1 minvalue 1 no maxvalue start with 1 owned by ?";
 	}
 
 	protected String getIdentitySqlString() {
@@ -210,7 +214,7 @@ public class PostgreSqlFeature extends BasicFeature {
 		return effects.size() > 0 ? Ints.toIntArray(effects) : null;
 	}
 
-	protected String[] defineModifyColumn(ColumnDefinition columnDefinition, int[] effects) {
+	protected List<String> defineModifyColumn(ColumnDefinition columnDefinition, int[] effects) {
 		final List<String> sqls = new ArrayList<String>();
 		TableDefinition tableDefinition = columnDefinition.getTableDefinition();
 		for (int code : effects) {
@@ -237,6 +241,7 @@ public class PostgreSqlFeature extends BasicFeature {
 			case MODIFY_AUTO_INCREMENT:
 				if (columnDefinition.isAutoIncrement()) {
 					String seqName = getDefaultSequenceName(tableDefinition.getTableName(), columnDefinition.getColumnName());
+					sqls.add(formatString(getDropSequenceSqlString(), new String[] { seqName }));
 					sqls.add(formatString(getCreateSequenceSqlString(),
 							new String[] { seqName, tableDefinition.getTableName() + "." + columnDefinition.getColumnName() }));
 					sqls.add(formatString(getSetDefaultValueSqlString(), new String[] { tableDefinition.getTableName(),
@@ -257,13 +262,14 @@ public class PostgreSqlFeature extends BasicFeature {
 				break;
 			}
 		}
-		return sqls.toArray(new String[0]);
+		return sqls;
 	}
 
 	protected void afterCreateTable(TableDefinition tableDefinition, List<String> ddls) {
 		for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitions()) {
 			if (columnDefinition.isAutoIncrement()) {
 				String seqName = getDefaultSequenceName(tableDefinition.getTableName(), columnDefinition.getColumnName());
+				ddls.add(formatString(getDropSequenceSqlString(), new String[] { seqName }));
 				ddls.add(formatString(getCreateSequenceSqlString(),
 						new String[] { seqName, tableDefinition.getTableName() + "." + columnDefinition.getColumnName() }));
 				ddls.add(formatString(getSetDefaultValueSqlString(),

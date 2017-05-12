@@ -12,7 +12,7 @@ public interface SchemaEditor {
 
 	SchemaDefinition getSchemaDefinition();
 
-	SequenceEditor addSequence(String sequenceName);
+	SequenceEditor registerSequence(String sequenceName);
 
 	SchemaEditor registerGenerator(String generatorType, String name, Generator generator);
 

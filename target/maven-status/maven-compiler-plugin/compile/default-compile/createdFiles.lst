@@ -113,7 +113,6 @@ lazycat\series\sqljam\transcation\TransactionException.class
 lazycat\series\sqljam\expression\ComparisonOperator$10.class
 lazycat\series\sqljam\ConnectionException.class
 lazycat\series\sqljam\transcation\TransactionFactory.class
-lazycat\series\sqljam\feature\BasicFeature$2.class
 lazycat\series\sqljam\relational\PrimaryKeyEditor.class
 lazycat\series\sqljam\expression\DataType$1.class
 lazycat\series\sqljam\relational\SequenceDefinition.class
@@ -159,11 +158,9 @@ lazycat\series\sqljam\query\CacheAdapter.class
 lazycat\series\sqljam\relational\DefaultDefinition.class
 lazycat\series\sqljam\Transformers$2.class
 lazycat\series\sqljam\PropertySelectors$AllPropertySelector.class
-lazycat\series\sqljam\feature\BasicFeature$3.class
 lazycat\series\sqljam\expression\AndExpression.class
 lazycat\series\sqljam\utils\SimpleDataSource$ConnectionProxy.class
 lazycat\series\sqljam\JdbcAdmin.class
-lazycat\series\sqljam\feature\BasicFeature$1.class
 lazycat\series\sqljam\feature\PostgreSqlFeature.class
 lazycat\series\sqljam\expression\DataType$4.class
 lazycat\series\sqljam\ORMException.class
@@ -229,6 +226,7 @@ lazycat\series\sqljam\expression\LikeExpression$MatchMode.class
 lazycat\series\sqljam\expression\FunctionException.class
 lazycat\series\sqljam\PreparedParameterCollector.class
 lazycat\series\sqljam\expression\Concat.class
+lazycat\series\sqljam\StandardGeneratorDefinition.class
 lazycat\series\sqljam\SessionAdmin.class
 lazycat\series\sqljam\relational\SchemaEditorImpl.class
 lazycat\series\sqljam\update\InsertBuilder.class
@@ -244,6 +242,7 @@ lazycat\series\sqljam\query\QueryableImpl$2.class
 lazycat\series\sqljam\SessionFactory.class
 lazycat\series\sqljam\AbstractConnectionProvider.class
 lazycat\series\sqljam\update\AbstractExecutor.class
+lazycat\series\sqljam\relational\StandardProcedureDefinition.class
 lazycat\series\sqljam\query\QueryableImpl$5.class
 lazycat\series\sqljam\expression\Identifier.class
 lazycat\series\sqljam\ScalarRowMapper.class
@@ -263,6 +262,7 @@ lazycat\series\sqljam\generator\GeneratorNotFoundException.class
 lazycat\series\sqljam\expression\ComparisonOperator$11.class
 lazycat\series\sqljam\update\Insert.class
 lazycat\series\sqljam\query\QueryImpl.class
+lazycat\series\sqljam\GeneratorDefinition.class
 lazycat\series\sqljam\SQL92Criterion$1.class
 lazycat\series\sqljam\expression\Select.class
 lazycat\series\sqljam\ConfigurationInitializer.class
@@ -306,7 +306,6 @@ lazycat\series\sqljam\AutoDdl.class
 lazycat\series\sqljam\CreateDdlResolver.class
 lazycat\series\sqljam\relational\SequenceEditorImpl.class
 lazycat\series\sqljam\relational\DefaultEditor.class
-lazycat\series\sqljam\feature\BasicFeature$4.class
 lazycat\series\sqljam\relational\TableDefinition.class
 lazycat\series\sqljam\JoinType$5.class
 lazycat\series\sqljam\relational\StandardForeignKeyDefinition.class
