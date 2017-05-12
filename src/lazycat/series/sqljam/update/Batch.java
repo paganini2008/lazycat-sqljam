@@ -1,7 +1,5 @@
 package lazycat.series.sqljam.update;
 
-import lazycat.series.sqljam.Executable;
-
 /**
  * Batch
  * 
