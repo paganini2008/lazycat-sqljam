@@ -19,7 +19,7 @@ public class BatchImpl extends AbstractExecutor implements Batch {
 
 	private final List<Object> bag = new CopyOnWriteArrayList<Object>();
 	private final Insert insert;
-	private int flushSize = -1;
+	private int flushSize = 100;
 
 	public BatchImpl(Session session, Insert insert) {
 		super(session);
@@ -28,8 +28,8 @@ public class BatchImpl extends AbstractExecutor implements Batch {
 
 	private final AtomicInteger rows = new AtomicInteger(0);
 
-	public Batch setFlushSize(int flushSize) {
-		this.flushSize = flushSize;
+	public Batch setFlushSize(int size) {
+		this.flushSize = Math.max(size, flushSize);
 		return this;
 	}
 
@@ -37,30 +37,23 @@ public class BatchImpl extends AbstractExecutor implements Batch {
 		if (object != null) {
 			bag.add(object);
 		}
-		if (flushSize > 0 && bag.size() > flushSize) {
-			flush();
+		if (bag.size() > flushSize) {
+			execute();
 		}
 		return this;
 	}
 
-	public void flush() {
-		session.getSessionAdmin().getSessionPool().execute(new Runnable() {
-			public void run() {
-				doFlush();
-			}
-		});
-	}
-
-	private void doFlush() {
+	public int flush() {
 		List<Object> objectList = new ArrayList<Object>(bag);
 		insert.values(objectList);
 		int effected = insert.batch(this);
 		rows.addAndGet(effected);
 		bag.removeAll(objectList);
+		return objectList.size();
 	}
 
 	public int execute() {
-		doFlush();
+		flush();
 		return rows.get();
 	}
 

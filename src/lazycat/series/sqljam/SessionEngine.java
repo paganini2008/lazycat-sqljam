@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import lazycat.series.jdbc.DataSourceFactory;
+import lazycat.series.lang.Hook;
+import lazycat.series.lang.Hooks;
 import lazycat.series.sqljam.transcation.TransactionFactory;
 
 /**
@@ -39,6 +41,11 @@ public class SessionEngine implements SessionFactory {
 		this.sessionAdmin = new StandardSessionAdmin(sessionOptions, jdbcAdmin.getConfiguration(), jdbcAdmin.getConnectionProvider());
 		jdbcAdmin.resolve();
 		this.jdbcAdmin = jdbcAdmin;
+		Hooks.addHook(new Hook() {
+			public void work() {
+				destroy();
+			}
+		});
 	}
 
 	public void setTransactionFactory(TransactionFactory transactionFactory) {

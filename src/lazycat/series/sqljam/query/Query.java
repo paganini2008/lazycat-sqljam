@@ -68,12 +68,12 @@ public interface Query extends From, ResultSet {
 	Query sum(String property, String label);
 
 	Query count(String property, String label);
+	
+	Query rows(String label);
 
-	Query countOne(String label);
+	Query rows(String tableAlias, String label);
 
-	Query countAll(String label);
-
-	Query countAll(String tableAlias, String label);
+	int rows();
 
 	Query cache(String name);
 
@@ -82,7 +82,5 @@ public interface Query extends From, ResultSet {
 	ResultSet limit(int limit);
 
 	ResultSet limit(int offset, int limit);
-
-	int rows();
 
 }

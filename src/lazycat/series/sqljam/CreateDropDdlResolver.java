@@ -14,16 +14,11 @@ public class CreateDropDdlResolver extends CreateDdlResolver {
 	public void resolve(final JdbcAdmin jdbcAdmin, final Class<?> mappedClass) {
 		super.resolve(jdbcAdmin, mappedClass);
 		Hooks.addHook(new Hook() {
-			public void run() {
+			public void work() {
 				jdbcAdmin.dropTable(mappedClass);
 			}
-
-			public int getPriority() {
-				return 0;
-			}
-
-			public void handleThrown(Throwable e) {
-				throw new DdlResolverException(e);
+			public void ignoreException(Throwable e) {
+				e.printStackTrace(System.err);
 			}
 		});
 	}

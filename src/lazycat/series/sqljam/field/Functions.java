@@ -22,11 +22,11 @@ public class Functions {
 		return count(property, false);
 	}
 
-	public static Column countOne() {
+	public static Column rows() {
 		return new NestedFunction("count", NumberData.ONE);
 	}
 
-	public static Column countAll(String tableAlias) {
+	public static Column rows(String tableAlias) {
 		return new NestedFunction("count", new All(tableAlias));
 	}
 

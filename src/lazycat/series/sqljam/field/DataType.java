@@ -1,7 +1,7 @@
 package lazycat.series.sqljam.field;
 
 /**
- * SqlType
+ * DataType
  * 
  * @author Fred Feng
  * @version 1.0

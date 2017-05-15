@@ -12,7 +12,7 @@ import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.relational.ColumnDefinition;
 
 /**
- * SelectAll
+ * Select
  * 
  * @author Fred Feng
  * @version 1.0

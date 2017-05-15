@@ -241,24 +241,16 @@ public class QueryImpl extends AbstractQuery implements Query {
 		return column(Columns.distinct(property).as(label));
 	}
 
-	public Query count(String property) {
-		return count(property, property);
-	}
-
 	public Query count(String property, String label) {
 		return column(Functions.count(property).as(label));
 	}
 
-	public Query countOne(String label) {
-		return column(Functions.countOne().as(label));
+	public Query rows(String label) {
+		return column(builder.getTableAlias(), label);
 	}
 
-	public Query countAll(String label) {
-		return countAll(builder.getTableAlias());
-	}
-
-	public Query countAll(String tableAlias, String label) {
-		return column(Functions.countAll(tableAlias).as(label));
+	public Query rows(String tableAlias, String label) {
+		return column(Functions.rows(tableAlias).as(label));
 	}
 
 	public ResultSet lock() {
@@ -315,7 +307,7 @@ public class QueryImpl extends AbstractQuery implements Query {
 	}
 
 	public int rows() {
-		Query query = session.query(this, defaultTableAlias()).countOne(null);
+		Query query = session.query(this, defaultTableAlias()).column(Functions.rows());
 		return session.getResult(query, Integer.class);
 	}
 

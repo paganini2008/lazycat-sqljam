@@ -32,11 +32,18 @@ public class TestPG {
 		return session;
 	}
 
+	private static int count() {
+		Session session = openSession();
+		int rows = session.query(Article.class).rows();
+		System.out.println(rows);
+		return rows;
+	}
+
 	private static void batchInsert2() {
 		Session session = openSession();
 		Batch batch = session.insert(Article.class).batch();
 		batch.setFlushSize(100);
-		int start = 6000;
+		int start = 12000;
 		int N = 1000;
 		for (int i = start; i < start + N; i++) {
 			Article article = new Article();
@@ -44,7 +51,7 @@ public class TestPG {
 			article.setContent("<div>Content_" + i + "</div>");
 			article.setTitle("Title_" + i);
 			article.setText("Text_" + i);
-			article.setUrl("http://www." + RandomStringUtils.randomString(5, true, false,false) + ".com/a/b/c.html");
+			article.setUrl("http://www." + RandomStringUtils.randomString(5, true, false, false) + ".com/a/b/c.html");
 			article.setScore(RandomUtils.randomFloat(1, 100));
 			article.setFollowCount(BigInteger.valueOf(RandomUtils.randomLong(10, 10000)));
 			batch.push(article);
@@ -75,7 +82,7 @@ public class TestPG {
 	}
 
 	public static void main(String[] args) {
-		batchInsert2();
+		count();
 	}
 
 }

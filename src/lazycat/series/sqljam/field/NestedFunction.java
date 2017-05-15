@@ -5,7 +5,7 @@ import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 
 /**
- * NamingFunction
+ * NestedFunction
  * 
  * @author Fred Feng
  * @version 1.0
