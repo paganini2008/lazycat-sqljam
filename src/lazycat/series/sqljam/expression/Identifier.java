@@ -4,7 +4,7 @@ import lazycat.series.beans.Property;
 import lazycat.series.lang.Assert;
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
-import lazycat.series.sqljam.IdentifierNullFault;
+import lazycat.series.sqljam.NullIdentifierException;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
@@ -49,12 +49,12 @@ public class Identifier implements Expression {
 
 	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
 		String tableAlias = table.getText(session, translator, configuration);
-		TableDefinition tableDefinition= translator.getTableDefinition(tableAlias, configuration);
+		TableDefinition tableDefinition = translator.getTableDefinition(tableAlias, configuration);
 		ColumnDefinition[] definitions = tableDefinition.getColumnDefinitions();
 		for (ColumnDefinition columnDefinition : definitions) {
 			Object parameter = getPropertyValue(columnDefinition);
 			if (parameter == null) {
-				throw new IdentifierNullFault();
+				throw new NullIdentifierException(columnDefinition.getColumnName());
 			}
 			parameterCollector.setParameter(parameter, columnDefinition.getJdbcType());
 		}

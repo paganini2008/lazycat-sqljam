@@ -161,6 +161,11 @@ public class SessionImpl implements Session {
 		sessionAdmin.getQueryCache().putObject(name, query);
 	}
 
+	public void commitAndClose() {
+		commit();
+		close();
+	}
+
 	public void close() {
 		transaction.close();
 	}

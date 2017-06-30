@@ -75,6 +75,8 @@ public interface Session {
 
 	void commit();
 
+	void commitAndClose();
+
 	void close();
 
 	void cache(String name, Query query);

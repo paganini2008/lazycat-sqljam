@@ -80,8 +80,8 @@ public class QueryImpl extends AbstractQuery implements Query {
 		return filter(new RelationShip(mappedClass, tableAlias));
 	}
 
-	public void setTimeout(long timeout) {
-		queryable.setTimeout(timeout);
+	public Queryable setTimeout(long timeout) {
+		return queryable.setTimeout(timeout);
 	}
 
 	public Query crossJoin(Class<?> mappedClass, String tableAlias, Expression on) {

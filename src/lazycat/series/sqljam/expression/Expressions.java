@@ -5,7 +5,7 @@ import lazycat.series.sqljam.field.Field;
 import lazycat.series.sqljam.query.From;
 
 /**
- * Expression Utils
+ * Expressions
  * 
  * @author Fred Feng
  * @version 1.0

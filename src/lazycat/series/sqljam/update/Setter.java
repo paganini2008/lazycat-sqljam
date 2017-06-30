@@ -13,13 +13,16 @@ import lazycat.series.collection.CollectionUtils;
 import lazycat.series.lang.Assert;
 import lazycat.series.lang.StringUtils;
 import lazycat.series.sqljam.Configuration;
+import lazycat.series.sqljam.NullIdentifierException;
 import lazycat.series.sqljam.ParameterCollector;
 import lazycat.series.sqljam.PropertySelector;
 import lazycat.series.sqljam.PropertySelectors;
 import lazycat.series.sqljam.Session;
 import lazycat.series.sqljam.Translator;
 import lazycat.series.sqljam.expression.Expression;
+import lazycat.series.sqljam.feature.Feature;
 import lazycat.series.sqljam.relational.ColumnDefinition;
+import lazycat.series.sqljam.relational.TableDefinition;
 
 /**
  * Setter
@@ -55,30 +58,54 @@ public class Setter implements Expression {
 	public String getText(Session session, Translator translator, Configuration configuration) {
 		String tableAlias = translator.getTableAlias();
 		String prefix = StringUtils.isNotBlank(tableAlias) ? tableAlias + "." : "";
-		ColumnDefinition[] definitions = translator.getColumns(null, configuration);
-		List<String> list = new ArrayList<String>();
-		for (ColumnDefinition cd : definitions) {
-			if (exludeProperties.contains(cd.getMappedProperty())) {
-				continue;
-			}
-			Object result = getPropertyValue(object, cd);
-			if (propertySelector.include(result, cd.getMappedProperty(), cd.getJdbcType())) {
-				list.add(prefix.concat(cd.getColumnName()).concat("=?"));
+		TableDefinition tableDefinition = translator.getTableDefinition(configuration);
+		ColumnDefinition[] columnDefinitions = translator.getColumns(null, configuration);
+		List<String> ids = new ArrayList<String>();
+		List<String> columns = new ArrayList<String>();
+		for (ColumnDefinition cd : columnDefinitions) {
+			if (tableDefinition.isPrimaryKey(cd.getMappedProperty())) {
+				ids.add(prefix.concat(cd.getColumnName().concat("=?")));
+			} else {
+				if (exludeProperties.contains(cd.getMappedProperty())) {
+					continue;
+				}
+				Object result = getPropertyValue(object, cd);
+				if (propertySelector.include(result, cd.getMappedProperty(), cd.getJdbcType())) {
+					columns.add(prefix.concat(cd.getColumnName()).concat("=?"));
+				}
 			}
 		}
-		return configuration.getJdbcAdmin().getFeature().set(CollectionUtils.join(list, ", "));
+		Feature feature = configuration.getJdbcAdmin().getFeature();
+		StringBuilder sql = new StringBuilder();
+		sql.append(feature.set(CollectionUtils.join(columns, ", "))).append(feature.where(CollectionUtils.join(ids, " and ")));
+		return sql.toString();
 	}
 
 	public void setParameter(Session session, Translator translator, ParameterCollector parameterCollector, Configuration configuration) {
-		ColumnDefinition[] definitions = translator.getColumns(null, configuration);
-		for (ColumnDefinition cd : definitions) {
-			if (exludeProperties.contains(cd.getMappedProperty())) {
-				continue;
+		TableDefinition tableDefinition = translator.getTableDefinition(configuration);
+		ColumnDefinition[] columnDefinitions = translator.getColumns(null, configuration);
+		List<ColumnDefinition> ids = new ArrayList<ColumnDefinition>();
+		List<ColumnDefinition> columns = new ArrayList<ColumnDefinition>();
+		for (ColumnDefinition cd : columnDefinitions) {
+			if (tableDefinition.isPrimaryKey(cd.getMappedProperty())) {
+				Object result = getPropertyValue(object, cd);
+				if (result == null) {
+					throw new NullIdentifierException(cd.getColumnName());
+				}
+				ids.add(cd);
+			} else {
+				if (exludeProperties.contains(cd.getMappedProperty())) {
+					continue;
+				}
+				Object result = getPropertyValue(object, cd);
+				if (propertySelector.include(result, cd.getMappedProperty(), cd.getJdbcType())) {
+					columns.add(cd);
+				}
 			}
-			Object result = getPropertyValue(object, cd);
-			if (propertySelector.include(result, cd.getMappedProperty(), cd.getJdbcType())) {
-				parameterCollector.setParameter(result, cd.getJdbcType());
-			}
+		}
+		columns.addAll(ids);
+		for (ColumnDefinition cd : columns) {
+			parameterCollector.setParameter(getPropertyValue(object, cd), cd.getJdbcType());
 		}
 	}
 

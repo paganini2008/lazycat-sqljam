@@ -35,7 +35,7 @@ public class UpdateBuilder implements SqlBuilder {
 		final Feature feature = configuration.getJdbcAdmin().getFeature();
 		StringBuilder text = new StringBuilder();
 		text.append(feature.update(source.getText(configuration)));
-		text.append(feature.set(set.getText(session, translator, configuration)));
+		text.append(set.getText(session, translator, configuration));
 		if (where != null) {
 			text.append(feature.where(where.getText(session, translator, configuration)));
 		}

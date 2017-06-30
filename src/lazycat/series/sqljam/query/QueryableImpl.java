@@ -33,10 +33,11 @@ public class QueryableImpl implements Queryable {
 		delegate.setParameters(parameterCollector, configuration);
 	}
 
-	private long timeout;
+	private long timeout = -1;
 
-	public void setTimeout(long timeout) {
+	public Queryable setTimeout(long timeout) {
 		this.timeout = timeout;
+		return this;
 	}
 
 	public <T> T one(final Class<T> requiredType) {
@@ -66,7 +67,7 @@ public class QueryableImpl implements Queryable {
 	public <T> List<T> list() {
 		return (List<T>) session.getSessionAdmin().getSessionPool().execute(new Call() {
 			public Object call() throws Exception {
-				return delegate.list();
+				return session.list(delegate, delegate.rootClass());
 			}
 		}, timeout);
 	}

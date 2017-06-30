@@ -52,8 +52,8 @@ public class Pageable implements ResultSet, CacheAdapter {
 		delegate.setParameters(parameterCollector, configuration);
 	}
 
-	public void setTimeout(long timeout) {
-		queryable.setTimeout(timeout);
+	public Queryable setTimeout(long timeout) {
+		return queryable.setTimeout(timeout);
 	}
 
 	public <T> T one(Class<T> requiredType) {

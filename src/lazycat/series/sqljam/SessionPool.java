@@ -35,7 +35,10 @@ public class SessionPool {
 	}
 
 	public Object execute(Call task, long timeout) {
-		return threadPool.apply(task, timeout, TimeUnit.MILLISECONDS);
+		if (timeout < 0) {
+			timeout = defaultTimeout;
+		}
+		return threadPool.apply(task, timeout, TimeUnit.SECONDS);
 	}
 
 	public void close() {

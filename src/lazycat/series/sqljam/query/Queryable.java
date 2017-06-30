@@ -6,7 +6,7 @@ import lazycat.series.sqljam.Executable;
 
 public interface Queryable extends Cacheable, Executable {
 
-	void setTimeout(long timeout);
+	Queryable setTimeout(long timeout);
 
 	<T> Iterator<T> iterator();
 
